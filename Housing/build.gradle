@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group 'me.Strobe'
+version '1.0'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/UnModded/GTA/GTACore2/Gta-Core/build/libs/'
+        // <-- folder in your project where jars are located
+    }
+
+}
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.18'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation name: 'Gta-Core-1.0'
+    implementation name: 'worldguard-6.2'
+    implementation name: 'worldedit-bukkit-6.1.9'
+    implementation name: 'FastAsyncWorldEdit'
+    //implementation name: 'AtomSpigot-2.3-stable'
+    implementation name: 'paperPatched 1.8'
+
+    // NBT API
+    implementation 'de.tr7zw:item-nbt-api-plugin:2.7.1'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.18'
+    annotationProcessor 'org.projectlombok:lombok:1.18.18'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.18'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.18'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}

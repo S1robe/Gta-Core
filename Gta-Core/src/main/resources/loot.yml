@@ -1,0 +1,22 @@
+Zombie:
+  minMon: 0.5
+  maxMon: 3.5
+  Loot: []
+
+Skeleton:
+  minMon: 1
+  maxMon: 5
+  Loot: []
+
+Villager:
+  minMon: 5
+  maxMon: 10
+  Loot: []
+
+Cop:
+  minMon: 2.7
+  maxMon: 7
+  Loot: []
+
+Loot:
+  Loot: [ ]

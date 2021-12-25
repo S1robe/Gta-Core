@@ -1,0 +1,8 @@
+name: Housing
+main: me.Strobe.Housing.Main
+version: 1.0
+depend:
+  - GTACore
+  - Vault
+commands:
+  house:

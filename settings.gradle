@@ -1,0 +1,6 @@
+rootProject.name = 'Gta-Core'
+include 'GTA-Gangs'
+include 'Gta-Gangs'
+include 'Gta-Core'
+include 'Housing'
+

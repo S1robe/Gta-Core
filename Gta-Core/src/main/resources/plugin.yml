@@ -1,0 +1,36 @@
+name: GTACore
+main: me.Strobe.Core.Main
+version: 1.0
+depend:
+  - 'WorldGuard'
+  - Vault
+prefix: "§9§l[§6§nGTA-MC§9§l]§7"
+commands:
+  chestloot:
+    description: Modify the loot table for chests
+    permission: gta.commands.chestloot
+  mobloot:
+    description: Modify the loot table for mobs
+    permission: gta.commands.mobloot
+  stats:
+    description: Configure your sidebar
+  cop:
+    description: Become a Cop!
+    permission: gta.commands.cop
+  gtareload:
+    description: reload the plugin
+    permission: gta.commands.reload
+
+permissions:
+  gtacore.commands:
+    cop:
+    cop.admin:
+    chestloot.edit:
+    chestloot.view:
+    mobloot.view:
+    mobloot.edit:
+    chestloot:
+    mobloot:
+    reload:
+
+

@@ -1,0 +1,20 @@
+#This is the string seralizaiton of a Location object for the spawn point of cops
+safeHouse: ""
+
+#The time in seconds that it will take for a cop to change back or vice versa.
+changeModeTimeOut: 7
+
+#The amount of money to award for killing a cop
+cop-kill-money: 1000
+#The blacklisted commands for cops
+cop-blacklisted-commands: [ "" ]
+#The minimum amount of cops that can spawn on a player
+min-cops: 3
+#The maximum amount of cops that can spawn on a player
+max-cops: 6
+
+low-WL-kill-Cop: 3
+
+high-WL-kill-Cop: 5
+
+inventory: []

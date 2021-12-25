@@ -1,0 +1,15 @@
+#This is the cooldown time in mintues for chest reset
+chest-reset-time: 10
+#the minimum a loot chest has inside it.
+min-chest-drop: 3
+#The max a loot chest has stored inside it.
+max-chest-drop: 7
+#The percentage of a players moeny that will drop upon death.
+percent-money-drop: 15
+#the minimum amount of items a mob can drop
+min-mob-drop: 0
+#the maximum amount of items a mob can drop
+max-mob-drop: 2
+
+loot-enabled-worlds: []
+mob-enabled-worlds: []

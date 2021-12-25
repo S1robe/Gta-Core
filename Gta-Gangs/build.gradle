@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group 'me.Strobe'
+version '1.0'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
+        // <-- folder in your project where jars are located
+    }
+
+    // worldguard
+    maven { url "https://maven.enginehub.org/repo/" }
+}
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.18'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation name: 'AtomSpigot-2.3-stable'
+
+    // NBT API
+    implementation 'de.tr7zw:item-nbt-api-plugin:2.7.1'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.18'
+    annotationProcessor 'org.projectlombok:lombok:1.18.18'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.18'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.18'
+}
+
+test {
+    useJUnitPlatform()
+}
