@@ -3,6 +3,8 @@ package me.Strobe.Core.Events;
 import me.Strobe.Core.Utils.Displays.GUIS;
 import me.Strobe.Core.Utils.StringUtils;
 import me.Strobe.Core.Utils.User;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
@@ -10,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -53,6 +56,26 @@ public class CopEvents implements Listener {
             e.setCancelled(true);
          else if(e.getCause().equals(EntityDamageEvent.DamageCause.FALL))
             e.setCancelled(true);
+      }
+   }
+
+   @EventHandler
+   public void onPigCopTargetPlayer(EntityTargetLivingEntityEvent e){
+      if (e.getEntity() instanceof PigZombie && e.getTarget() instanceof Player) {
+         final PigZombie pigZombie = (PigZombie)e.getEntity();
+         final Player player = (Player)e.getTarget();
+         String name = ChatColor.stripColor(pigZombie.getCustomName());
+         name = name.substring(name.indexOf("Wanted: "));
+
+         if (!name.equals(player.getName())) {
+            final Player target = Bukkit.getPlayerExact(name);
+            if (target == null) {
+               e.getEntity().remove();
+               return;
+            }
+            e.setCancelled(true);
+            pigZombie.setTarget(target);
+         }
       }
    }
 

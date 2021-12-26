@@ -126,7 +126,7 @@ public class LootCommands implements CommandExecutor {
                      if(args.length != 5)
                         return false;
                      String type = args[1].toLowerCase();
-                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skelton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop"))
+                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skeleton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop"))
                         try {
                            short minAmt = Short.parseShort(args[2]);
                            try {

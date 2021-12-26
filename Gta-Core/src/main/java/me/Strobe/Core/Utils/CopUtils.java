@@ -1,6 +1,7 @@
 package me.Strobe.Core.Utils;
 
 import me.Strobe.Core.Main;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -45,50 +46,48 @@ public final class CopUtils {
    private CopUtils() {}
 
    public static void spawnCopsOnPlayer(User user) {
+      plrPigmen.put(user.getPlayerUUID(), new LinkedList<>());
       BukkitRunnable x= new BukkitRunnable() {
          private final User target = user;
-         private final Random rand = new Random();
 
          @Override
          public void run() {
-            if(((Player) target.getPLAYER()).isDead() || this.rand.nextInt(100) <= 50) {
+            if(GenUtils.getRandInt(0, 100) <= 50) {
                target.sendPlayerMessage(StringUtils.copsDisengage);
                this.cancel();
             }
             else {
-               int numToSpawn = rand.nextInt(maxCopSpawn) * minCopSpawn + 1;
+               int numToSpawn = GenUtils.getRandInt(minCopSpawn, maxCopSpawn);
                List<PigZombie> temp = createPigmenCops(target, numToSpawn);
                new BukkitRunnable() {
                   @Override
                   public void run() {
                      temp.forEach(pigZombie -> {
+                        pigZombie.setTarget(user.getPLAYER().getPlayer());
                         pigZombie.setAngry(true);
                         pigZombie.removeMetadata("INVULNERABLE", Main.getMain());
                      });
+                     plrPigmen.get(target.getPlayerUUID()).add(temp);
                      target.sendPlayerMessage(StringUtils.copsEngage);
                   }
                }.runTaskLater(Main.getMain(), 100L);
-               plrPigmen.get(target.getPlayerUUID()).add(temp);
+
                new BukkitRunnable() {
                   @Override
                   public void run() {
-                     Queue<List<PigZombie>> q = plrPigmen.get(target.getPlayerUUID());
-                     if(q == null){
-                        return;
-                     }
-                     Objects.requireNonNull(q.poll()).forEach(Entity::remove);
+                     despawnCopsOnPlayer(target.getPlayerUUID());
                   }
-               }.runTaskLater(Main.getMain(), 4800L);
+               }.runTaskLater(Main.getMain(), 3600L);
             }
          }
          @Override
          public void cancel(){
+            if(Bukkit.getScheduler().isQueued(playerRunnableIds.get(target.getPlayerUUID())) || Bukkit.getScheduler().isCurrentlyRunning(playerRunnableIds.get(target.getPlayerUUID())))
+               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(target.getPlayerUUID()));
             playerRunnableIds.remove(target.getPlayerUUID());
-            plrPigmen.get(target.getPlayerUUID()).forEach(list -> list.forEach(Entity::remove));
-            plrPigmen.remove(target.getPlayerUUID());
          }
       };
-      playerRunnableIds.put(user.getPlayerUUID(), x.runTaskTimer(Main.getMain(), 0L, 1200L).getTaskId());
+      playerRunnableIds.put(user.getPlayerUUID(), x.runTaskTimer(Main.getMain(), 0L, 3000L).getTaskId());
    }
 
    private static List<PigZombie> createPigmenCops(User target, int amtToSpawn) {
@@ -103,7 +102,6 @@ public final class CopUtils {
                                                                  pigCopHelm(WL) });
          piggie.getEquipment().setItemInHand(pigCopSword(WL));
          piggie.setCustomName(StringUtils.color("&c&lWanted: &6" + player.getName()));
-         piggie.setTarget(player);
          piggie.setMetadata("INVULNERABLE", new FixedMetadataValue(Main.getMain(), true));
          pigList.add(piggie);
       }
@@ -112,6 +110,8 @@ public final class CopUtils {
 
    private static ItemStack pigCopBoots(int wL) {
       ItemStack itemStack = createItem(Material.DIAMOND_BOOTS, 1);
+      if(wL < 20)
+         return itemStack;
       return applyCopEnchants(wL, itemStack);
    }
 
@@ -286,6 +286,15 @@ public final class CopUtils {
          }
       }
       return createItem(Material.STAINED_GLASS_PANE, 1, (byte) 14, "&c&lNot Tracking Player");
+   }
+
+   public static void despawnCopsOnPlayer(UUID pID){
+      Queue<List<PigZombie>> q = plrPigmen.get(pID);
+      if(q.isEmpty()){
+         plrPigmen.remove(pID);
+         return;
+      }
+      Objects.requireNonNull(q.poll()).forEach(Entity::remove);
    }
 
 

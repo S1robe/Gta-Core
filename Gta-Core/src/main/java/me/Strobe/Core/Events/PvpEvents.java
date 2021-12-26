@@ -70,7 +70,7 @@ public class PvpEvents implements Listener {
       Integer id = CopUtils.playerRunnableIds.get(killed.getUniqueId());
       if(id != null){
          Bukkit.getScheduler().cancelTask(id);
-         CopUtils.playerRunnableIds.remove(killed.getUniqueId());
+         CopUtils.despawnCopsOnPlayer(Ukilled.getPlayerUUID());
       }
       if(killed.equals(killed.getKiller()) || killed.getKiller() == null) {
          //Drop the money item with 15% of the deceased's current bal.
@@ -114,7 +114,6 @@ public class PvpEvents implements Listener {
             return changeBal;
          }
          int change = GenUtils.getRandInt(1, Math.max(1, killed.getWantedlevel() / 2));
-          killer.sendPlayerMessage(StringUtils.increasedWantedLevel.replace("{amt}", "" + change).replace("{wl}", "" + killer.getWantedlevel()));
          if(killed.isCop()) {
             change = GenUtils.getRandInt(1, Math.max(CopUtils.lowWantedForCop, CopUtils.highWantedForCop));
             killer.modCopKills(1);
@@ -122,6 +121,7 @@ public class PvpEvents implements Listener {
             killer.sendPlayerMessage(StringUtils.gainedMoneyFromCop.replace("{amt}", ""+ CopUtils.moneyForKillCop));
          }
          killer.modWantedLevel(change); //increase the killers WL by at most 1/2 the wanted level of the killed person.
+         killer.sendPlayerMessage(StringUtils.increasedWantedLevel.replace("{amt}", "" + change).replace("{wl}", "" + killer.getWantedlevel()));
          killed.setAttackedCop(false);
          CopUtils.spawnCopsOnPlayer(killer);
       }

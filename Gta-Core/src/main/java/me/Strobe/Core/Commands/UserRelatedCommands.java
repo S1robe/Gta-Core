@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.DisplaySlot;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 public class UserRelatedCommands implements CommandExecutor {
 
@@ -43,13 +42,13 @@ public class UserRelatedCommands implements CommandExecutor {
                //cop setinventory
                //cop setmaxspawns <num>
                //cop setminspawns <num>
-               if(args.length == 0){
+               if(args.length == 0) {
                   return cop(sender);
                }
-               switch(args[0].toLowerCase()){
+               switch(args[0].toLowerCase()) {
                   case "setsafehouse":
                      CopUtils.safeHouse = p.getLocation();
-                     sender.sendPlayerMessage(StringUtils.copSetSafeHouse.replace("{w}", p.getWorld().getName()).replace("{x}", ""+p.getLocation().getBlockX()).replace("{y}",""+ p.getLocation().getBlockY()).replace("{z}", ""+p.getLocation().getBlockZ()));
+                     sender.sendPlayerMessage(StringUtils.copSetSafeHouse.replace("{w}", p.getWorld().getName()).replace("{x}", "" + p.getLocation().getBlockX()).replace("{y}", "" + p.getLocation().getBlockY()).replace("{z}", "" + p.getLocation().getBlockZ()));
                      CopUtils.save();
                      break;
                   case "setinventory":
@@ -71,14 +70,14 @@ public class UserRelatedCommands implements CommandExecutor {
                      CopUtils.save();
                      break;
                   case "blockcmd":
-                     if(!CopUtils.blackListedCommands.contains(args[1])){
+                     if(!CopUtils.blackListedCommands.contains(args[1])) {
                         CopUtils.blackListedCommands.add(args[1]);
                         sender.sendPlayerMessage(CopUtils.blackListedCommands.toString());
                         CopUtils.save();
                      }
                      break;
                   case "allowcmd":
-                     if(CopUtils.blackListedCommands.contains(args[1])){
+                     if(CopUtils.blackListedCommands.contains(args[1])) {
                         CopUtils.blackListedCommands.remove(args[1]);
                         sender.sendPlayerMessage(CopUtils.blackListedCommands.toString());
                         CopUtils.save();
@@ -102,67 +101,64 @@ public class UserRelatedCommands implements CommandExecutor {
                }
             }
             // /gta
-            case "gta": {
-               if(args.length == 0){
-                  sender.sendPlayerBulkMessage(StringUtils.help);
-               }
-               switch(args[0].toLowerCase(Locale.ROOT)){
-                  case "help":{
-
-                  }
-                  // /gta stats <stat> <add/remove/reset> (name)
-                  case "stats":{
-                     if(args.length < 2){
-                        sender.sendPlayerBulkMessage(StringUtils.gtastatsUsage);
-                        return false;
-                     }
-                     switch(args[1].toLowerCase()){
-                        case "pigcopkill":
-                        case "pck":
-                           break;
-                        case "death":
-                        case "d":
-                           break;
-                        case "kills":
-                        case "k":
-                           break;
-                        case "mobkills":
-                        case "mk":
-                           break;
-                        case "skeletonkills":
-                        case "sk":
-                           break;
-                        case "zombiekills":
-                        case "zk":
-                           break;
-                        case "mobdeaths":
-                        case "md":
-                           break;
-                        case "wantedlevel":
-                        case "wanted":
-                        case "wl":
-                        case "w":
-                           break;
-                        case "witherskeletonkills":
-                        case "wsk":
-                           break;
-                        case "villagerkills":
-                        case "vk":
-                           break;
-                        case "copkills":
-                        case "ck":
-                           break;
-                        case "endermankills":
-                        case "ek":
-                           break;
-                        case "killstreak":
-                        case "ks":
-                           break;
-                     }
-                  }
-                  case "":
-               }
-            }
+            //            case "gta": {
+            //               if(args.length == 0){
+            //                  sender.sendPlayerBulkMessage(StringUtils.help);
+            //               }
+            //               switch(args[0].toLowerCase(Locale.ROOT)){
+            //                  case "help":{
+            //
+            //                  }
+            //                  // /gta stats <stat> <add/remove/reset> (name)
+            //                  case "stats":{
+            //                     if(args.length < 2){
+            //                        sender.sendPlayerBulkMessage(StringUtils.gtastatsUsage);
+            //                        return false;
+            //                     }
+            //                     switch(args[1].toLowerCase()){
+            //                        case "pigcopkill":
+            //                        case "pck":
+            //                           break;
+            //                        case "death":
+            //                        case "d":
+            //                           break;
+            //                        case "kills":
+            //                        case "k":
+            //                           break;
+            //                        case "mobkills":
+            //                        case "mk":
+            //                           break;
+            //                        case "skeletonkills":
+            //                        case "sk":
+            //                           break;
+            //                        case "zombiekills":
+            //                        case "zk":
+            //                           break;
+            //                        case "mobdeaths":
+            //                        case "md":
+            //                           break;
+            //                        case "wantedlevel":
+            //                        case "wanted":
+            //                        case "wl":
+            //                        case "w":
+            //                           break;
+            //                        case "witherskeletonkills":
+            //                        case "wsk":
+            //                           break;
+            //                        case "villagerkills":
+            //                        case "vk":
+            //                           break;
+            //                        case "copkills":
+            //                        case "ck":
+            //                           break;
+            //                        case "endermankills":
+            //                        case "ek":
+            //                           break;
+            //                        case "killstreak":
+            //                        case "ks":
+            //                           break;
+            //                     }
+            //                  }
          }
       }
       return false;
@@ -276,6 +272,7 @@ public class UserRelatedCommands implements CommandExecutor {
             case "ks":
                break;
          }
+      return false;
    }
 
 }
