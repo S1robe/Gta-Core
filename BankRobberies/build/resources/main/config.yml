@@ -1,0 +1,13 @@
+#Welcoem to the robbery plugin
+
+#commands not allowed while robbing.
+blocked-cmds-during-rob: []
+
+#default time to rob in seconds (  180 s -> 3 minutes )
+default-time-to-rob: 180
+
+default-time-to-reset: 300
+
+default-min-drop: 1
+
+default-max-drop: 3
