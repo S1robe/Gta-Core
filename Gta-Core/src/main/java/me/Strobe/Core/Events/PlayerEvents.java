@@ -2,8 +2,10 @@ package me.Strobe.Core.Events;
 
 import me.Strobe.Core.Utils.CopUtils;
 import me.Strobe.Core.Utils.Displays.ScoreboardManager;
+import me.Strobe.Core.Utils.RegionUtils;
 import me.Strobe.Core.Utils.StringUtils;
 import me.Strobe.Core.Utils.User;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -29,9 +31,26 @@ public class PlayerEvents implements Listener {
    public void onQuit(PlayerQuitEvent e) {
       Player player = e.getPlayer();
       User user = User.removeUser(player.getUniqueId());
+      if(CopUtils.playerRunnableIds.containsKey(player.getUniqueId())){
+         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(player.getUniqueId()));
+         CopUtils.despawnAllCops(player.getUniqueId());
+         CopUtils.playerRunnableIds.remove(player.getUniqueId());
+      }
+
       if(user.getTrackedBy() != null)
          user.getTrackedBy().setTracked(null);
       user.savePlayerData();
+   }
+
+   @EventHandler
+   public void onTeleport(PlayerTeleportEvent e){
+      Player player = e.getPlayer();
+      if(!RegionUtils.allowsPVP(e.getTo()) && CopUtils.playerRunnableIds.containsKey(player.getUniqueId())){
+         StringUtils.sendMessage(player, StringUtils.Text.COPS_DISENGAGE.create());
+         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(player.getUniqueId()));
+         CopUtils.despawnAllCops(player.getUniqueId());
+         CopUtils.playerRunnableIds.remove(player.getUniqueId());
+      }
    }
 
    @EventHandler
@@ -42,7 +61,7 @@ public class PlayerEvents implements Listener {
       if(item.getType().equals(Material.GOLD_NUGGET) && item.hasItemMeta()) {
          e.setCancelled(true);
          double money = StringUtils.roundDecimal(Double.parseDouble(item.getItemMeta().getDisplayName()), 2);
-         Uplayer.sendPlayerMessage(StringUtils.gainedMoney.replace("{amt}",""+ money));
+         Uplayer.sendPlayerMessage(StringUtils.Text.GAINED_MONEY.create(""+ money));
          e.getItem().remove();
          player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.2F, 2f);
          Uplayer.addMoney(money);
@@ -66,7 +85,7 @@ public class PlayerEvents implements Listener {
       final User u = User.getByPlayer(p);
       if(u.isCop() && CopUtils.blackListedCommands.contains(e.getMessage().split(" ")[0].toLowerCase().replace("/", ""))) {
          e.setCancelled(true);
-         u.sendPlayerMessage(StringUtils.deniedInCop);
+         u.sendPlayerMessage(StringUtils.Text.DENY_ACTION.create());
       }
    }
 

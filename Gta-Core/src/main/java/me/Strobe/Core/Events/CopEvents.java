@@ -21,7 +21,7 @@ public class CopEvents implements Listener {
    public static void onCopDrop(User u, PlayerDropItemEvent e) {
       if(!e.isCancelled()) {
          e.setCancelled(true);
-         u.sendPlayerMessage(StringUtils.deniedInCop);
+         u.sendPlayerMessage(StringUtils.Text.DENY_ACTION.create());
       }
    }
 

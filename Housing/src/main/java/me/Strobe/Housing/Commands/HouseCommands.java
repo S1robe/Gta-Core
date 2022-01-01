@@ -1,15 +1,12 @@
 package me.Strobe.Housing.Commands;
 
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import me.Strobe.Core.Utils.PlayerUtils;
 import me.Strobe.Housing.House;
 import me.Strobe.Housing.Utils.Displays.GUIS;
 import me.Strobe.Housing.Utils.HouseUtils;
 import me.Strobe.Housing.Utils.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -51,23 +48,23 @@ public class HouseCommands implements CommandExecutor {
                case "reload":
                   if(args.length >= 2){
                      if(args[1].equalsIgnoreCase("all"))
+                        HouseUtils.reloadAllOwned();
+                     else if(args[1].equalsIgnoreCase("all -u"))
                         HouseUtils.reloadAll();
                      else
                         reloadSpecificHouse(HouseUtils.getHouseByName(args[1]));
-
                      return true;
                   }
                   else
                      me.Strobe.Core.Utils.StringUtils.sendMessage(p, StringUtils.houseReloadUsage);
                   return false;
-               case "create":
-                  if(args.length >= 4){
-                     if(ProtectedRegion.isValidId(args[1]) && HouseUtils.getHouseByName(args[1]) == null)
-                        return create(p, args);
-                  }
                case "clear":{
                   //house clear <name>
                   if(args.length == 2){
+                     if(args[1].equalsIgnoreCase("all")){
+                        HouseUtils.clearAll();
+                        return true;
+                     }
                      h = HouseUtils.getHouseByName(args[1]);
                      if(h == null){
                         me.Strobe.Core.Utils.StringUtils.sendMessage(p, StringUtils.notAHouse);
@@ -78,9 +75,19 @@ public class HouseCommands implements CommandExecutor {
                      }
                   }
                }
-               case "listall":
-                  System.out.println(HouseUtils.houses);
                   return true;
+               case "flagall":{
+                  HouseUtils.flagAll(args[1], args[2]);
+                  me.Strobe.Core.Utils.StringUtils.sendMessage(p, "&b&l(!) &7 You have flagged all houses with the tags: " + args[1] + " to " + args[2]);
+                  return true;
+               }
+//               case "loadall":{
+//                  HouseUtils.loadAllHouses();
+//                  return true;
+//               }
+//               case "saveall":{
+//                  HouseUtils.saveAllHouses();
+//               }
             }
          }
          else
@@ -135,9 +142,9 @@ public class HouseCommands implements CommandExecutor {
    //will remove the player from the house if properly spelt, fails if they are not added
    private boolean houseAddMember(House h, String otherPlayerName) {
       if(!h.isPlayerAdded(otherPlayerName)){
-         OfflinePlayer plr = Bukkit.getOfflinePlayer(otherPlayerName);
+         OfflinePlayer plr = PlayerUtils.getOfflinePlayer(otherPlayerName);
          if(plr == null) {
-            h.sendOwnerMessage(me.Strobe.Core.Utils.StringUtils.invalidPlayer.replace("{plr}", otherPlayerName));
+            h.sendOwnerMessage(me.Strobe.Core.Utils.StringUtils.Text.INVALID_PLAYER.create(otherPlayerName));
             return false;
          }
          else{
@@ -153,9 +160,9 @@ public class HouseCommands implements CommandExecutor {
 
    //gifts the house to the specific player, fails if they already own a house
    private boolean giftHouse(House h, String otherPlayerName) {
-      OfflinePlayer plr = Bukkit.getOfflinePlayer(otherPlayerName);
+      OfflinePlayer plr = PlayerUtils.getOfflinePlayer(otherPlayerName);
       if(plr == null) {
-         h.sendOwnerMessage(me.Strobe.Core.Utils.StringUtils.invalidPlayer.replace("{plr}", otherPlayerName));
+         h.sendOwnerMessage(me.Strobe.Core.Utils.StringUtils.Text.INVALID_PLAYER.create(otherPlayerName));
          return false;
       }
       else
@@ -173,10 +180,9 @@ public class HouseCommands implements CommandExecutor {
    }
 
    private boolean clearHouse(House h) {
-      h.getChestLocations().stream().map(Location::getBlock).map(Block::getState).forEach(bs -> ((Chest)bs).getInventory().clear());
+      h.clear();
       return true;
    }
 
-   private boolean create(Player p, String... args){return false;}
 
 }

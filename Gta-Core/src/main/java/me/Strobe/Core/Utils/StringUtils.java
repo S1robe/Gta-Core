@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -14,59 +15,123 @@ import java.util.stream.Collectors;
 
 public final class StringUtils {
 
-   public static final String droppedMoney = "&c&l(!) &7You dropped &c$ {amt}&7. Your balance is now &n{bal}&r&7.";
-   public static final String gainedMoney = "&a&l(!) &7You pick up &a&n$ {amt}&7.";
-   public static final String gainedMoneyForWanted = "&a&l(!) &7You gained &a${amt}&7 for killing someone with a wanted level of {wl}.";
-   public static final String gainedMoneyFromCop = "&a&l(!) &7You earned $ {amt} for killing a cop!.";
-   public static final String increasedWantedLevel = "&a&l(!) &7Your &c&lWanted Level &7has increased by $ {amt}, it is now {wl}";
-   public static final String resetWantedLevel = "&c&l(!) &7Your wanted level has reset!";
-   public static final String deniedInCop = "&c&l(!) &7You cannot do that in Cop Mode!";
-   public static final String copsEngage = "&c&l(!) Start Running!";
-   public static final String copsDisengage = "&a&l(!) You got away! &7This time....";
-   public static final String invalidAmount = "&c&l(!) &7&n$ {amt}&7 is not a valid amount!";
-   public static final String invalidPlayer = "&c&l(!) &7&n{plr}&7 has not joined this server!";
-   public static final String invalidBoardType = "&c&l(!) &7That is not a stats type on this server. Types: &bPVP&7, &bPVE&7, &bALL&7.";
-   public static final String invalidMobType = "&c&l(!) &7That is not a mob type on this server. Types: &bZombie, &bSkeleton, &bEnderman, &bVillager, &bCop.";
-   public static final String invalidItemType = "&a&l(!) &7The item in your hand &c&ncannot&7 be added to the loot pool!";
-   public static final String successAddedToPool = "&a&l(!) &7The item in your hand has been &a&nsuccessfully&7 added to the loot pool!";
-   public static final String randomItemSuccessful = "&a&l(!) &7Boop! You received an item from the chest lootpool.";
-   public static final String randomZomItemSuccessful = "&a&l(!) &7Boop! You received an item from the Zombie lootpool.";
-   public static final String randomSkelItemSuccessful = "&a&l(!) &7Boop! You received an item from the Skeleton lootpool.";
-   public static final String randomEndItemSuccessful = "&a&l(!) &7Boop! You received an item from the Enderman lootpool.";
-   public static final String randomVillItemSuccessful = "&a&l(!) &7Boop! You received an item from the Villager lootpool.";
-   public static final String randomCopItemSuccessful = "&a&l(!) &7Boop! You received an item from the Cop lootpool.";
-   public static final String giveRandomItemUnSuccessful = "&a&l(!) &7That players inventory is full!";
-   public static final String deniedAction = "&c&l(!) &7You cannot do that.";
-   public static final String notUnderstnad = "&c&l(!) &7Sorry, I didn't understand that.";
-   public static final String[] help = {"&c&l(!) &7Welcome to GTA-MC",
-                                        ""};
+   //  "&a&l(!) " positive
+   //  "&c&l(!) " negative
+   //  "&e&l(!) " info
+   //  "&b&l(!) " command info
+
+   public enum Text {
+      //General stuff
+      DROPPED_MONEY(false, "&c&l(!) &7You dropped &c$ {0}&7. Your balance is now &n{1}&r&7."),
+      GAINED_MONEY(false, "&a&l(!) &7You pick up &a&n$ {0}&7."),
+      GAINED_MONEY_FOR_KILL_COP(false, "&a&l(!) &7You gained &a${0}&7 for killing someone with a wanted level of {1}."),
+      GAINED_MONEY_FOR_WANTED(false, "&a&l(!) &7You earned $ {0} for killing a cop!."),
+
+      INC_WL(false, "&a&l(!) &7Your &c&lWanted Level &7has increased by {0}, it is now {1}"),
+      R_WL(false, "&c&l(!) &7Your wanted level has reset!"),
+
+      COPS_ENGAGE(false, "&e&l(!) &7Start Running!"),
+      COPS_BACKUP(false, "&e&l(!) &7Looks like they called for backup!"),
+      COPS_DISENGAGE(false, "&a&l(!) You got away! &7This time...."),
+
+      DENY_ACTION(false, "&e&l(!) &7You cannot do that."),
+      INVALID_AMOUNT(false, "&c&l(!) &b&n{0}&7 is not a valid amount!"),
+      INVALID_PLAYER(false, "&c&l(!) &7&n{0}&7 has not joined this server!"),
+      FAIL_ITEM_DELIVERED(true, "&a&l(!) &7{0}'s inventory is full!"),
+      UNCERTAIN(true, "&c&l(!) &7Sorry, I didn't understand that."),
+      HELP(false, "&7|----&8[&6GTA-MC&8]&7----|\n" +
+                                          "&7 Welcome to GTA-MC, As you may have noticed there are some changes.\n" +
+                                          "&7 Read through the following pages to learn more, the colors are clickable."),
+
+      // Commands
+      STATS_USAGE(true, "&b&l(!)&7 Use the stats command like this:\n" + " &B/stats <PVP, PVE, All, OFF, ON> \n" + " To view another player's stats add their name after. " + " &B/stats <PVP, PVE, ALL> <playername>"),
+      INVALID_STATS(false, "&c&l(!) &7That is not a stats type on this server. Types: &bPVP&7, &bPVE&7, &bALL&7."),
+      STATS_TO_PVP(false, "&b&l(!) &7Your scoreboard reflects your pvp stats now!"),
+      STATS_TO_PVE(false, "&b&l(!) &7Your scoreboard reflects your pve stats now!"),
+      STATS_TO_ALL(false, "&b&l(!) &7Your scoreboard reflects all your stats now!"),
+      STATS_OFF(false, "&b&l(!) &7Your scoreboard is disabled now!"),
+      STATS_ON(false, "&b&l(!) &7Your scoreboard is re-enabled now!"),
+      STATS_ALREADY_ON(false, "&b&l(!) &7Your scoreboard is already on!"),
+
+      COP_USAGE(true, "&b&l(!)&7 Use the cop command like this\n" + " &b/cop &7: Change into or out of cop mode.\n" +
+                      " &b/cop setsafehouse &7: Stand where you want the spawn to be and run the command.\n" + " &b/cop setinventory &7: Organize your inventory how you wish the cop's to be, then run the command.\n" + " &b/cop setmaxspawns &6<amt> &7: Set the max amount of cops to spawn each wave\n" + " &b/cop setminspawns &6<amt> &7: Set the minimum amount of cops to spawn each wave.\n" + " &b/cop blockcmd &6<cmd> &7: Block a specific command provided in <cmd>\n" + " &b/cop allowcmd &6<cmd> &7: Allow a specific command in <cmd>\n" + " &b/cop settimeout &6<amt> &7: Set the time to change in seconds between cop mode and player mode\n" + " &b/cop viewinventory &7: View the current cop mode inventory."),
+
+      COP_SETSAFEHOUSE_USAGE(true,"&b&l(!) &7Use the cop command like this\n" + " &b/cop setsafehouse &7: Stand where you want the spawn to be and run the command."),
+      COP_MODE_ON(false, "&a&l(!)&7 You are now a &bCop&7."),
+      COP_MODE_OFF(false, "&c&l(!)&7 You are no longer a &bCop&7."),
+      COP_SET_INV(true, "&b&l(!)&7 The cop mode inventory is now yours!"),
+      COP_SET_INV_USAGE(true, "&b&l(!) &7Use the cop command like this\n" + " &b/cop setinventory &7: Organize your inventory how you wish the cop's to be, then run the command.\n"),
+      COP_SET_MIN(true, "&b&l(!)&7 The minimum amount of cops to spawn is now {0}"),
+      COP_SET_MIN_USAGE(true, "&b&l(!) &7Use the cop command like this\n" + " &b/cop setminspawns &6<amt> &7: Set the minimum amount of cops to spawn each wave.\n"),
+      COP_SET_MAX(true, "&b&l(!)&7 The maximum amount of cops to spawn is now {0}"),
+      COP_SET_MAX_USAGE(true, "&b&l(!)&7 Use the cop command like this\n" + " &b/cop setmaxspawns &6<amt> &7: Set the max amount of cops to spawn each wave\n"),
+      COP_SUCCESS_SPAWN(true, "&b&l(!) &7Successfully spawned {0} cop(s) on {1}"),
 
 
-   public static final String statsUsage = "&bUse the stats command like this:\n  /stats <PVP, PVE, All, OFF> (optional)[Player] ";
-   public static final String copUsage = "&bUse the cop command like this:\n  /cop";
-   public static final String copSetSafehouseUsage = "&e&l(!)&7 Use the cop setsafehouse command like this:\n 1. Stand where you want to set the safehouse\n 2. /cop setsafehouse";
-   public static final String copSetInventoryUsage = "&e&l(!)&7 Use the cop setInventory command like this:\n 1. Organize your inventory for a cop, armor included\n 2. /cop setinventory";
-   public static final String copSetInventory = "&e&l(!)&7 The cop's inventory is now set to yours!";
+      COP_BLOCKCMD(true, "&b&l(!)&7 You have blocked the command &b{0}&7 in cop mode."),
+      COP_BLOCKCMD_USAGE(true, "&b&l(!) &7Use the cop command like this\n" + " &b/cop blockcmd &6<cmd> &7: Block a specific command provided in <cmd>\n"),
 
-   public static final String copSetMin = "&e&l(!)&7 The minimum amount of cops to spawn is now {n}";
-   public static final String copSetMax = "&e&l(!)&7 The minimum amount of cops to spawn is now {n}";
-   public static final String copSetTimechange = "&e&l(!)&7 It now takes {n} seconds to change modes.";
+      COP_ALLOWCMD_USAGE(true, "&b&l(!)&7 Use the cop command like this\n" + " &b/cop allowcmd &6<cmd> &7: Allow a specific command in <cmd>\n"),
+      COP_ALLOWCMD(true, "&b&l(!)&7 You have allowed the command &b{0}&7 in cop mode."),
+
+      COP_SET_TIMEOUT(true, "&b&l(!)&7 The time to chage between modes is now {0}"),
+      COP_SET_TIMEOUT_USAGE(true, "&b&l(!) &7Use the cop command like this\n" +
+                                  " &b/cop settimeout &6<amt> &7: Set the time to change in seconds between cop mode and player mode."),
 
 
+      LOOT_USAGE(true, "&b&l(!)&7 Use the loot command list this\n" +
+                         " &b/loot reload &7: Reloads all loot tables.\n"
+                       + " &b/loot time <amt> &7: Set the time in minutes for chests to restock.\n"
+                       + " &b/loot world (mob) (worldname) <activate/deactivate> &7: enable or disable worlds from using chest and mob drops.\n"
+                       + " &b/loot (mobtype) add <min> <max> <weight> &7: Add the current held item to the chest loot pool or the optional mobloot pool.\n"
+                       + " &b/loot (mobtype) view  &7: View the chest loot pool or the optional mob's loot pool.\n"
+                       + " &b/loot (mobtype) giverandom &7: Give yourself a random drop from the chest or optional mob's loot pool.\n"
+                       + " &b/loot (mobtype) min <amt> &7: Set the minimum number of items in a chest or to drop from a mob.\n"
+                       + " &b/loot (mobtype) max <amt> &7: Set the maximum number of items in a chest or to drop from a mob.\n"),
+      ALL_LOOT_RELOAD(true, "&b&l(!)&7 All loot tables have been reloaded."),
+      LOOT_TIME_SET(true, "&b&l(!)&7 The time for chests to restock is now {0}"),
+      LOOT_TIME_USAGE(true, "&b&l(!) Use the loot command list this\n &b/loot time <amt> &7: Set the time in minutes for chests to restock."),
+      LOOT_WORLD_ACTIVE(true, "&b&l(!)&7 The world {0} is now loot activated!"),
+      LOOT_WORLD_DEACTIVE(true, "&b&l(!)&7 The world {0} is now loot de-activated!"),
+      NOT_WORLD(true, "&b&L(!)&7 That is not a valid world."),
+      LOOT_WORLD_USAGE(true, "&b&l(!) Use the loot command list this\n" + " &b/loot world (mob) (worldname) <activate/deactivate> &7: enable or disable worlds from using chest and mob drops.\n"),
+      LOOT_VIEW_USAGE(false, "&b&l(!)&7 Use the loot command list this\n" + " &b/loot (mobtype) or \"chest\": view  &7: View the chest loot pool or the optional mob's loot pool.\n"),
+      MOB_WORLD_ACTIVE(true, "&b&l(!)&7 The world {0} is now loot activated!"),
+      MOB_WORLD_DEACTIVE(true, "&b&l(!)&7 The world {0} is now mob-loot activated!"),
 
-   public static final String copSetMaxSpawnsUsage = "&e&l(!)&7 Use the cop setmaxspawns command like this:\n  /cop setmaxspawns <amt>";
-   public static final String copSetMinSpawnsUsage = "&e&l(!)&7 Use the cop command like this:\n /cop setminspawns <amt>";
-   public static final String copSetSafeHouse = "&e&l(!)&7 The spawn for cops has been set at {w} {x} {y} {z}!";
-   public static final String chestlootUsage = "&e&l(!)&7 Use the command like this: \n1. Hold an item in your hand.\n2. Run: /chestloot add <minAmt> <maxAmt> <weight>";
-   public static final String moblootUsage = "&e&l(!)&7 Use the command like this: \n1. Hold an item in your hand.\n2. Run: /mobloot add <Zombie, Skeleton, Cop, Villager> <minAmt> <maxAmt> <weight>";
-   public static final String lootActivatedWorld = "&e&l(!)&7 The world {w} has been loot-activated!";
-   public static final String notAWorld = "&e&l(!)&7 The world provided is not a world";
-   public static final String mobActivatedWorld = "&e&l(!)&7 The world {w} has been mob-activated!";
-   public static final String lootDeactivatedWorld  = "&e&l(!)&7 The world {w} has been loot-deactivated!";
-   public static final String mobDeactivatedWorld = "&e&l(!)&7 The world {w} has been mob-deactivated!";
-   public static final String worldUsage = "&e&l(!)&7 Use the command like this: /chestloot world activate/deactivate (worldName)\n/mobloot world activate/deactivate (worldName)";
+      SUCCESS_LOOT_ADD(true, "&b&l(!)&7 The item in your hand was successfully added to the {0} pool"),
+      ITEM_DELIVERED_LOOTPOOL(false, "&a&l(!) &7Boop! You received an item from the {0} loot pool."),
+      INVALID_ITEM(true, "&b&l(!) &7The item in your hand &c&ncannot&7 be added to the loot pool!"),
+      SUCCESS_ITEM_DELIVERED(true, "&b&l(!) &7{0} delivered successfully."),
+      INVALID_MOB(false, "&c&l(!) &7That is not a valid type on this server. Types: &bZombie&7, &bSkeleton&7, &bEnderman&7, &bVillager&7, &bCop&7, &bChest&7."),
 
-   public static final String teleporting = "&e&l(!)&7 Teleporting... Dont Move! ({t} sec...)";
+      LOOT_POOL_RELOADED(true, "&b&l(!)&7 The pool {0} has been reloaded."),
+      LOOT_RELOAD_USAGE(true, "&b&l(!) Use the loot command list this\n " + "&b/loot reload <type> : reload a specific loot table"),
+      LOOT_SET_MIN(true, "&b&l(!)&7 The minimum amount of items in a chest is now {0}"),
+      LOOT_SETMIN_USAGE(true, "&b&l(!) Use the loot command list this\n " + " &b/loot (mobtype) min <amt> &7: Set the minimum number of items in a chest or to drop from a mob."),
+      LOOT_SET_MAX(true, "&b&l(!)&7 The maximim amount of items in a chest is now {0}"),
+      LOOT_SETMAX_USAGE(true, "&b&l(!) Use the loot command list this\n " + " &b/loot (mobtype) max <amt> &7: Set the maximum number of items in a chest or to drop from a mob."),
+
+
+      TELEPORTING(false,  "&e&l(!)&7 Teleporting... Dont Move! ({0} sec...)"),
+
+
+      ;
+
+
+      String text;
+      boolean pT;
+
+      Text(boolean pluginTagged, String message) {
+         pT = pluginTagged;
+         text = StringUtils.color(message);
+      }
+
+      public String create(String... replacements) {
+         String hand = MessageFormat.format(text, (Object[]) replacements);
+         return pT? Main.PLUGINPREFIX + hand : hand;
+      }
+   }
    private StringUtils() {}
 
    public static String capitalizeFirst(String word) {
@@ -83,13 +148,12 @@ public final class StringUtils {
     * @param msg message to send player
     */
    public static void sendCommandMessage(CommandSender p, String msg) {
-      p.sendMessage(color(Main.PLUGINPREFIX + msg));
+      p.sendMessage(color(msg));
    }
 
    public static void logFine(String... message){
       for(String s : message) Main.getMain().getLogger().log(Level.FINE, color(s));
    }
-
    public static void logInfo(String... message){
       for(String s : message) Main.getMain().getLogger().log(Level.INFO, color(s));
    }

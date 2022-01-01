@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
@@ -90,6 +91,7 @@ public class User implements ConfigurationSerializable {
       user.setPlayer_Name(user.getPLAYER().getName());
       user.setPlayerUUID(u);
       users.putIfAbsent(u, user);
+      ScoreboardManager.createScoreBoard(user);
       return user;
    }
 
@@ -180,61 +182,103 @@ public class User implements ConfigurationSerializable {
    public void addMoney(double amt){
       Main.getMain().getEcon().depositPlayer(PLAYER, amt);
    }
-
    public void removeMoney(double amt){
       Main.getMain().getEcon().withdrawPlayer(PLAYER, amt);
    }
 
-   public void modPvpDeaths(int amt) {
-      this.pvpDeaths = Math.max((this.pvpDeaths + amt), 0);
+   public void addDeaths(int amt) {
+         this.pvpDeaths += amt;
+   }
+   public void removeDeaths(int amt){
+      this.pvpDeaths = Math.max((this.pvpDeaths - amt), 0);
    }
 
-   public void modPvPKills(int amt) {
-      this.pvpKills = Math.max((this.pvpKills + amt), 0);
+   public void addPVPKills(int amt) {
+         this.pvpKills += amt;
+   }
+   public void removePVPKills(int amt){
+
+      this.pvpKills = Math.max((this.pvpKills - amt), 0);
    }
 
-   public void modWantedLevel(int amt) {
-      this.wantedlevel = Math.max((this.wantedlevel + amt), 0);
+   public void addWantedLevel(int amt) {
+         this.wantedlevel += amt;
+   }
+   public void removeWantedLevel(int amt){
+      this.wantedlevel = Math.max((this.wantedlevel - amt), 0);
    }
 
-   public void modMobDeaths(int amt) {
-      this.mobDeaths = Math.max((this.mobDeaths + amt), 0);
+   public void addMobDeaths(int amt) {
+         this.mobDeaths += amt;
+   }
+   public void removeMobDeath(int amt){
+      this.mobDeaths = Math.max((this.mobDeaths - amt), 0);
    }
 
-   public void modMobKill(int amt) {
-      this.mobKills = Math.max((this.mobKills + amt), 0);
+   public void addSkelKills(int amt) {
+         this.skeletonKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeSkelKills(int amt){
+
+      this.skeletonKills = Math.max((this.skeletonKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modSkelKill(int amt) {
-      this.skeletonKills = Math.max((this.skeletonKills + amt), 0);
-      modMobKill(amt);
+   public void addWithSkelKills(int amt) {
+         this.witherSkeletonKills += amt;
+         this.skeletonKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeWithSkelKills(int amt){
+      this.skeletonKills = Math.max((this.skeletonKills - amt), 0);
+      this.witherSkeletonKills = Math.max((this.witherSkeletonKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modWithSkelKill(int amt) {
-      this.witherSkeletonKills = Math.max((this.witherSkeletonKills + amt), 0);
-      modMobKill(amt);
+   public void addZomKill(int amt) {
+         this.zombieNormalKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeZomKills(int amt){
+      this.zombieNormalKills = Math.max((this.zombieNormalKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modZomKill(int amt) {
-      this.zombieNormalKills = Math.max((this.zombieNormalKills + amt), 0);
-      modMobKill(amt);
+   public void addEndKill(int amt) {
+         this.endermanKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeEndKills(int amt){
+      this.endermanKills = Math.max((this.endermanKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modEndKill(int amt) {
-      this.endermanKills = Math.max((this.endermanKills + amt), 0);
-      modMobKill(amt);
+   public void addVillKills(int amt) {
+         this.villagerKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeVillagerKills(int amt){
+         this.villagerKills = Math.max((this.villagerKills - amt), 0);
+         this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modVillagerKill(int amt) {
-      this.villagerKills = Math.max((this.villagerKills + amt), 0);
+   public void addNPCCopKill(int amt) {
+         this.npcCopKills += amt;
+         this.mobKills += amt;
+   }
+   public void removeNPCCopKills(int amt){
+      this.npcCopKills = Math.max((this.npcCopKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
-   public void modNPCCopKills(int amt) {
-      this.npcCopKills = Math.max((this.npcCopKills + amt), 0);
+   public void addCopKills(int amt) {
+      this.copKills += amt;
+      this.mobKills += amt;
    }
-
-   public void modCopKills(int amt) {
-      this.copKills = Math.max((this.copKills + amt), 0);
+   public void removeCopKills(int amt){
+      this.npcCopKills = Math.max((this.npcCopKills - amt), 0);
+      this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
 
@@ -271,25 +315,40 @@ public class User implements ConfigurationSerializable {
       StringUtils.sendMessage(this.PLAYER.getPlayer(), message);
    }
 
-   public void viewOtherPlayerStats(OfflinePlayer other, int type){
+   public static void sendAllUsersMessage(String message){
+      users.forEach((u, user) -> user.sendPlayerMessage(message));
+   }
+
+   public void viewOtherPlayerStats(User sender, User other, int type){
+      PLAYER.getPlayer().setMetadata("VIEWINGOTHER", new FixedMetadataValue(Main.getMain(), 0));
       Scoreboard hold = ScoreboardManager.getBoardAndRemoveByUser(this);
-      User u = User.getByPlayer(other);
       if(type == 0) {
-         ScoreboardManager.allBoardText(u, hold);
-         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getName() + "'s Stats"));
+         ScoreboardManager.allBoardText(other, hold);
+         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getPlayer_Name() + "'s Stats"));
       }
       else if(type == 1) {
-         ScoreboardManager.PVPBoardText(u, hold);
-         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getName() + "'s PVP Stats"));
+         ScoreboardManager.PVPBoardText(other, hold);
+         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getPlayer_Name() + "'s PVP Stats"));
       }
       else {
-         ScoreboardManager.PVEBoardText(u, hold);
-         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getName() + "'s PVE Stats"));
+         ScoreboardManager.PVEBoardText(other, hold);
+         hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&b" +other.getPlayer_Name() + "'s PVE Stats"));
       }
       new BukkitRunnable() {
          @Override
          public void run() {
-            ScoreboardManager.createScoreBoard(User.this);
+            switch(currentBoard){
+               case 0:
+                  ScoreboardManager.allBoardText(sender , hold);
+                  break;
+               case 1:
+                  ScoreboardManager.PVPBoardText(sender, hold);
+                  break;
+               case 2:
+                  ScoreboardManager.PVEBoardText(sender, hold);
+            }
+            ScoreboardManager.addScoreBoard(sender, hold);
+            PLAYER.getPlayer().removeMetadata("VIEWINGOTHER", Main.getMain());
          }
       }.runTaskLater(Main.getMain(), 200L);
       setScoreBoard(hold);
@@ -326,6 +385,21 @@ public class User implements ConfigurationSerializable {
     */
    public static User getByUUID(UUID player_UUID) {
       return users.get(player_UUID);
+   }
+
+   public static User getByOfflinePlayer(OfflinePlayer p){
+      File f = new File(Main.getMain().getDataFolder() + System.getProperty("file.separator") + "PlayerData", p.getUniqueId() + ".u");
+      YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
+      if(f.exists() && y.isSet("Data")){
+         User u = (User) y.get("Data");
+         u.setPLAYER(p);
+         u.setPlayer_File(f);
+         u.setFileConfig(y);
+         u.setPlayer_Name(u.getPLAYER().getName());
+         u.setPlayerUUID(p.getUniqueId());
+         return u;
+      }
+      else return null;
    }
 
    public ItemStack[] getSavedInventory(){

@@ -2,6 +2,8 @@ package me.Strobe.Housing.Events;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.Strobe.Core.Utils.RegionUtils;
@@ -41,9 +43,18 @@ public class PlayerEvents implements Listener {
             if(!Main.getWG().getRegionManager(p.getWorld()).hasRegion(e.getLine(1))) {
                try {
                   Main.getWG().getRegionManager(p.getWorld()).addRegion(pr);
+                  pr.setFlag(DefaultFlag.INVINCIBILITY, StateFlag.State.ALLOW);
+                  pr.setFlag(DefaultFlag.MOB_SPAWNING, StateFlag.State.DENY);
+                  pr.setFlag(DefaultFlag.PVP, StateFlag.State.DENY);
                   Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + pr.getId() + " -w " + p.getWorld().getName() + " chest-access -g NON_MEMBERS deny");
-                  Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + pr.getId() + " -w " + p.getWorld().getName() + " pvp deny");
+//                  Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + pr.getId() + " -w " + p.getWorld().getName() + " invincible allow");
+//                  Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + pr.getId() + " -w " + p.getWorld().getName() + " pvp deny");
+//                  Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + pr.getId() + " -w " + p.getWorld().getName() + " mob-spawning deny");
                   House h = new House(e.getBlock().getLocation(), Integer.parseInt(e.getLine(3)), Double.parseDouble(e.getLine(2)), pr, HouseUtils.findChests(p.getWorld(), pr));
+                  e.setLine(0, "FOR RENT");
+                  e.setLine(1, "&r" + h.getName());
+                  e.setLine(2,"&r" + h.getStartDays() + " Days");
+                  e.setLine(3,"&r$" + h.getPrice());
                   HouseUtils.addNewHouse(h);
                   me.Strobe.Core.Utils.StringUtils.sendMessage(p, me.Strobe.Housing.Utils.StringUtils.cmdCreateHouseSuccess.replace("{loc}", RegionUtils.locationSerializer(h.getSignLocation())));
                }

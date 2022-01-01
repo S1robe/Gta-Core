@@ -45,49 +45,75 @@ public final class CopUtils {
 
    private CopUtils() {}
 
-   public static void spawnCopsOnPlayer(User user) {
+   public static void spawnCopsOnPlayer(User user, int num, int waves) {
       plrPigmen.put(user.getPlayerUUID(), new LinkedList<>());
-      BukkitRunnable x= new BukkitRunnable() {
-         private final User target = user;
+      BukkitRunnable x;
+      user.sendPlayerMessage(StringUtils.Text.COPS_ENGAGE.create());
+      if(num != -1 && waves != 0){
+         x = new BukkitRunnable() {
+            private int times = 1;
+            @Override
+            public void run() {
+               if( !user.getPLAYER().isOnline()|| times == waves || !RegionUtils.allowsPVP(user.getPLAYER().getPlayer().getLocation())) {
+                  this.cancel();
+                  return;
+               }
+               List<PigZombie> temp = createPigmenCops(user, num);
+               plrPigmen.get(user.getPlayerUUID()).add(temp);
+               user.sendPlayerMessage(StringUtils.Text.COPS_BACKUP.create());
+               times++;
+               new BukkitRunnable(){
 
-         @Override
-         public void run() {
-            if(GenUtils.getRandInt(0, 100) <= 50) {
-               target.sendPlayerMessage(StringUtils.copsDisengage);
-               this.cancel();
-            }
-            else {
-               int numToSpawn = GenUtils.getRandInt(minCopSpawn, maxCopSpawn);
-               List<PigZombie> temp = createPigmenCops(target, numToSpawn);
-               new BukkitRunnable() {
                   @Override
                   public void run() {
-                     temp.forEach(pigZombie -> {
-                        pigZombie.setTarget(user.getPLAYER().getPlayer());
-                        pigZombie.setAngry(true);
-                        pigZombie.removeMetadata("INVULNERABLE", Main.getMain());
-                     });
-                     plrPigmen.get(target.getPlayerUUID()).add(temp);
-                     target.sendPlayerMessage(StringUtils.copsEngage);
+                     despawnWave(user.getPlayerUUID());
                   }
-               }.runTaskLater(Main.getMain(), 100L);
+               }.runTaskLater(Main.getMain(), 3200L);
 
-               new BukkitRunnable() {
+            }
+
+            @Override
+            public void cancel(){
+               if(user.getPLAYER().isOnline())
+                  user.sendPlayerMessage(StringUtils.Text.COPS_DISENGAGE.create());
+               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(user.getPlayerUUID()));
+               playerRunnableIds.remove(user.getPlayerUUID());
+               despawnAllCops(user.getPlayerUUID());
+            }
+         };
+      }
+      else{
+         x = new BukkitRunnable() {
+
+            @Override
+            public void run() {
+               if(!user.getPLAYER().isOnline() || GenUtils.getRandInt(0, 100) <= 50) {
+                  this.cancel();
+                  return;
+               }
+               List<PigZombie> temp = createPigmenCops(user, GenUtils.getRandInt(minCopSpawn, maxCopSpawn));
+               plrPigmen.get(user.getPlayerUUID()).add(temp);
+               user.sendPlayerMessage(StringUtils.Text.COPS_BACKUP.create());
+
+               new BukkitRunnable(){
+
                   @Override
                   public void run() {
-                     despawnCopsOnPlayer(target.getPlayerUUID());
+                     despawnWave(user.getPlayerUUID());
                   }
-               }.runTaskLater(Main.getMain(), 3600L);
+               }.runTaskLater(Main.getMain(), 3200L);
             }
-         }
-         @Override
-         public void cancel(){
-            if(Bukkit.getScheduler().isQueued(playerRunnableIds.get(target.getPlayerUUID())) || Bukkit.getScheduler().isCurrentlyRunning(playerRunnableIds.get(target.getPlayerUUID())))
-               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(target.getPlayerUUID()));
-            playerRunnableIds.remove(target.getPlayerUUID());
-         }
-      };
-      playerRunnableIds.put(user.getPlayerUUID(), x.runTaskTimer(Main.getMain(), 0L, 3000L).getTaskId());
+            @Override
+            public void cancel(){
+               if(user.getPLAYER().isOnline())
+                  user.sendPlayerMessage(StringUtils.Text.COPS_DISENGAGE.create());
+               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(user.getPlayerUUID()));
+               playerRunnableIds.remove(user.getPlayerUUID());
+               despawnAllCops(user.getPlayerUUID());
+            }
+         };
+      }
+      playerRunnableIds.put(user.getPlayerUUID(), x.runTaskTimer(Main.getMain(), 0L, 1200L).getTaskId());
    }
 
    private static List<PigZombie> createPigmenCops(User target, int amtToSpawn) {
@@ -102,7 +128,9 @@ public final class CopUtils {
                                                                  pigCopHelm(WL) });
          piggie.getEquipment().setItemInHand(pigCopSword(WL));
          piggie.setCustomName(StringUtils.color("&c&lWanted: &6" + player.getName()));
-         piggie.setMetadata("INVULNERABLE", new FixedMetadataValue(Main.getMain(), true));
+         piggie.setMetadata(target.getPlayer_Name(), new FixedMetadataValue(Main.getMain(), true));
+         piggie.setTarget(target.getPLAYER().getPlayer());
+         piggie.setAngry(true);
          pigList.add(piggie);
       }
       return pigList;
@@ -160,11 +188,13 @@ public final class CopUtils {
          itemStack = createItem(Material.STONE_SWORD, 1);
 
       itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 2);
-      itemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
       if(wL > 100) {
          itemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 6);
          return itemStack;
       }
+      else
+         itemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+
 
       return itemStack;
    }
@@ -176,6 +206,7 @@ public final class CopUtils {
          itemStack.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.PROTECTION_EXPLOSIONS, 5);
          return itemStack;
       }
+      if(wL/20 == 0) return itemStack;
       itemStack.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.PROTECTION_ENVIRONMENTAL, wL / 20);
       itemStack.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.PROTECTION_PROJECTILE, wL / 20);
       itemStack.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.PROTECTION_EXPLOSIONS, wL / 20);
@@ -288,7 +319,7 @@ public final class CopUtils {
       return createItem(Material.STAINED_GLASS_PANE, 1, (byte) 14, "&c&lNot Tracking Player");
    }
 
-   public static void despawnCopsOnPlayer(UUID pID){
+   public static void despawnWave(UUID pID){
       Queue<List<PigZombie>> q = plrPigmen.get(pID);
       if(q.isEmpty()){
          plrPigmen.remove(pID);
@@ -297,5 +328,31 @@ public final class CopUtils {
       Objects.requireNonNull(q.poll()).forEach(Entity::remove);
    }
 
+   public static void despawnAllCops(UUID pID){
+      Queue<List<PigZombie>> q = plrPigmen.get(pID);
+      if(q.isEmpty()){
+         plrPigmen.remove(pID);
+         return;
+      }
+      q.forEach(list -> list.forEach(Entity::remove));
+   }
+
+   public static void init(){
+      FileConfiguration f = Main.getMain().getMainDataFile().getCustomConfig();
+      blackListedCommands       = f.getStringList("cop-blacklisted-commands");
+      percentMoneyToDropOnDeath = f.getDouble("percent-money-drop") / 100;
+      f = Main.getMain().getCopDataFile().getCustomConfig();
+      moneyForKillCop           = f.getDouble("cop-kill-money");
+      lowWantedForCop           = f.getInt("low-WL-kill-Cop");
+      highWantedForCop          = f.getInt("high-WL-kill-Cop");
+      modeChangeTimeout         = f.getInt("changeModeTimeOut");
+      maxCopSpawn               = f.getInt("max-cops");
+      minCopSpawn               = f.getInt("min-cops");
+      inventory                 = new ArrayList<>();
+      String house              = f.getString("safeHouse");
+
+      if(!house.equals("")) CopUtils.safeHouse = RegionUtils.locationDeserializer(house);
+      Main.getMain().getCopDataFile().getCustomConfig().getList("inventory").forEach(e -> CopUtils.inventory.add((ItemStack) e));
+   }
 
 }

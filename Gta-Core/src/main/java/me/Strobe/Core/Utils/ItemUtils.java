@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -162,35 +163,33 @@ public final class ItemUtils {
       return item;
    }
 
-   public static ItemStack appendToLore(ItemStack itemStack, String... addedLines){
+   public static void appendToLore(ItemStack itemStack, String... addedLines){
       ItemMeta itemMeta = itemStack.getItemMeta();
       List<String> itemLore = itemStack.getItemMeta().getLore();
       colorBulk(itemLore);
       itemLore.addAll(Arrays.asList(colorBulk(addedLines)));
       itemMeta.setLore(itemLore);
       itemStack.setItemMeta(itemMeta);
-      return itemStack;
    }
    
-   public static ItemStack changeLine(ItemStack itemStack, int line, String newLine){
+   public static void changeLine(ItemStack itemStack, int line, String newLine){
       ItemMeta im = itemStack.getItemMeta();
       List<String> lore = im.getLore();
+      if(lore == null){
+         lore = new ArrayList<>();
+      }
       if(line >= lore.size()){
          while(line >= lore.size()) lore.add("");
-         lore.set(line, newLine);
       }
-      else
-         lore.set(line, newLine);
+      lore.set(line, newLine);
       im.setLore(lore);
       itemStack.setItemMeta(im);
-      return itemStack;
    }
 
-   public static ItemStack setDisplayName(ItemStack itemStack, String name){
+   public static void setDisplayName(ItemStack itemStack, String name){
       ItemMeta m = itemStack.getItemMeta();
       m.setDisplayName(color(name));
       itemStack.setItemMeta(m);
-      return itemStack;
    }
 
    public static String getStrippedLoreLine(ItemStack itemStack, int line){
@@ -200,6 +199,11 @@ public final class ItemUtils {
             return ChatColor.stripColor(lore.get(line));
       }
       return "";
+   }
+
+   public static ItemStack createMoneyItem(double min, double max){
+      double amt = GenUtils.getRandDouble(min, max);
+      return ItemUtils.createItem(Material.GOLD_NUGGET, 1, (byte)0, true, "" + amt);
    }
 
 }

@@ -59,7 +59,7 @@ public class DelayedTeleport extends BukkitRunnable {
 
     //runs the teleportation
     public static void doDelayedTeleport(Plugin plugin, Player p, Location to, int timeout) {
-        StringUtils.sendMessage(p, StringUtils.teleporting.replace("{t}", ""+timeout));
+        StringUtils.sendMessage(p, StringUtils.Text.TELEPORTING.create( ""+timeout));
         DelayedTeleport dt = new DelayedTeleport(plugin, timeout, p, to);
         p.setMetadata(TELEPORT_ACTION, new FixedMetadataValue(plugin, dt));
         p.setMetadata("Successful Teleport", new FixedMetadataValue(plugin, dt));

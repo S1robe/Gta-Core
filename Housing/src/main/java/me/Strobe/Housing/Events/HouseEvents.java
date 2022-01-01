@@ -37,12 +37,15 @@ public class HouseEvents implements Listener {
          onHouseSignClick(e.getPlayer(), HouseUtils.getHouseBySignBlock(b));
       }
       else if(b != null && HouseUtils.isHouseBlockedChest(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
-         Chest c = (Chest) b.getState();
-         if(c.getInventory().getHolder() instanceof DoubleChest){
-            openCoveredHouseDoubleChest(e.getPlayer(), (DoubleChest) c.getInventory().getHolder());
-         }
-         else{
-            openCoveredHouseChest(e.getPlayer(), c);
+         House h = HouseUtils.getHouseByChestLocation(b.getLocation());
+         if(h != null && h.isPlayerApartOfHouse(e.getPlayer())) {
+            Chest c = (Chest) b.getState();
+            if(c.getInventory().getHolder() instanceof DoubleChest) {
+               openCoveredHouseDoubleChest(e.getPlayer(), (DoubleChest) c.getInventory().getHolder());
+            }
+            else {
+               openCoveredHouseChest(e.getPlayer(), c);
+            }
          }
 
       }
@@ -66,7 +69,10 @@ public class HouseEvents implements Listener {
       else if(!h.isOwned()) {
          User u = User.getByPlayer(p);
          if(u.getBalance() >= h.getPrice())
-            HouseUtils.buyHouse(p, h);
+            if(HouseUtils.getHouseByPlayer(p) == null)
+               HouseUtils.buyHouse(p, h);
+            else
+               u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.alreadyOwnedHouse);
          else
             u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.notEnoughMoney);
       }
@@ -87,6 +93,7 @@ public class HouseEvents implements Listener {
       if(i != null) {
          ItemStack item = e.getCurrentItem();
          Player p = (Player) e.getWhoClicked();
+         User u = User.getByPlayer(p);
          String inventoryTitle = ChatColor.stripColor(i.getTitle());
          if(inventoryTitle.contains("Select a home")) {
             e.setCancelled(true);
@@ -116,7 +123,7 @@ public class HouseEvents implements Listener {
       if(!(clicked.isSimilar(GUIS.filler()) || clicked.isSimilar(GUIS.noHouse()) || clicked.isSimilar(GUIS.noMemberOf()) || clicked.isSimilar(GUIS.divider()))) {
          House h = HouseUtils.getHouseByName(ChatColor.stripColor(clicked.getItemMeta().getDisplayName()));
          if(h != null)
-            if(h.getOwner().equals(p))
+            if(h.isPlayerOwner(p))
                GUIS.home(p, h);
             else
                GUIS.notOwnerView(p, h, true);
@@ -132,6 +139,10 @@ public class HouseEvents implements Listener {
             DelayedTeleport.doDelayedTeleport(Main.getMain(), p, h.getSpawnLocation(), 5);
             break;
          case "Extend Your Stay":
+            if(u.getBalance() < (h.getPrice()/h.getStartDays())){
+               u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.notEnoughMoney);
+               return;
+            }
             if(h.getDaysRemaining() >= HouseUtils.maxNumDays) {
                u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.maxDaysReached);
                return;
@@ -171,6 +182,10 @@ public class HouseEvents implements Listener {
             DelayedTeleport.doDelayedTeleport(Main.getMain(), p, h.getSpawnLocation(), 5);
             break;
          case "Extend Your Stay":
+            if(u.getBalance() < (h.getPrice()/h.getStartDays())){
+               u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.notEnoughMoney);
+               return;
+            }
             if(h.getDaysRemaining() >= HouseUtils.maxNumDays) {
                u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.maxDaysReached);
                return;
@@ -194,6 +209,7 @@ public class HouseEvents implements Listener {
       p.closeInventory();
       p.openInventory(clicked.getInventory());
    }
+
 
 
 

@@ -1,0 +1,19 @@
+name: Robberies
+main: me.strobe.bankrobberies.Main
+version: 1.0
+author: Strobe
+depend:
+  - "Citizens"
+  - 'WorldGuard'
+  - GTACore
+  - Vault
+commands:
+  rnpc:
+    description: Base command
+
+permissions:
+    robnpc.commands:
+      create:
+      delete:
+      reset:
+      view:

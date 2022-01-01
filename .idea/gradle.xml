@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/BankRobberies" />
+            <option value="$PROJECT_DIR$/ConfigAPI" />
             <option value="$PROJECT_DIR$/GTA-Gangs" />
             <option value="$PROJECT_DIR$/Gta-Core" />
             <option value="$PROJECT_DIR$/Gta-Gangs" />

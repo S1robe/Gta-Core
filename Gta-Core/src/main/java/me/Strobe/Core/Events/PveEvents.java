@@ -1,22 +1,13 @@
 package me.Strobe.Core.Events;
 
-import me.Strobe.Core.Utils.User;
-import me.Strobe.Core.Utils.GenUtils;
-import me.Strobe.Core.Utils.LootingUtils;
-import me.Strobe.Core.Utils.StringUtils;
-import org.bukkit.World;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.inventory.ItemStack;
+import me.Strobe.Core.Utils.*;
+import org.bukkit.*;
+import org.bukkit.entity.*;
+import org.bukkit.event.*;
+import org.bukkit.event.entity.*;
+import org.bukkit.inventory.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PveEvents implements Listener {
 
@@ -32,42 +23,38 @@ public class PveEvents implements Listener {
          if(player != null && LootingUtils.isWorldMobActive(world)) {
             User user = User.getByPlayer(player);
             try {
-               switch(entity.getType()) {
-                  case WITCH:
+               EntityType eT = entity.getType();
+               switch(eT) {
                   case VILLAGER: {
-                     user.modVillagerKill(1);
-                     dropItems(EntityType.VILLAGER, GenUtils.getRandInt(LootingUtils.minItemDropMob, LootingUtils.maxItemDropMob)).forEach(i -> world.dropItem(entity.getLocation(), i));
+                     user.addVillKills(1);
                      break;
                   }
                   case ZOMBIE: {
-                     user.modZomKill(1);
-                     dropItems(EntityType.ZOMBIE, GenUtils.getRandInt(LootingUtils.minItemDropMob, LootingUtils.maxItemDropMob)).forEach(i -> world.dropItem(entity.getLocation(), i));
+                     user.addZomKill(1);
                      break;
                   }
                   //Cops
                   case PIG_ZOMBIE: {
-                     user.modNPCCopKills(1);
-                     dropItems(EntityType.PIG_ZOMBIE, GenUtils.getRandInt(LootingUtils.minItemDropMob, LootingUtils.maxItemDropMob)).forEach(i -> world.dropItem(entity.getLocation(), i));
+                     user.addNPCCopKill(1);
                      break;
                   }
                   case ENDERMAN: {
-                     user.modEndKill(1);
-                     dropItems(EntityType.ENDERMAN, GenUtils.getRandInt(LootingUtils.minItemDropMob, LootingUtils.maxItemDropMob)).forEach(i -> world.dropItem(entity.getLocation(), i));
+                     user.addEndKill(1);
                      break;
                   }
                   //Counts both withers and skeletons
                   case SKELETON: {
                      if(((Skeleton) entity).getSkeletonType().equals(Skeleton.SkeletonType.WITHER))
-                        user.modWithSkelKill(1);
+                        user.addWithSkelKills(1);
                      else
-                        user.modSkelKill(1);
-                     dropItems(EntityType.SKELETON, GenUtils.getRandInt(LootingUtils.minItemDropMob, LootingUtils.maxItemDropMob)).forEach(i -> world.dropItem(entity.getLocation(), i));
+                        user.addSkelKills(1);
                      break;
                   }
                }
+               dropItems(eT, GenUtils.getRandInt(LootingUtils.getMinItemDropMob(), LootingUtils.getMaxItemDropMob())).forEach(i -> world.dropItem(entity.getLocation(), i));
             }
             catch(NullPointerException i){
-               StringUtils.logFine(i.getMessage());
+               StringUtils.logFine("No loot for mod: " +entity.getType() + " : dropping nothing.");
             }
          }
          //Looting idea: armor and money from mobs, weapons ammo parts/attatchments and food from chests.
@@ -78,18 +65,18 @@ public class PveEvents implements Listener {
       List<ItemStack> loot = new ArrayList<>(draw);
       switch(e) {
          case VILLAGER:
-            loot.add(LootingUtils.createMoneyItem(LootingUtils.villMinMonDrop, LootingUtils.villMaxMonDrop));
+            loot.add(ItemUtils.createMoneyItem(LootingUtils.getVillMinMonDrop(), LootingUtils.getVillMaxMonDrop()));
                for(int i = 0; i < draw; i++)
                   loot.add(LootingUtils.getRandom("Villager").getRandom());
             break;
          case ZOMBIE:
-            loot.add(LootingUtils.createMoneyItem(LootingUtils.zomMinMonDrop, LootingUtils.zomMaxMonDrop));
+            loot.add(ItemUtils.createMoneyItem(LootingUtils.getZomMinMonDrop(), LootingUtils.getZomMaxMonDrop()));
                for(int i = 0; i < draw; i++)
                   loot.add(LootingUtils.getRandom("Zombie").getRandom());
             break;
          //Cops
          case PIG_ZOMBIE:
-            loot.add(LootingUtils.createMoneyItem(LootingUtils.pigCopMinMonDrop, LootingUtils.pigCopMaxMonDrop));
+            loot.add(ItemUtils.createMoneyItem(LootingUtils.getPigCopMinMonDrop(), LootingUtils.getPigCopMaxMonDrop()));
                for(int i = 0; i < draw; i++)
                   loot.add(LootingUtils.getRandom("Cop").getRandom());
             break;
@@ -99,7 +86,7 @@ public class PveEvents implements Listener {
 //            break;
          //Counts both withers and skeletons
          case SKELETON:
-            loot.add(LootingUtils.createMoneyItem(LootingUtils.skelMinMonDrop, LootingUtils.skelMaxMonDrop));
+            loot.add(ItemUtils.createMoneyItem(LootingUtils.getSkelMinMonDrop(), LootingUtils.getSkelMaxMonDrop()));
                for(int i = 0; i < draw; i++)
                   loot.add(LootingUtils.getRandom("Skeleton").getRandom());
       }

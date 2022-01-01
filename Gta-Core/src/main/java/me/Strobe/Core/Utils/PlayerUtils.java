@@ -25,8 +25,7 @@ import java.util.stream.Stream;
 
 public final class PlayerUtils {
 
-   private PlayerUtils() {
-   }
+   private PlayerUtils() {}
 
    /**
     * remove 1 item from players hand
@@ -146,9 +145,9 @@ public final class PlayerUtils {
    }
 
    public static Player getPlayer(String playerName) {
-      for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+      for(Player offlinePlayer : Bukkit.getOnlinePlayers()) {
          if(playerName.equalsIgnoreCase(offlinePlayer.getName())) {
-            return offlinePlayer.getPlayer();
+            return offlinePlayer;
          }
       }
       return null;

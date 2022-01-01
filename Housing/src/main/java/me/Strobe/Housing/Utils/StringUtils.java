@@ -9,7 +9,7 @@ public final class StringUtils {
    public static final String unrentHouse = "&e&l(!)&7 You have unrented your house!";
    public static final String purchaseHouse = "&a&l(!)&7 You have purchased this house!";
    public static final String addedMember = "&e&l(!)&7 You have added &b{plr}&7 to your house!";
-   public static final String removeMember = "&c&l(!)&7 You have removed &b{plr}&7 to your house!";
+   public static final String removeMember = "&c&l(!)&7 You have removed &b{plr}&7 from your house!";
    public static final String gainedOwnership = "&a&l(!)&7 You are now the owner of &b{reg}&7!";
    public static final String lostOwnership = "&c&l(!)&7 You no longer own this house!";
    public static final String expiredHouse = "&c&l(!)&7 Your house's time has expired!";
@@ -26,6 +26,7 @@ public final class StringUtils {
    public static final String notEnoughMoney = "&c&l(!)&7 You dont have enough for this house!";
    public static final String notAHouse = "&c&l(!)&7 There is no house by this name!";
    public static final String leftHouse = "&c&l(!)&7 You have left {plr}'s house!";
+   public static final String alreadyOwnedHouse = "&c&l(!)&7 You already have a house!";
 
    //TODO: Command args helper yes.
    public static final String cmdSetSpawnSuccess = "&a&l(!)&7 You have set the spawn of this house to {x}, {y}, {z}";

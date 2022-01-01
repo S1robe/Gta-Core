@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -41,9 +42,9 @@ public class House implements ConfigurationSerializable {
    private OfflinePlayer owner;
    private List<OfflinePlayer> members = new ArrayList<>();
    private Location spawnLocation;
-   private transient String[] timeLeftString;
-   private transient ItemStack GUIHOUSEITEM;
-   private List<Location> chestLocations;
+   private transient String[] timeLeftString = new String[0];
+   private transient ItemStack GUIHOUSEITEM = new ItemStack(Material.AIR);
+   private List<Location> chestLocations = new ArrayList<>();
 
    private House() {
    }
@@ -56,7 +57,6 @@ public class House implements ConfigurationSerializable {
       this.signLocation = signLocation;
       this.region = region;
       this.chestLocations = chests;
-      updateSign(StringUtils.colorBulk("FOR RENT", "&r" + this.name, "&r" + startDays + " Days", "&r$" + price));
    }
 
    //loading from the file.
@@ -65,7 +65,8 @@ public class House implements ConfigurationSerializable {
       this.name = (String) serialized.get("name");
       this.price = (double) serialized.get("price");
       this.signLocation = RegionUtils.locationDeserializer((String) serialized.get("sLocation"));
-      this.chestLocations = (List<Location>) serialized.get("chestLocations");
+      this.chestLocations = RegionUtils.locationDeserializer((List<String>) serialized.get("chestLocations"));
+      //this.chestLocations = (List<Location>) serialized.get("chestLocations");
 
       this.region = Main.getWG().getRegionManager(signLocation.getWorld()).getRegion(name);
       if(serialized.containsKey("startTime"))
@@ -127,9 +128,10 @@ public class House implements ConfigurationSerializable {
    public void removeMember(OfflinePlayer member) {
       region.getMembers().removePlayer(member.getUniqueId());
       members.remove(member);
-      sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.removeMember.replace("{plr}", member.getName()));
-      if(member.isOnline())
-         me.Strobe.Core.Utils.StringUtils.sendMessage(member.getPlayer(), me.Strobe.Housing.Utils.StringUtils.kickFromHouse.replace("{plr}", owner.getName()));
+//      sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.removeMember.replace("{plr}", member.getName()));
+//      if(member.isOnline())
+//         me.Strobe.Core.Utils.StringUtils.sendMessage(member.getPlayer(), me.Strobe.Housing.Utils.StringUtils.kickFromHouse.replace("{plr}", owner.getName()));
+//   }
    }
 
    public boolean assignOwner(OfflinePlayer newOwner) {
@@ -137,12 +139,13 @@ public class House implements ConfigurationSerializable {
          region.getOwners().removeAll();
          region.getOwners().addPlayer(newOwner.getUniqueId());
          region.getMembers().addPlayer(owner.getUniqueId());
-         sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.lostOwnership);
-         if(newOwner.isOnline())
-            StringUtils.sendMessage(newOwner.getPlayer(), me.Strobe.Housing.Utils.StringUtils.gainedOwnership.replace("{plr}", owner.getName()).replace("{reg}", name));
          owner = newOwner;
          members.remove(newOwner);
          members.add(owner);
+         sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.lostOwnership);
+         if(newOwner.isOnline())
+            StringUtils.sendMessage(newOwner.getPlayer(), me.Strobe.Housing.Utils.StringUtils.gainedOwnership.replace("{plr}", owner.getName()).replace("{reg}", name));
+
          updateSign(StringUtils.colorBulk("&r" + owner.getName()));
          return true;
       }
@@ -163,6 +166,10 @@ public class House implements ConfigurationSerializable {
       owner = null;
       members = null;
       updateSign(StringUtils.colorBulk("FOR RENT", "&r" + this.name, "&r" + startDays + " Day(s)", "&r$" + price));
+   }
+
+   public void clear(){
+      chestLocations.stream().map(Location::getBlock).map(Block::getState).forEach(state -> {if(state instanceof Chest)((Chest) state).getInventory().clear();});
    }
 
    public void sendMembersAMessage(String... message) {
@@ -219,7 +226,7 @@ public class House implements ConfigurationSerializable {
    }
 
    public boolean doesPlayerOwnHouse(OfflinePlayer p) {
-      return p.equals(owner);
+      return p.getUniqueId().equals(owner.getUniqueId());
    }
 
    public OfflinePlayer getMemberByName(String playerName){
@@ -228,7 +235,7 @@ public class House implements ConfigurationSerializable {
       return null;
    }
 
-   public boolean isPlayerOwner(Player p){
+   public boolean isPlayerOwner(OfflinePlayer p){
       return owner != null && p.getUniqueId().equals(owner.getUniqueId());
    }
 
@@ -238,6 +245,10 @@ public class House implements ConfigurationSerializable {
 
    public boolean isPlayerAdded(OfflinePlayer p) {
       return members.contains(p);
+   }
+
+   public boolean isPlayerApartOfHouse(OfflinePlayer p){
+      return isOwned() && (isPlayerAdded(p) || isPlayerOwner(p));
    }
 
    public boolean isOwned() {
@@ -267,12 +278,9 @@ public class House implements ConfigurationSerializable {
    @Override
    public Map<String, Object> serialize() {
       Map<String, Object> map = new HashMap<>();
-      map.put("sLocation", RegionUtils.locationSerializer(signLocation));
       map.put("name", name);
       map.put("price", price);
       map.put("startDays", startDays);
-      map.put("chestLocations", chestLocations);
-
       if(startTime != -1)
          map.put("startTime", startTime);
       if(endTime != -1)
@@ -283,8 +291,8 @@ public class House implements ConfigurationSerializable {
          map.put("memberUUIDs", members.stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
       if(spawnLocation != null)
          map.put("spawnLocation", RegionUtils.locationSerializer(spawnLocation));
-
-
+      map.put("chestLocations", RegionUtils.locationSerializer(chestLocations));
+      map.put("sLocation", RegionUtils.locationSerializer(signLocation));
       return map;
    }
 }

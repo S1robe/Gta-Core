@@ -10,12 +10,10 @@ import me.Strobe.Core.Utils.CopUtils;
 import me.Strobe.Core.Utils.Displays.ScoreboardManager;
 import me.Strobe.Core.Utils.Looting.LootItem;
 import me.Strobe.Core.Utils.LootingUtils;
-import me.Strobe.Core.Utils.RegionUtils;
 import me.Strobe.Core.Utils.User;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -23,9 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.logging.Level;
-
 
 public final class Main extends JavaPlugin {
 
@@ -63,7 +59,6 @@ public final class Main extends JavaPlugin {
       LootingUtils.saveActiveWorlds();
       CopUtils.save();
       fileMan.saveAllFiles();
-      plMan.disablePlugin(this);
    }
 
    @Override
@@ -92,11 +87,11 @@ public final class Main extends JavaPlugin {
       plMan.registerEvents(new EntityEvents(), this);
       plMan.registerEvents(new CopEvents(), this);
       plMan.registerEvents(new GUIEvents(), this);
-      getCommand("chestloot").setExecutor(new LootCommands());
-      getCommand("mobloot").setExecutor(new LootCommands());
+      getCommand("loot").setExecutor(new LootCommands());
       getCommand("stats").setExecutor(new UserRelatedCommands());
       getCommand("cop").setExecutor(new UserRelatedCommands());
-      getCommand("gtareload").setExecutor(new UserRelatedCommands());
+      getCommand("gta").setExecutor(new UserRelatedCommands());
+      getCommand("help").setExecutor(new UserRelatedCommands());
    }
 
    private void startBoardUpdates() {
@@ -120,38 +115,8 @@ public final class Main extends JavaPlugin {
    }
 
    public void initUtils() {
-      LootingUtils.loadAllLoot();
-      CopUtils.blackListedCommands = this.mainDataFile.getCustomConfig().getStringList("cop-blacklisted-commands");
-      String house = this.copDataFile.getCustomConfig().getString("safeHouse");
-      if(!house.equals(""))
-         CopUtils.safeHouse = RegionUtils.locationDeserializer(house);
-
-      CopUtils.modeChangeTimeout = this.copDataFile.getCustomConfig().getInt("changeModeTimeOut");
-      CopUtils.maxCopSpawn = this.copDataFile.getCustomConfig().getInt("max-cops");
-      CopUtils.minCopSpawn = this.copDataFile.getCustomConfig().getInt("min-cops");
-      CopUtils.inventory = new ArrayList<>();
-      this.copDataFile.getCustomConfig().getList("inventory").forEach(e -> CopUtils.inventory.add((ItemStack) e));
-
-
-      LootingUtils.chestResetTime = (this.mainDataFile.getCustomConfig().getInt("chest-reset-time") * 60000L);
-      LootingUtils.minItemChestdrop = (this.mainDataFile.getCustomConfig().getInt("min-chest-drop"));
-      LootingUtils.maxItemChestDrop = (this.mainDataFile.getCustomConfig().getInt("max-chest-drop"));
-      LootingUtils.maxItemDropMob = (this.mainDataFile.getCustomConfig().getInt("max-mob-drop"));
-      LootingUtils.minItemDropMob = (this.mainDataFile.getCustomConfig().getInt("min-mob-drop"));
-      CopUtils.moneyForKillCop = (this.copDataFile.getCustomConfig().getDouble("cop-kill-money"));
-      CopUtils.percentMoneyToDropOnDeath = (this.mainDataFile.getCustomConfig().getDouble("percent-money-drop") / 100);
-      CopUtils.lowWantedForCop = (this.copDataFile.getCustomConfig().getInt("low-WL-kill-Cop"));
-      CopUtils.highWantedForCop = (this.copDataFile.getCustomConfig().getInt("high-WL-kill-Cop"));
-
-      LootingUtils.zomMinMonDrop = this.lootFile.getCustomConfig().getDouble("Zombie.minMon");
-      LootingUtils.zomMaxMonDrop = this.lootFile.getCustomConfig().getDouble("Zombie.maxMon");
-      LootingUtils.skelMinMonDrop = this.lootFile.getCustomConfig().getDouble("Skeleton.minMon");
-      LootingUtils.skelMaxMonDrop = this.lootFile.getCustomConfig().getDouble("Skeleton.maxMon");
-      LootingUtils.villMinMonDrop = this.lootFile.getCustomConfig().getDouble("Villager.minMon");
-      LootingUtils.villMaxMonDrop = this.lootFile.getCustomConfig().getDouble("Villager.maxMon");
-      LootingUtils.pigCopMinMonDrop = this.lootFile.getCustomConfig().getDouble("Cop.minMon");
-      LootingUtils.pigCopMaxMonDrop = this.lootFile.getCustomConfig().getDouble("Cop.maxMon");
-      LootingUtils.loadActiveWorlds();
+      LootingUtils.init();
+      CopUtils.init();
    }
 
    private boolean setupEconomy() {

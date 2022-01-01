@@ -13,7 +13,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class GUIS {
 
@@ -68,9 +67,9 @@ public class GUIS {
          inv.setItem(5, noMemberOf());
       }
       else if(houseItemAddedTo.size() == 0) {
+         inv.setItem(0, houseItemOwned);
          inv.setItem(5, noMemberOf());
-         GenUtils.setLeft(inv, filler(), new ArrayList<>(Collections.singleton(houseItemOwned)));
-         HouseUtils.updateItemInHouseGUI(p, houseItemOwned, h);
+         HouseUtils.updateItemInHouseGUI(p, inv.getItem(0), h);
       }
       else if(houseItemOwned == null) {
          inv.setItem(0, noHouse());
@@ -78,9 +77,9 @@ public class GUIS {
          houseItemAddedTo.forEach(i -> HouseUtils.updateItemInHouseGUI(p, i, h));
       }
       else {
-         GenUtils.setLeft(inv, filler(), new ArrayList<>(Collections.singleton(houseItemOwned)));
+         inv.setItem(0, houseItemOwned);
          GenUtils.setRight(inv, filler(), houseItemAddedTo);
-         HouseUtils.updateItemInHouseGUI(p, houseItemOwned, h);
+         HouseUtils.updateItemInHouseGUI(p, inv.getItem(0), h);
          houseItemAddedTo.forEach(i -> HouseUtils.updateItemInHouseGUI(p, i, h));
       }
       p.openInventory(inv);

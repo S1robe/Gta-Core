@@ -1,4 +1,4 @@
-#This is the string seralizaiton of a Location object for the spawn point of cops
+#This is the string serialization of a Location object for the spawn point of cops
 safeHouse: ""
 
 #The time in seconds that it will take for a cop to change back or vice versa.

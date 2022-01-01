@@ -1,11 +1,11 @@
 package me.Strobe.Core.Commands;
 
-import me.Strobe.Core.Utils.User;
 import me.Strobe.Core.Utils.Displays.GUIS;
 import me.Strobe.Core.Utils.Looting.LootItem;
 import me.Strobe.Core.Utils.LootingUtils;
 import me.Strobe.Core.Utils.PlayerUtils;
 import me.Strobe.Core.Utils.StringUtils;
+import me.Strobe.Core.Utils.User;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,206 +21,167 @@ public class LootCommands implements CommandExecutor {
    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
       if(commandSender instanceof Player) {
          if(args.length == 0) {
-            if(s.equalsIgnoreCase("chestloot")){
-               StringUtils.sendCommandMessage(commandSender, StringUtils.chestlootUsage);
-            }
-            else if(s.equalsIgnoreCase("mobloot")){
-               StringUtils.sendCommandMessage(commandSender, StringUtils.moblootUsage);
+            if(s.equalsIgnoreCase("loot")){
+               StringUtils.sendCommandMessage(commandSender, StringUtils.Text.LOOT_USAGE.create());
             }
             return true;
          }
          Player sendr = (Player) commandSender;
          User sender = User.getByPlayer(sendr);
-         switch(s.toLowerCase()) {
-            case "chestloot": {
-               switch(args[0].toLowerCase()) {
-                  // chestloot add <minAmt> <maxAmt> <weight> //pulls from item in hand, copies the item exactly.
-                  case "a":
-                  case "+":
-                  case "add": {
-                     if(args.length != 4)
-                        return false;
-                     try {
-                        short minAmt = Short.parseShort(args[1]);
-                        try {
-                           short maxAmt = Short.parseShort(args[2]);
-                           try {
-                              double weight = Double.parseDouble(args[3]);
-                              ItemStack item = sendr.getItemInHand();
-                              if(sendr.getItemInHand().getType().equals(Material.AIR)) {
-                                 sender.sendPlayerMessage(StringUtils.invalidItemType);
-                                 return false;
-                              }
-                              sender.sendPlayerMessage(StringUtils.successAddedToPool);
-                              return addLootChest(item, minAmt, maxAmt, weight);
-                           }
-                           catch(NumberFormatException e) {
-                              sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[3]));
-                           }
-                        }
-                        catch(NumberFormatException e) {
-                           sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[2]));
-                        }
-                     }
-                     catch(NumberFormatException e) {
-                        sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[1]));
-                     }
-                     return false;
-                  }
-                  case "v":
-                  case "d":
-                  case "display":
-                  case "view": {
-                     displayLoot(sendr, "Loot");
-                     return true;
-                  }
-                  case "g":
-                  case "give":
-                  case "giverandom": {
-                     return giveRandomChestLoot(sender);
-                  }
-                  case "rel":
-                  case "reload": {
-                     LootingUtils.reloadChestLoot();
-                     return true;
-                  }
-                  case "w":
-                     //chestloot world activate (worldname)
-                  case "world": {
-                     if(args.length == 2){
-                        if(args[1].equalsIgnoreCase("activate")){
-                           return world(sender, sendr.getWorld(),true, true);
-                        }
-                        else if(args[1].equalsIgnoreCase("deactivate")){
-                           return world(sender, sendr.getWorld(),false, true);
-                        }
-                     }
-                     else if(args.length == 3){
-                        if(args[1].equalsIgnoreCase("activate")){
-                           return world(sender, Bukkit.getWorld(args[2]),true, false);
-
-                        }
-                        else if(args[1].equalsIgnoreCase("deactivate")){
-                           return world(sender, Bukkit.getWorld(args[2]),false, false);
-                        }
-                     }
-                     else{
-                        sender.sendPlayerMessage(StringUtils.worldUsage);
-                     }
-                  }
-                  case "min":{
-                     LootingUtils.minItemChestdrop = Integer.parseInt(args[1]);
-                  }
-                  case "max":
-                     LootingUtils.maxItemChestDrop = Integer.parseInt(args[1]);
-                  case "time":
-                     LootingUtils.chestResetTime = Integer.parseInt(args[1]) * 60000L;
+         if(s.equalsIgnoreCase("loot")){
+            String type = StringUtils.capitalizeFirst(args[0].toLowerCase());
+            switch(type){
+               case "Reload":{
+                  if(!sendr.hasPermission("loot.admin")) return false;
+                  LootingUtils.reloadAllLoot();
+                  sender.sendPlayerMessage(StringUtils.Text.ALL_LOOT_RELOAD.create());
+                  break;
                }
-            }
-            case "mobloot": {
-               switch(args[0].toLowerCase()) {
-                  // mobloot add <type> <minAmt> <maxAmt> <weight> //pulls from item in hand, copies the item exactly.
-                  case "a":
-                  case "+":
-                  case "add": {
-                     if(args.length != 5)
-                        return false;
-                     String type = args[1].toLowerCase();
-                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skeleton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop"))
-                        try {
-                           short minAmt = Short.parseShort(args[2]);
-                           try {
-                              short maxAmt = Short.parseShort(args[3]);
-                              try {
-                                 double weight = Double.parseDouble(args[4]);
-                                 ItemStack item = sendr.getItemInHand();
-                                 sender.sendPlayerMessage(StringUtils.successAddedToPool);
-                                 return addMobLoot(type, item, minAmt, maxAmt, weight);
-                              }
-                              catch(NumberFormatException e) {
-                                 sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[4]));
-                              }
-                           }
-                           catch(NumberFormatException e) {
-                              sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[3]));
-                           }
-                        }
-                        catch(NumberFormatException e) {
-                           sender.sendPlayerMessage(StringUtils.invalidAmount.replace("{amt}", args[2]));
-                        }
+               case "Time": {
+                  if(!sendr.hasPermission("loot.admin")) return false;
+                  try {
+                     LootingUtils.setChestResetTime(Integer.parseInt(args[1]));
+                     sender.sendPlayerMessage(StringUtils.Text.LOOT_TIME_SET.create(args[1]));
+                  }
+                  catch(NumberFormatException e) {
+                     sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create(args[1]));
+                  }
+                  break;
+               }
+               case "World": {
+                  if(!sendr.hasPermission("loot.admin")) return false;
+                  if(args.length == 3){
+                     if(args[1].equalsIgnoreCase("activate"))
+                        return world(sender, sendr.getWorld(),true, Boolean.parseBoolean(args[2]));
+                     else if(args[1].equalsIgnoreCase("deactivate"))
+                        return world(sender, sendr.getWorld(),false, Boolean.parseBoolean(args[2]));
                      else
-                        sender.sendPlayerMessage(StringUtils.invalidMobType);
-
-                     return false;
+                        sender.sendPlayerMessage(StringUtils.Text.LOOT_WORLD_USAGE.create());
                   }
-                  case "v":
-                  case "d":
-                  case "display":
-                  case "view": {
-                     String type = args[1].toLowerCase();
-                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skeleton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop")) {
-                        type = StringUtils.capitalizeFirst(type);
-                        displayLoot(sendr, type);
-                        return true;
-                     }
-                     sender.sendPlayerMessage(StringUtils.invalidMobType);
-                     return false;
+                  else if(args.length == 4){
+                     if(args[1].equalsIgnoreCase("activate"))
+                        return world(sender, Bukkit.getWorld(args[2]),true, Boolean.parseBoolean(args[3]));
+                     else if(args[1].equalsIgnoreCase("deactivate"))
+                        return world(sender, Bukkit.getWorld(args[2]),false, Boolean.parseBoolean(args[3]));
+                     else
+                        sender.sendPlayerMessage(StringUtils.Text.LOOT_WORLD_USAGE.create());
                   }
-                  case "gr":
-                  case "giver":
-                  case "giverandom": {
-                     String type = args[1].toLowerCase();
-                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skeleton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop")) {
-                        type = StringUtils.capitalizeFirst(type);
-                        if(!giveRandomMobLoot(type, sender)) {
-                           sender.sendPlayerMessage(StringUtils.giveRandomItemUnSuccessful);
-                           return false;
-                        }
-                     }
-                     sender.sendPlayerMessage(StringUtils.invalidMobType);
-                     return false;
-                  }
-                  case "rel":
-                  case "reload": {
-                     if(args.length == 1) {
-                        LootingUtils.reloadMobLoot();
-                        return true;
-                     }
-                     String type = args[1].toLowerCase();
-                     if(type.equalsIgnoreCase("zombie") || type.equalsIgnoreCase("skeleton") || type.equalsIgnoreCase("enderman") || type.equalsIgnoreCase("villager") || type.equalsIgnoreCase("cop")) {
-                        type = StringUtils.capitalizeFirst(type);
-                        LootingUtils.reloadSpecificMobLoot(type);
-                        return true;
-                     }
-                     sender.sendPlayerMessage(StringUtils.invalidMobType);
-                     return false;
-                  }
-                  case "w":
-                  case "world": {
-                     if(args.length == 2){
-                        if(args[1].equalsIgnoreCase("activate")){
-                           return world(sender, sendr.getWorld(),true, true);
-                        }
-                        else if(args[1].equalsIgnoreCase("deactivate")){
-                           return world(sender, sendr.getWorld(),false, true);
-                        }
-                     }
-                     else if(args.length == 3){
-                        if(args[1].equalsIgnoreCase("activate")){
-                           return world(sender, Bukkit.getWorld(args[2]),true, false);
-
-                        }
-                        else if(args[1].equalsIgnoreCase("deactivate")){
-                           return world(sender, Bukkit.getWorld(args[2]),false, false);
-                        }
-                     }
-                     else{
-                        sender.sendPlayerMessage(StringUtils.worldUsage);
-                     }
-                  }
+                  else
+                     sender.sendPlayerMessage(StringUtils.Text.LOOT_WORLD_USAGE.create());
+                  break;
                }
+               case "Z":
+               case "Zombie":
+                  return processLootCommand("Zombie", sendr, sender, args);
+               case "S":
+               case "Skeleton":
+                  return processLootCommand("Skeleton", sendr, sender, args);
+               case "E":
+               case "Enderman":
+                  return processLootCommand("Enderman", sendr, sender, args);
+               case "V":
+               case "Villager":
+                  return processLootCommand("Villager", sendr, sender, args);
+               case "C":
+               case "Chest":
+                  return processLootCommand("Chest", sendr, sender, args);
+               default:
+                  sender.sendPlayerMessage(StringUtils.Text.LOOT_USAGE.create());
             }
          }
+      }
+      return false;
+   }
+
+   private boolean processLootCommand(String type, Player sendr, User sender, String[] args){
+      if(args.length < 2) {
+         if(sendr.hasPermission("loot.admin"))
+            sender.sendPlayerMessage(StringUtils.Text.LOOT_USAGE.create());
+         else
+            sender.sendPlayerMessage(StringUtils.Text.LOOT_VIEW_USAGE.create());
+         return false;
+      }
+      switch(args[1].toLowerCase()) {
+         // /loot <type> add min max weight
+         case "add": {
+            if(!sendr.hasPermission("loot.admin")) return false;
+            try {
+               short minAmt = Short.parseShort(args[2]);
+               try {
+                  short maxAmt = Short.parseShort(args[3]);
+                  try {
+                     double weight = Double.parseDouble(args[4]);
+                     ItemStack item = sendr.getItemInHand();
+                     if(sendr.getItemInHand().getType().equals(Material.AIR)) {
+                        sender.sendPlayerMessage(StringUtils.Text.INVALID_ITEM.create());
+                        return false;
+                     }
+                     sender.sendPlayerMessage(StringUtils.Text.SUCCESS_LOOT_ADD.create(type));
+                     return addLoot(item, type, minAmt, maxAmt, weight);
+                  }
+                  catch(NumberFormatException e) {
+                     sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create( args[3]));
+                  }
+               }
+               catch(NumberFormatException e) {
+                  sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create( args[2]));
+               }
+            }
+            catch(NumberFormatException e) {
+               sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create( args[1]));
+            }
+            return false;
+         }
+         // /loot <type> view
+         case "view": {
+            displayLoot(sendr, type);
+            return true;
+         }
+         // /loot giverandom <type>
+         case "giverandom": {
+            if(!sendr.hasPermission("loot.admin")) return false;
+            if(giveRandomLoot(sender, type)) {
+               sender.sendPlayerMessage(StringUtils.Text.SUCCESS_ITEM_DELIVERED.create());
+               return true;
+            }
+            else
+               sender.sendPlayerMessage(StringUtils.Text.FAIL_ITEM_DELIVERED.create());
+            return false;
+         }
+         // /loot reload <type>
+         case "reload": {
+            if(!sendr.hasPermission("loot.admin")) return false;
+            LootingUtils.reloadSpecificLoot(type);
+            sender.sendPlayerMessage(StringUtils.Text.LOOT_POOL_RELOADED.create(type));
+            return true;
+         }
+         // /loot <type> min <amt>
+         case "min":
+            if(!sendr.hasPermission("loot.admin")) return false;
+            try{
+               LootingUtils.setMinDrop(type, Integer.parseInt(args[3]));
+               sender.sendPlayerMessage(StringUtils.Text.LOOT_SET_MIN.create(args[3]));
+            }
+            catch(NumberFormatException e) {
+               sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create( args[3]));
+            }
+            return true;
+         // /loot <type> max  <amt>
+         case "max":
+            if(!sendr.hasPermission("loot.admin")) return false;
+            try{
+               LootingUtils.setMaxDrop(type, Integer.parseInt(args[3]));
+               sender.sendPlayerMessage(StringUtils.Text.LOOT_SET_MAX.create(args[3]));
+            }
+            catch(NumberFormatException e) {
+               sender.sendPlayerMessage(StringUtils.Text.INVALID_AMOUNT.create( args[3]));
+            }
+            return true;
+         default:
+            if(sendr.hasPermission("loot.admin"))
+               sender.sendPlayerMessage(StringUtils.Text.LOOT_USAGE.create());
+            else
+               sender.sendPlayerMessage(StringUtils.Text.LOOT_VIEW_USAGE.create());
       }
       return false;
    }
@@ -234,9 +195,9 @@ public class LootCommands implements CommandExecutor {
     * @param weight  the weight of this item in the loot pool
     * @return     false if the exact item is in the loot pool already, true otherwise.
     */
-   private boolean addLootChest(ItemStack item, short minAmt, short maxAmt, double weight) {
+   private boolean addLoot(ItemStack item, String type, short minAmt, short maxAmt, double weight) {
       LootItem x = new LootItem(item, minAmt, maxAmt, weight);
-      return LootingUtils.addItemToLootPool(x, "Loot");
+      return LootingUtils.addItemToLootPool(x, type);
    }
 
    /**
@@ -255,98 +216,43 @@ public class LootCommands implements CommandExecutor {
     * @param receiver   The user that is receiving the item
     * @return  true if the user received the item, false otherwise
     */
-   private boolean giveRandomChestLoot(User receiver) {
-      if(PlayerUtils.offerPlayerItem((Player) receiver.getPLAYER(), LootingUtils.getRandom("Loot").getItem())) {
-         receiver.sendPlayerMessage(StringUtils.randomItemSuccessful);
+   private boolean giveRandomLoot(User receiver, String type) {
+      if(PlayerUtils.offerPlayerItem((Player) receiver.getPLAYER(), LootingUtils.getRandom(type).getItem())) {
+         receiver.sendPlayerMessage(StringUtils.Text.ITEM_DELIVERED_LOOTPOOL.create(type));
          return true;
       }
       return false;
    }
 
-   /**
-    * Adds a new LootITem to the specified mob loot type with the specified characteristics
-    *
-    * @param type    The type of mob that we are adding this loot poool to.
-    * @param minAmt  the minimum amount of the item to be given
-    * @param maxAmt  the maximum amount of the item to be given
-    * @param weight  the weight of this item in the loot pool
-    * @return     false if the exact item is in the loot pool already, true otherwise.
-    */
-   private boolean addMobLoot(String type, ItemStack item, short minAmt, short maxAmt, double weight) {
-      LootItem x = new LootItem(item, minAmt, maxAmt, weight);
-      type = StringUtils.capitalizeFirst(type);
-      return LootingUtils.addItemToLootPool(x, type);
-   }
-
-   /**
-    * Offers the specified user a random item from the specified mob loot pool.
-    *
-    * @param type       The type of mob that we are pulling from.
-    * @param receiver   The user that is receiving the item
-    * @return  true if the user received the item, false otherwise
-    */
-   private boolean giveRandomMobLoot(String type, User receiver) {
-      if(PlayerUtils.offerPlayerItem((Player) receiver.getPLAYER(), LootingUtils.getRandom(type).getItem())) {
-         switch(type) {
-            case "Zombie": {
-               receiver.sendPlayerMessage(StringUtils.randomZomItemSuccessful);
-               return true;
-            }
-            case "Skeleton": {
-               receiver.sendPlayerMessage(StringUtils.randomSkelItemSuccessful);
-               return true;
-            }
-            case "Enderman": {
-               receiver.sendPlayerMessage(StringUtils.randomEndItemSuccessful);
-               return true;
-            }
-            case "Villager": {
-               receiver.sendPlayerMessage(StringUtils.randomVillItemSuccessful);
-               return true;
-            }
-            case "Cop": {
-               receiver.sendPlayerMessage(StringUtils.randomCopItemSuccessful);
-               return true;
-            }
-         }
-      }
-
-      return false;
-   }
-
    private boolean world(User u, World world, boolean activate, boolean lootEnabling) {
-      if(lootEnabling) {
+      if(lootEnabling)
          if(world != null) {
             if(activate) {
                LootingUtils.lootActivateWorld(world);
-               u.sendPlayerMessage(StringUtils.lootActivatedWorld.replace("{w}", world.getName()));
+               u.sendPlayerMessage(StringUtils.Text.LOOT_WORLD_ACTIVE.create(world.getName()));
             }
             else {
                LootingUtils.lootDeactivateWorld(world);
-               u.sendPlayerMessage(StringUtils.lootDeactivatedWorld.replace("{w}", world.getName()));
+               u.sendPlayerMessage(StringUtils.Text.LOOT_WORLD_DEACTIVE.create(world.getName()));
             }
             return true;
          }
-         else {
-            u.sendPlayerMessage(StringUtils.notAWorld);
-         }
-      }
-      else{
+         else
+            u.sendPlayerMessage(StringUtils.Text.NOT_WORLD.create());
+      else
          if(world != null) {
             if(activate) {
                LootingUtils.mobActivateWorld(world);
-               u.sendPlayerMessage(StringUtils.mobDeactivatedWorld.replace("{w}", world.getName()));
+               u.sendPlayerMessage(StringUtils.Text.MOB_WORLD_ACTIVE.create( world.getName()));
             }
             else {
                LootingUtils.mobDeactivateWorld(world);
-               u.sendPlayerMessage(StringUtils.mobDeactivatedWorld.replace("{w}", world.getName()));
+               u.sendPlayerMessage(StringUtils.Text.MOB_WORLD_DEACTIVE.create( world.getName()));
             }
             return true;
          }
-         else {
-            u.sendPlayerMessage(StringUtils.notAWorld);
-         }
-      }
+         else
+            u.sendPlayerMessage(StringUtils.Text.NOT_WORLD.create());
       return false;
    }
 }

@@ -6,3 +6,12 @@ depend:
   - Vault
 commands:
   house:
+    description: Base command
+
+permissions:
+  houses.commands:
+    house:
+      description: Allows for the usage of the base command
+    houses.admin:
+      description: Allows for the managament of Houses
+

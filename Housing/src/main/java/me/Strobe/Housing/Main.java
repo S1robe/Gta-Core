@@ -20,8 +20,6 @@ public final class Main extends JavaPlugin {
    static Main main;
 
    @Getter
-   static me.Strobe.Core.Main gtaMain;
-   @Getter
    static WorldGuardPlugin WG;
    @Getter
    static Fawe FAWEPlugin;
@@ -44,7 +42,7 @@ public final class Main extends JavaPlugin {
 
    @Override
    public void onDisable() {
-      HouseUtils.saveAllHouses();
+      HouseUtils.saveAllOwnedHouses();
       plMan.disablePlugin(this);
    }
 
@@ -71,7 +69,7 @@ public final class Main extends JavaPlugin {
 
    private void initUtils() {
       HouseUtils.maxNumDays = (int) Main.getMain().getMainDataFile().getCustomConfig().get("max-days-occupiable");
-      HouseUtils.loadAllHouses();
+      HouseUtils.init();
    }
 
    private void registerEvents() {

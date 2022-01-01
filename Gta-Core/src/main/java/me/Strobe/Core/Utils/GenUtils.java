@@ -50,9 +50,9 @@ public final class GenUtils {
       for(int l = 0; l < loops; l++) {
          for(int i = 0, s = 9 * l; s < 9 * l + 4; s++, i++) {
             if(i >= items.size())
-               inv.setItem(i, filler);
+               inv.setItem(s, filler);
             else
-               inv.setItem(i, items.get(i));
+               inv.setItem(s, items.get(i));
          }
       }
    }
@@ -60,11 +60,11 @@ public final class GenUtils {
    public static void setRight(Inventory inv, ItemStack filler, ArrayList<ItemStack> items) {
       short loops = (short) (inv.getSize() / 9);
       for(int l = 0; l < loops; l++) {
-         for(int i = 0, s = 5 + 9 * l; s < 9 * l + 9; s++, i++) {
+         for(int i = 0, s = (9 * l) + 5; s < (9 * l) + 9; s++, i++) {
             if(i >= items.size())
-               inv.setItem(i, filler);
+               inv.setItem(s, filler);
             else
-               inv.setItem(i, items.get(i));
+               inv.setItem(s, items.get(i));
          }
       }
    }

@@ -1,36 +1,41 @@
 name: GTACore
 main: me.Strobe.Core.Main
+author: Strobe
 version: 1.0
 depend:
   - 'WorldGuard'
   - Vault
 prefix: "§9§l[§6§nGTA-MC§9§l]§7"
 commands:
-  chestloot:
+  loot:
     description: Modify the loot table for chests
-    permission: gta.commands.chestloot
-  mobloot:
-    description: Modify the loot table for mobs
-    permission: gta.commands.mobloot
+    permission: gtacore.commands.loot
   stats:
+    permission: gtacore.commands.stats
     description: Configure your sidebar
   cop:
     description: Become a Cop!
-    permission: gta.commands.cop
-  gtareload:
-    description: reload the plugin
-    permission: gta.commands.reload
+    permission: gtacore.commands.cop
+  gta:
+    permission: gtacore.commands.gta.admin
+  help:
 
 permissions:
   gtacore.commands:
+    stats:
+      description: Allows you to change your sidebar
+      default: true
     cop:
+      description: Grants access to cop mode
     cop.admin:
-    chestloot.edit:
-    chestloot.view:
-    mobloot.view:
-    mobloot.edit:
-    chestloot:
-    mobloot:
-    reload:
+      description: Grants access to all cop commands
+    loot.admin:
+      description: Grans access to editing loot.
+    loot.view:
+      description: Grants access to viewing the loot tables
+      default: true
+    gta.admin:
+      description: Grants access to editing player data
+
 
 

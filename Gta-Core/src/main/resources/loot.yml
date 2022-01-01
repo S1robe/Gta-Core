@@ -18,5 +18,12 @@ Cop:
   maxMon: 7
   Loot: []
 
-Loot:
+Enderman:
+  minMon: 10
+  maxMon: 17
+  Loot: []
+
+Chest:
+  min-chest-drop: 3
+  max-chest-drop: 7
   Loot: [ ]

@@ -5,6 +5,7 @@ import me.Strobe.Core.Utils.Looting.LootItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
@@ -44,13 +45,14 @@ public class LootEvents implements Listener {
             User u = User.getByPlayer(p);
             if(u.isCop()) {
                e.setCancelled(true);
-               u.sendPlayerMessage(StringUtils.deniedInCop);
+               u.sendPlayerMessage(StringUtils.Text.DENY_ACTION.create());
                return;
             }
             if(RegionUtils.allowsPVP(p.getLocation())) {
                e.setCancelled(true);
                Long xpirationTime = u.getChestLocations().get(b.getLocation());
                p.closeInventory();
+               RegionUtils.playSound(p.getLocation(), Sound.CHEST_OPEN, 1, 1);
                if(xpirationTime != null)
                   if(System.currentTimeMillis() >= xpirationTime)
                      openNewChest(bL, u);
@@ -74,6 +76,7 @@ public class LootEvents implements Listener {
       }
       else if(e.getItem() != null && e.getItem().getType().equals(Material.COMPASS)){
          CopEvents.onCompassClick(e);
+         RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       }
    }
 
@@ -82,9 +85,9 @@ public class LootEvents implements Listener {
     * @param user     The user that is both online and doing the looting, may not ever be null.
     */
    private void openNewChest(@NotNull Location chestLoc, @NotNull User user) {
-      final int draw = GenUtils.getRandInt(LootingUtils.minItemChestdrop, LootingUtils.maxItemChestDrop);
+      final int draw = GenUtils.getRandInt(LootingUtils.getMinItemChestdrop(), LootingUtils.getMaxItemChestDrop());
       List<ItemStack> loot = drawNewLoot(draw);
-      user.addChestLocation(chestLoc, System.currentTimeMillis() + LootingUtils.chestResetTime, loot);
+      user.addChestLocation(chestLoc, System.currentTimeMillis() + LootingUtils.getChestResetTime(), loot);
       user.setViewedChestLocation(chestLoc);
       displayChest(loot, user.getPLAYER().getPlayer(), true);
    }
@@ -107,7 +110,7 @@ public class LootEvents implements Listener {
    private List<ItemStack> drawNewLoot(int draw) {
       List<ItemStack> loot = new ArrayList<>(draw);
       for(int i = 0; i < draw; i++) {
-         LootItem x = LootingUtils.getRandom("Loot");
+         LootItem x = LootingUtils.getRandom("Chest");
          if(x != null)
             loot.add(x.getRandom());
       }
@@ -128,31 +131,41 @@ public class LootEvents implements Listener {
    }
 
    private void onFuranceClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onCraftEvent(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onDropperClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onBrewingClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onHopperClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onDispenserClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);}
    private void onAnvilClick(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
-         e.setCancelled(true);}
+         e.setCancelled(true);
+   }
    private void onItemFrameInteract(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);
    }
    private void onPaintingtingInteract(PlayerInteractEvent e){
+      RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
       if(!e.getPlayer().hasPermission("gtacore.admin"))
          e.setCancelled(true);
    }

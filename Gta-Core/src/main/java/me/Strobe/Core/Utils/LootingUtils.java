@@ -3,7 +3,6 @@ package me.Strobe.Core.Utils;
 import me.Strobe.Core.Main;
 import me.Strobe.Core.Utils.Looting.LootItem;
 import me.Strobe.Core.Utils.Looting.WeightedRandomBag;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
@@ -12,19 +11,28 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 public final class LootingUtils {
 
-   public static double zomMinMonDrop;
-   public static double zomMaxMonDrop;
-   public static double skelMinMonDrop;
-   public static double skelMaxMonDrop;
-   public static double villMinMonDrop;
-   public static double villMaxMonDrop;
-   public static double pigCopMinMonDrop;
-   public static double pigCopMaxMonDrop;
-   public static double endMinMonDrop;
-   public static double endMaxMonDrop;
+
+   @lombok.Getter private static double zomMinMonDrop;
+
+   @lombok.Getter private static double zomMaxMonDrop;
+
+   @lombok.Getter private static double skelMinMonDrop;
+
+   @lombok.Getter private static double skelMaxMonDrop;
+
+   @lombok.Getter private static double villMinMonDrop;
+
+   @lombok.Getter private static double villMaxMonDrop;
+
+   @lombok.Getter private static double pigCopMinMonDrop;
+
+   @lombok.Getter private static double pigCopMaxMonDrop;
+
+   @lombok.Getter private static double endMinMonDrop;
+
+   @lombok.Getter private static double endMaxMonDrop;
 
    private static List<String> lootActiveWorlds = new ArrayList<>();
    private static List<String> mobActiveWorlds = new ArrayList<>();
@@ -32,54 +40,58 @@ public final class LootingUtils {
    /**
     * Cooldown time in minutes to refresh chests
     */
-   public static long chestResetTime; //Cooldown time in mintues
+
+   @lombok.Getter private static long chestResetTime; //Cooldown time in mintues
    /**
     * Minimum amount of items a chest can spawn
     */
-   public static int minItemChestdrop;
+
+   @lombok.Getter private static int minItemChestdrop;
    /**
     * Max amount of items a chest can spawn
     */
-   public static int maxItemChestDrop;
+
+   @lombok.Getter private static int maxItemChestDrop;
    /**
     * min amount of items a mob can drop
     */
-   public static int minItemDropMob;
+
+   @lombok.Getter private static int minItemDropMob;
    /**
     * Max amount of items a mob can drop
     */
-   public static int maxItemDropMob;
+
+   @lombok.Getter private static int maxItemDropMob;
    /**
     * loot table for the chests
     */
-   private static WeightedRandomBag lootTable = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> lootTable = new WeightedRandomBag<LootItem>();
    /**
     * loot table for zombies
     */
-   private static WeightedRandomBag zomLootPool = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> zomLootPool = new WeightedRandomBag<LootItem>();
    /**
     * loot table for skeletons
     */
-   private static WeightedRandomBag skelLootPool = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> skelLootPool = new WeightedRandomBag<LootItem>();
    /**
     * loot table for endermen
     */
-   private static WeightedRandomBag enderLootPool = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> enderLootPool = new WeightedRandomBag<LootItem>();
    /**
     * loot table for villagers
     */
-   private static WeightedRandomBag villLootPool = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> villLootPool = new WeightedRandomBag<LootItem>();
    /**
     * loot table for cops
     */
-   private static WeightedRandomBag copLootPool = new WeightedRandomBag();
+   private static final WeightedRandomBag<LootItem> copLootPool = new WeightedRandomBag<LootItem>();
 
    private LootingUtils() {}
 
-   //TODO figure out why the serialization of loot items is weird.
    public static LootItem getRandom(String type) {
       switch(type) {
-         case "Loot":
+         case "Chest":
             return lootTable.getRandom();
          case "Zombie":
             return zomLootPool.getRandom();
@@ -97,18 +109,18 @@ public final class LootingUtils {
 
    public static List<LootItem> getLootList(String type) {
       switch(type) {
-         case "Loot":
-            return lootTable.innerObjects;
+         case "Chest":
+            return lootTable.getInnerObjects();
          case "Zombie":
-            return zomLootPool.innerObjects;
+            return zomLootPool.getInnerObjects();
          case "Skeleton":
-            return skelLootPool.innerObjects;
+            return skelLootPool.getInnerObjects();
          case "Enderman":
-            return enderLootPool.innerObjects;
+            return enderLootPool.getInnerObjects();
          case "Villager":
-            return villLootPool.innerObjects;
+            return villLootPool.getInnerObjects();
          case "Cop":
-            return copLootPool.innerObjects;
+            return copLootPool.getInnerObjects();
       }
       return new ArrayList<>();
    }
@@ -125,100 +137,130 @@ public final class LootingUtils {
 
    public static void removeItemFromLootPoolByDisplay(String type, ItemStack displayItem) {
       switch(type) {
-         case "Loot":
-            lootTable.removeEntry(displayItem);
+         case "Chest":
+            for(LootItem object : lootTable.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  lootTable.removeEntryByInner(object);
             break;
          case "Zombie":
-            zomLootPool.removeEntry(displayItem);
+            for(LootItem object : zomLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  skelLootPool.removeEntryByInner(object);
             break;
          case "Skeleton":
-            skelLootPool.removeEntry(displayItem);
+            for(LootItem object : skelLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  skelLootPool.removeEntryByInner(object);
             break;
          case "Enderman":
-            enderLootPool.removeEntry(displayItem);
+            for(LootItem object : enderLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  enderLootPool.removeEntryByInner(object);
             break;
          case "Villager":
-            villLootPool.removeEntry(displayItem);
+            for(LootItem object : villLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  villLootPool.removeEntryByInner(object);
             break;
          case "Cop":
-            copLootPool.removeEntry(displayItem);
+            for(LootItem object : copLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  copLootPool.removeEntryByInner(object);
             break;
       }
    }
 
    public static void removeItemFromLootPoolByRealItem(String type, LootItem item) {
-      switch(type) {
-         case "Loot":
-            lootTable.removeEntry(item);
-            break;
+      switch(type){
+         case "Chest":
+            lootTable.removeEntryByInner(item);
          case "Zombie":
-            zomLootPool.removeEntry(item);
-            break;
+            zomLootPool.removeEntryByInner(item);
          case "Skeleton":
-            skelLootPool.removeEntry(item);
-            break;
+            skelLootPool.removeEntryByInner(item);
          case "Enderman":
-            enderLootPool.removeEntry(item);
-            break;
+            enderLootPool.removeEntryByInner(item);
          case "Villager":
-            villLootPool.removeEntry(item);
-            break;
+            villLootPool.removeEntryByInner(item);
          case "Cop":
-            copLootPool.removeEntry(item);
-            break;
+            copLootPool.removeEntryByInner(item);
       }
    }
 
    public static LootItem getItemFromLootPool(String type, ItemStack displayItem) {
       switch(type) {
-         case "Loot":
-            return lootTable.getItemByDisplay(displayItem);
+         case "Chest":
+            for(LootItem object : lootTable.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
          case "Zombie":
-            return zomLootPool.getItemByDisplay(displayItem);
+            for(LootItem object : zomLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
          case "Skeleton":
-            return skelLootPool.getItemByDisplay(displayItem);
+            for(LootItem object : skelLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
          case "Enderman":
-            return enderLootPool.getItemByDisplay(displayItem);
+            for(LootItem object : enderLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
          case "Villager":
-            return villLootPool.getItemByDisplay(displayItem);
+            for(LootItem object : villLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
          case "Cop":
-            return copLootPool.getItemByDisplay(displayItem);
+            for(LootItem object : copLootPool.getInnerObjects())
+               if(object.getDisplayItem().equals(displayItem))
+                  return object;
       }
       return null;
    }
 
    public static LootItem getItemByItem(String type, ItemStack item){
       switch(type) {
-         case "Loot":
-            return lootTable.getItemByRep(item);
+         case "Chest":
+            for(LootItem object : lootTable.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
          case "Zombie":
-            return zomLootPool.getItemByRep(item);
+            for(LootItem object : zomLootPool.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
          case "Skeleton":
-            return skelLootPool.getItemByRep(item);
+            for(LootItem object : skelLootPool.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
          case "Enderman":
-            return enderLootPool.getItemByRep(item);
+            for(LootItem object : enderLootPool.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
          case "Villager":
-            return villLootPool.getItemByRep(item);
+            for(LootItem object : villLootPool.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
          case "Cop":
-            return copLootPool.getItemByRep(item);
+            for(LootItem object : copLootPool.getInnerObjects())
+               if(object.getItem().equals(item))
+                  return object;
       }
       return null;
    }
 
    public static double getTotalBagWeight(String type){
       switch(type) {
-         case "Loot":
-            return lootTable.getAccumulatedWeight();
+         case "Chest":
+            return lootTable.getTotalWeight();
          case "Zombie":
-            return zomLootPool.getAccumulatedWeight();
+            return zomLootPool.getTotalWeight();
          case "Skeleton":
-            return skelLootPool.getAccumulatedWeight();
+            return skelLootPool.getTotalWeight();
          case "Enderman":
-            return enderLootPool.getAccumulatedWeight();
+            return enderLootPool.getTotalWeight();
          case "Villager":
-            return villLootPool.getAccumulatedWeight();
+            return villLootPool.getTotalWeight();
          case "Cop":
-            return copLootPool.getAccumulatedWeight();
+            return copLootPool.getTotalWeight();
       }
       return 0;
    }
@@ -226,23 +268,23 @@ public final class LootingUtils {
    public static boolean addItemToLootPool(LootItem item, String type) {
       boolean result = false;
       switch(type) {
-         case "Loot":
-            result = lootTable.addEntry(item);
+         case "Chest":
+            result = lootTable.addEntry(item, item.getWeight());
             break;
          case "Zombie":
-            result = zomLootPool.addEntry(item);
+            result = zomLootPool.addEntry(item, item.getWeight());
             break;
          case "Skeleton":
-            result = skelLootPool.addEntry(item);
+            result = skelLootPool.addEntry(item, item.getWeight());
             break;
          case "Enderman":
-            result = enderLootPool.addEntry(item);
+            result = enderLootPool.addEntry(item, item.getWeight());
             break;
          case "Villager":
-            result = villLootPool.addEntry(item);
+            result = villLootPool.addEntry(item, item.getWeight());
             break;
          case "Cop":
-            result = copLootPool.addEntry(item);
+            result = copLootPool.addEntry(item, item.getWeight());
       }
       saveSpecificLootFile(type);
       return result;
@@ -252,37 +294,37 @@ public final class LootingUtils {
       FileConfiguration f = Main.getMain().getLootFile().getCustomConfig();
       switch(type) {
          case "Zombie": {
-            f.set(type+ ".Loot", zomLootPool.innerObjects);
+            f.set(type+ ".Loot", zomLootPool.getInnerObjects());
             f.set(type+".minMon", zomMinMonDrop);
             f.set(type+".maxMon", zomMaxMonDrop);
             break;
          }
          case "Skeleton": {
-            f.set(type+ ".Loot", skelLootPool.innerObjects);
+            f.set(type+ ".Loot", skelLootPool.getInnerObjects());
             f.set(type+".minMon", skelMinMonDrop);
             f.set(type+".maxMon", skelMaxMonDrop);
             break;
          }
-//         case "Enderman": {
-//            f.set(type+ ".Loot", enderLootPool.innerObjects);
-//            f.set(type+".minMon", MinMonDrop);
-//            f.set(type+".maxMon", zomMinMonDrop);
-//            break;
-//         }
+         case "Enderman": {
+            f.set(type+ ".Loot", enderLootPool.getInnerObjects());
+            f.set(type+".minMon", endMinMonDrop);
+            f.set(type+".maxMon", endMaxMonDrop);
+            break;
+         }
          case "Villager": {
-            f.set(type+ ".Loot", villLootPool.innerObjects);
+            f.set(type+ ".Loot", villLootPool.getInnerObjects());
             f.set(type+".minMon", villMinMonDrop);
             f.set(type+".maxMon", villMaxMonDrop);
             break;
          }
          case "Cop": {
-            f.set(type+ ".Loot", copLootPool.innerObjects);
+            f.set(type+ ".Loot", copLootPool.getInnerObjects());
             f.set(type+".minMon", pigCopMinMonDrop);
             f.set(type+".maxMon", pigCopMaxMonDrop);
             break;
          }
-         case "Loot": {
-            Main.getMain().getLootFile().getCustomConfig().set(type+ ".Loot", lootTable.innerObjects);
+         case "Chest": {
+            f.set(type+ ".Loot", lootTable.getInnerObjects());
             Main.getMain().getLootFile().saveCustomConfig();
             return;
          }
@@ -290,17 +332,45 @@ public final class LootingUtils {
       Main.getMain().getLootFile().saveCustomConfig();
    }
 
-   public static void reloadMobLoot() {
+   public static void reloadAllLoot(){
+      lootTable.clear();
       zomLootPool.clear();
       skelLootPool.clear();
-      //enderLootPool.clear();
+      enderLootPool.clear();
       villLootPool.clear();
       copLootPool.clear();
+      Main.getMain().getLootFile().reloadCustomConfig();
+      loadLoot("Chest");
       loadLoot("Zombie");
       loadLoot("Skeleton");
-      //loadLoo, "Enderman");
+      loadLoot("Enderman");
       loadLoot("Villager");
       loadLoot("Cop");
+   }
+
+   public static void reloadSpecificLoot(String type){
+      switch(type){
+         case "Chest":
+            lootTable.clear();
+            break;
+         case "Zombie":
+            zomLootPool.clear();
+            break;
+         case "Skeleton":
+            skelLootPool.clear();
+            break;
+         case "Enderman":
+            enderLootPool.clear();
+            break;
+         case "Villager":
+            villLootPool.clear();
+            break;
+         case "Cop":
+            copLootPool.clear();
+            break;
+      }
+      Main.getMain().getLootFile().reloadCustomConfig();
+      loadLoot(type);
    }
 
    private static void loadLoot(String type) {
@@ -309,44 +379,58 @@ public final class LootingUtils {
          f.getList(type+ ".Loot").forEach(map -> {
             LootItem y = (LootItem) map;
             switch(type) {
-               case "Loot":
-                  lootTable.addEntry(y);
+               case "Chest":
+                  lootTable.addEntry(y, y.getWeight());
                   break;
                case "Zombie":
-                  zomLootPool.addEntry(y);
+                  zomLootPool.addEntry(y, y.getWeight());
                   break;
                case "Skeleton":
-                  skelLootPool.addEntry(y);
+                  skelLootPool.addEntry(y, y.getWeight());
                   break;
                case "Enderman":
-                  enderLootPool.addEntry(y);
+                  enderLootPool.addEntry(y, y.getWeight());
                   break;
                case "Villager":
-                  villLootPool.addEntry(y);
+                  villLootPool.addEntry(y, y.getWeight());
                   break;
                case "Cop":
-                  copLootPool.addEntry(y);
+                  copLootPool.addEntry(y, y.getWeight());
             }
          });
    }
 
+
+
+
+
+
+
    public static void loadAllLoot() {
-      loadLoot("Loot");
+      loadLoot("Chest");
       loadLoot("Zombie");
       loadLoot("Skeleton");
-      //loadLoot(f, "Enderman");
+      loadLoot( "Enderman");
       loadLoot("Villager");
       loadLoot("Cop");
    }
 
    public static void saveAllLoot(){
-      saveSpecificLootFile("Loot");
+      saveSpecificLootFile("Chest");
       saveSpecificLootFile("Zombie");
       saveSpecificLootFile("Skeleton");
       saveSpecificLootFile("Villager");
       saveSpecificLootFile("Cop");
-      //saveSpecificLootFile("Enderman");
+      saveSpecificLootFile("Enderman");
    }
+
+
+
+
+
+
+
+
 
    public static void loadActiveWorlds(){
       FileConfiguration f = Main.getMain().getMainDataFile().getCustomConfig();
@@ -359,43 +443,6 @@ public final class LootingUtils {
       f.set("loot-enabled-worlds", lootActiveWorlds);
       f.set("mob-enabled-worlds", mobActiveWorlds);
       Main.getMain().getMainDataFile().saveCustomConfig();
-   }
-
-   public static void reloadSpecificMobLoot(String type) {
-      switch(type) {
-         case "Zombie": {
-            zomLootPool.clear();
-            break;
-         }
-         case "Skeleton": {
-            skelLootPool.clear();
-            break;
-         }
-         case "Enderman": {
-            enderLootPool.clear();
-            break;
-         }
-         case "Villager": {
-            villLootPool.clear();
-            break;
-         }
-         case "Cop": {
-            copLootPool.clear();
-            break;
-         }
-      }
-      loadLoot(type);
-   }
-
-   public static void reloadChestLoot() {
-      lootTable.clear();
-      Main.getMain().getLootFile().reloadCustomConfig();
-      loadLoot( "Loot");
-   }
-
-   public static ItemStack createMoneyItem(double min, double max){
-      double amt = GenUtils.getRandDouble(min, max);
-      return ItemUtils.createItem(Material.GOLD_NUGGET, 1, (byte)0, true, "" + amt);
    }
 
    public static boolean isWorldLootActive(World world){
@@ -422,5 +469,62 @@ public final class LootingUtils {
 
    public static void mobDeactivateWorld(World world){
       lootActiveWorlds.remove(world.getName());
+   }
+
+   public static void setChestResetTime(int timeInMinutes){
+      chestResetTime = timeInMinutes * 60000L;
+   }
+
+   public static void setMinDrop(String type, int min){
+      switch(type){
+         case "Zombie":
+            zomMinMonDrop = Math.max(0, min);
+         case "Skeleton":
+            skelMinMonDrop = Math.max(0, min);
+         case "Enderman":
+            endMinMonDrop = Math.max(0, min);
+         case "Villager":
+            villMinMonDrop = Math.max(0, min);
+         case "Cop":
+            pigCopMinMonDrop = Math.max(0, min);
+         case "Chest":
+            minItemChestdrop = Math.max(0, min);
+      }
+   }
+
+   public static void setMaxDrop(String type, int max){
+      switch(type){
+         case "Zombie":
+            zomMaxMonDrop = Math.max(zomMinMonDrop, max);
+         case "Skeleton":
+            skelMaxMonDrop = Math.max(skelMinMonDrop, max);
+         case "Enderman":
+            endMaxMonDrop = Math.max(endMinMonDrop, max);
+         case "Villager":
+            villMaxMonDrop = Math.max(villMinMonDrop, max);
+         case "Cop":
+            pigCopMaxMonDrop = Math.max(pigCopMinMonDrop, max);
+         case "Chest":
+            maxItemChestDrop = Math.max(minItemChestdrop, max);
+      }
+   }
+
+   public static void init(){
+      loadAllLoot();
+      chestResetTime    = Main.getMain().getMainDataFile().getCustomConfig().getInt("chest-reset-time") * 60000L;
+      maxItemDropMob    = Main.getMain().getMainDataFile().getCustomConfig().getInt("max-mob-drop");
+      minItemDropMob    = Main.getMain().getMainDataFile().getCustomConfig().getInt("min-mob-drop");
+
+      minItemChestdrop  = Main.getMain().getLootFile().getCustomConfig().getInt("Chest.min-chest-drop");
+      maxItemChestDrop  = Main.getMain().getLootFile().getCustomConfig().getInt("Chest.max-chest-drop");
+      zomMinMonDrop     = Main.getMain().getLootFile().getCustomConfig().getDouble("Zombie.minMon");
+      zomMaxMonDrop     = Main.getMain().getLootFile().getCustomConfig().getDouble("Zombie.maxMon");
+      skelMinMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Skeleton.minMon");
+      skelMaxMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Skeleton.maxMon");
+      villMinMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Villager.minMon");
+      villMaxMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Villager.maxMon");
+      pigCopMinMonDrop  = Main.getMain().getLootFile().getCustomConfig().getDouble("Cop.minMon");
+      pigCopMaxMonDrop  = Main.getMain().getLootFile().getCustomConfig().getDouble("Cop.maxMon");
+      loadActiveWorlds();
    }
 }
