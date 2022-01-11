@@ -86,7 +86,7 @@ public final class GUIS {
       inv.setItem(7, saveItem());
       inv.setItem(25, cancelItem());
       inv.setItem(19, changeAmtType(1, "Item Weight"));
-      ItemUtils.changeLine(inv.getItem(4), 3, "§9DropRate: §7" + StringUtils.formatDouble((item.getWeight() / (LootingUtils.getTotalBagWeight(type))) * 100));
+      ItemUtils.changeLine(inv.getItem(4), 3, "§9DropRate: §7" + StringUtils.formatDouble((item.getWeight() / (LootingUtils.getTotalBagWeight(type))) * 100, 4));
       viewer.closeInventory();
       viewer.openInventory(inv);
    }

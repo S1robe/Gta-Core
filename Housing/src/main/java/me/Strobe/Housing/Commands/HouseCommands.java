@@ -46,6 +46,7 @@ public class HouseCommands implements CommandExecutor {
                   }
                   return giftHouse(h, args[1]);
                case "reload":
+                  if(!sender.hasPermission("houses.admin")) return false;
                   if(args.length >= 2){
                      if(args[1].equalsIgnoreCase("all"))
                         HouseUtils.reloadAllOwned();
@@ -59,6 +60,7 @@ public class HouseCommands implements CommandExecutor {
                      me.Strobe.Core.Utils.StringUtils.sendMessage(p, StringUtils.houseReloadUsage);
                   return false;
                case "clear":{
+                  if(!sender.hasPermission("houses.admin")) return false;
                   //house clear <name>
                   if(args.length == 2){
                      if(args[1].equalsIgnoreCase("all")){
@@ -75,19 +77,25 @@ public class HouseCommands implements CommandExecutor {
                      }
                   }
                }
-                  return true;
+               return true;
                case "flagall":{
+                  if(!sender.hasPermission("houses.admin")) return false;
                   HouseUtils.flagAll(args[1], args[2]);
                   me.Strobe.Core.Utils.StringUtils.sendMessage(p, "&b&l(!) &7 You have flagged all houses with the tags: " + args[1] + " to " + args[2]);
                   return true;
                }
-//               case "loadall":{
-//                  HouseUtils.loadAllHouses();
-//                  return true;
-//               }
-//               case "saveall":{
-//                  HouseUtils.saveAllHouses();
-//               }
+               case "loadall":{
+                  if(!sender.hasPermission("houses.admin")) return false;
+                  HouseUtils.loadAllHouses();
+                  return true;
+               }
+               case "saveall":{
+                  if(!sender.hasPermission("houses.admin")) return false;
+                  HouseUtils.saveAllHouses();
+               }
+               default:
+                  me.Strobe.Core.Utils.StringUtils.sendMessage(p, StringUtils.houseUsage);
+                  return true;
             }
          }
          else

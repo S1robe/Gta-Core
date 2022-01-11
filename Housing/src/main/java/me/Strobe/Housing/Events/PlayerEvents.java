@@ -6,6 +6,7 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import lombok.SneakyThrows;
 import me.Strobe.Core.Utils.RegionUtils;
 import me.Strobe.Core.Utils.StringUtils;
 import me.Strobe.Housing.House;
@@ -31,10 +32,11 @@ public class PlayerEvents implements Listener {
       }
    }
 
-   @EventHandler
+   @EventHandler @SneakyThrows
    public void onSignPlace(SignChangeEvent e){
       if(e.getLine(0).contains("FOR RENT")) {
          Player p = e.getPlayer();
+         if(!p.hasPermission("houses.admin")) return;
          Region sel = Main.getFAWEPlugin().getCachedPlayer(p.getUniqueId()).getSelection();
          if(sel != null) {
             BlockVector point1 = sel.getMinimumPoint().toBlockPoint();
@@ -57,6 +59,7 @@ public class PlayerEvents implements Listener {
                   e.setLine(3,"&r$" + h.getPrice());
                   HouseUtils.addNewHouse(h);
                   me.Strobe.Core.Utils.StringUtils.sendMessage(p, me.Strobe.Housing.Utils.StringUtils.cmdCreateHouseSuccess.replace("{loc}", RegionUtils.locationSerializer(h.getSignLocation())));
+                  Main.getWG().getRegionManager(p.getWorld()).saveChanges();
                }
                catch(NumberFormatException n) {
                   me.Strobe.Core.Utils.StringUtils.sendMessage(p, me.Strobe.Housing.Utils.StringUtils.cmdCreateHouseFailPriceOrDaysInvalid);

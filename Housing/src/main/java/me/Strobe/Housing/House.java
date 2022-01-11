@@ -3,6 +3,7 @@ package me.Strobe.Housing;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import me.Strobe.Core.Utils.ItemUtils;
 import me.Strobe.Core.Utils.RegionUtils;
 import me.Strobe.Core.Utils.StringUtils;
@@ -85,12 +86,14 @@ public class House implements ConfigurationSerializable {
       return new House(serialized);
    }
 
+   @SneakyThrows
    public void buyHouse(User purchaser) {
       startTime = System.currentTimeMillis();
       endTime = startTime + startDays * 24 * 60 * 60 * 1000L;
       this.spawnLocation = this.signLocation;
       this.owner = purchaser.getPLAYER();
       region.getOwners().addPlayer(owner.getUniqueId());
+      Main.getWG().getRegionManager(signLocation.getWorld()).saveChanges();
       members = new ArrayList<>();
       purchaser.removeMoney(price);
       updateSign(StringUtils.colorBulk("&r" + owner.getName(), "&8&nClick Me!", "", "&r" + this.getName()));
@@ -111,13 +114,14 @@ public class House implements ConfigurationSerializable {
       u.removeMoney( (price / startDays));
    }
 
+   @SneakyThrows
    public void addMember(OfflinePlayer member) {
       region.getMembers().addPlayer(member.getUniqueId());
       members.add(member);
       sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.addedMember.replace("{plr}", member.getName()));
       if(member.isOnline())
          me.Strobe.Core.Utils.StringUtils.sendMessage(member.getPlayer(), me.Strobe.Housing.Utils.StringUtils.addedToHouse.replace("{plr}", owner.getName()));
-
+      Main.getWG().getRegionManager(signLocation.getWorld()).saveChanges();
    }
 
    public void sendOwnerMessage(String... message) {
@@ -125,6 +129,7 @@ public class House implements ConfigurationSerializable {
          StringUtils.sendBulkMessage(owner.getPlayer(), message);
    }
 
+   @SneakyThrows
    public void removeMember(OfflinePlayer member) {
       region.getMembers().removePlayer(member.getUniqueId());
       members.remove(member);
@@ -132,8 +137,10 @@ public class House implements ConfigurationSerializable {
 //      if(member.isOnline())
 //         me.Strobe.Core.Utils.StringUtils.sendMessage(member.getPlayer(), me.Strobe.Housing.Utils.StringUtils.kickFromHouse.replace("{plr}", owner.getName()));
 //   }
+      Main.getWG().getRegionManager(signLocation.getWorld()).saveChanges();
    }
 
+   @SneakyThrows
    public boolean assignOwner(OfflinePlayer newOwner) {
       if(!region.getOwners().contains(newOwner.getUniqueId())) {
          region.getOwners().removeAll();
@@ -147,25 +154,30 @@ public class House implements ConfigurationSerializable {
             StringUtils.sendMessage(newOwner.getPlayer(), me.Strobe.Housing.Utils.StringUtils.gainedOwnership.replace("{plr}", owner.getName()).replace("{reg}", name));
 
          updateSign(StringUtils.colorBulk("&r" + owner.getName()));
+
+         Main.getWG().getRegionManager(signLocation.getWorld()).saveChanges();
          return true;
       }
       return false;
    }
 
    public void unrentHouse() {
-      User.getByPlayer(owner).addMoney((price / (double) startDays) * getDaysRemaining());
       sendMembersAMessage(me.Strobe.Housing.Utils.StringUtils.ownerSoldHouse);
       sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.unrentHouse);
       resetHouse();
    }
 
+   @SneakyThrows
    private void resetHouse() {
       startTime = -1;
+      System.out.println(name);
       region.getOwners().removeAll();
       region.getMembers().removeAll();
       owner = null;
-      members = null;
+      members = new ArrayList<>();
       updateSign(StringUtils.colorBulk("FOR RENT", "&r" + this.name, "&r" + startDays + " Day(s)", "&r$" + price));
+
+      Main.getWG().getRegionManager(signLocation.getWorld()).saveChanges();
    }
 
    public void clear(){
@@ -226,7 +238,7 @@ public class House implements ConfigurationSerializable {
    }
 
    public boolean doesPlayerOwnHouse(OfflinePlayer p) {
-      return p.getUniqueId().equals(owner.getUniqueId());
+      return owner != null && p.getUniqueId().equals(owner.getUniqueId());
    }
 
    public OfflinePlayer getMemberByName(String playerName){
@@ -287,10 +299,9 @@ public class House implements ConfigurationSerializable {
          map.put("endTime", endTime);
       if(owner != null)
          map.put("ownerUUID", owner.getUniqueId().toString());
-      if(members != null && !members.isEmpty())
-         map.put("memberUUIDs", members.stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
       if(spawnLocation != null)
          map.put("spawnLocation", RegionUtils.locationSerializer(spawnLocation));
+      map.put("memberUUIDs", members.stream().map(OfflinePlayer::getUniqueId).map(UUID::toString).collect(Collectors.toList()));
       map.put("chestLocations", RegionUtils.locationSerializer(chestLocations));
       map.put("sLocation", RegionUtils.locationSerializer(signLocation));
       return map;

@@ -3,6 +3,7 @@ package me.Strobe.Core.Events;
 import me.Strobe.Core.Utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -10,6 +11,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +34,11 @@ public class PvpEvents implements Listener {
          Player receiver = (Player) e.getEntity();
          User UDamager = User.getByPlayer(damager);
          User UReceiver = User.getByPlayer(receiver);
-         if(UReceiver != null && UDamager != null && UReceiver.isCop()) {
+         if(UReceiver != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL) && UReceiver.isCop()) {
+            e.setCancelled(true);
+            return;
+         }
+         if(UReceiver != null && UDamager != null) {
             CopEvents.onCopDamage(UDamager, UReceiver, e);
          }
       }
@@ -75,10 +81,9 @@ public class PvpEvents implements Listener {
       User Ukilled = User.getByPlayer(killed);
       if(Ukilled.isCop())
          e.setKeepInventory(true);
-      if(CopUtils.playerRunnableIds.containsKey(killed.getUniqueId())){
-         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(killed.getUniqueId()));
+      if(CopUtils.playerRunnableIds.containsKey(killed.getUniqueId()) && !CopUtils.playerRunnableIds.get(killed.getUniqueId()).isEmpty()){
+         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(killed.getUniqueId()).poll());
          CopUtils.despawnAllCops(killed.getUniqueId());
-         CopUtils.playerRunnableIds.remove(killed.getUniqueId());
       }
       if(killed.equals(killed.getKiller()) || killed.getKiller() == null) {
          //Drop the money item with 15% of the deceased's current bal.
@@ -113,17 +118,21 @@ public class PvpEvents implements Listener {
       double changeBal = killed.getBalance() * CopUtils.percentMoneyToDropOnDeath;
       killed.removeMoney(changeBal);
       killed.sendPlayerMessage(StringUtils.Text.DROPPED_MONEY.create(StringUtils.formatDouble(changeBal), "$" + StringUtils.formatDouble(killed.getBalance())));
+      killed.removeKillstreak(killed.getKillstreak());
       if(!self) {
+         killer.addKillstreak(1);
          killer.addPVPKills(1);
          if(killer.isCop()){
+            double hand = changeBal;
             changeBal = wl * CopUtils.moneyForWanted;
             killer.addMoney(changeBal);
             killer.sendPlayerMessage(StringUtils.Text.GAINED_MONEY_FOR_WANTED.create(""+changeBal,"" + wl) );
-            return changeBal;
+            killed.setAttackedCop(false);
+            return hand;
          }
          int change = GenUtils.getRandInt(1, Math.max(1, killed.getWantedlevel() / 2));
          if(killed.isCop()) {
-            change = GenUtils.getRandInt(1, Math.max(CopUtils.lowWantedForCop, CopUtils.highWantedForCop));
+            change = Math.max(1, GenUtils.getRandInt(CopUtils.lowWantedForCop, CopUtils.highWantedForCop));
             killer.addCopKills(1);
             killer.addMoney(CopUtils.moneyForKillCop);
             killer.sendPlayerMessage(StringUtils.Text.GAINED_MONEY_FOR_KILL_COP.create(""+ CopUtils.moneyForKillCop));
@@ -131,7 +140,7 @@ public class PvpEvents implements Listener {
          killer.addWantedLevel(change); //increase the killers WL by at most 1/2 the wanted level of the killed person.
          killer.sendPlayerMessage(StringUtils.Text.INC_WL.create("" + change, "" + killer.getWantedlevel()));
          killed.setAttackedCop(false);
-         CopUtils.spawnCopsOnPlayer(killer, -1, 0);
+         CopUtils.spawnCopsOnPlayer(killer, GenUtils.getRandInt(CopUtils.maxCopSpawn, CopUtils.minCopSpawn), GenUtils.getRandInt(1, 5));
       }
       return changeBal;
    }
@@ -142,6 +151,41 @@ public class PvpEvents implements Listener {
       User u = User.getByPlayer(player);
       if(u.isCop() || !RegionUtils.allowsPVP(player.getLocation())) {
          e.setCancelled(true);
+         return;
+      }
+      ItemStack[] armor = player.getInventory().getArmorContents();
+      if(armor[0] != null && armor[0].getEnchantmentLevel(Enchantment.DURABILITY) != 0){
+         if(processUnbreakingLevel(armor[0].getEnchantmentLevel(Enchantment.DURABILITY))){
+            e.setCancelled(true);
+         }
+      }
+      if(armor[1] != null && armor[1].getEnchantmentLevel(Enchantment.DURABILITY) != 0){
+         if(processUnbreakingLevel(armor[1].getEnchantmentLevel(Enchantment.DURABILITY))){
+            e.setCancelled(true);
+         }
+      }
+      if(armor[2] != null && armor[2].getEnchantmentLevel(Enchantment.DURABILITY) != 0){
+         if(processUnbreakingLevel(armor[2].getEnchantmentLevel(Enchantment.DURABILITY))){
+            e.setCancelled(true);
+         }
+      }
+      if(armor[3] != null && armor[3].getEnchantmentLevel(Enchantment.DURABILITY) != 0){
+         if(processUnbreakingLevel(armor[3].getEnchantmentLevel(Enchantment.DURABILITY))){
+            e.setCancelled(true);
+         }
+      }
+   }
+
+   private boolean processUnbreakingLevel(int level){
+      switch(level){
+         case 1:
+            return GenUtils.getRandDouble(1, 100) <  PlayerUtils.getUnb1breakChance();
+         case 2:
+            return GenUtils.getRandDouble(1, 100) <  PlayerUtils.getUnb2breakChance();
+         case 3:
+            return GenUtils.getRandDouble(1, 100) <  PlayerUtils.getUnb3breakChance();
+         default:
+            return GenUtils.getRandDouble(1, 100) < 50;
       }
    }
 }

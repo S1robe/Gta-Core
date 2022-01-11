@@ -9,6 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.EnderChest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -52,7 +54,7 @@ public class LootEvents implements Listener {
                e.setCancelled(true);
                Long xpirationTime = u.getChestLocations().get(b.getLocation());
                p.closeInventory();
-               RegionUtils.playSound(p.getLocation(), Sound.CHEST_OPEN, 1, 1);
+               RegionUtils.playSound(p.getLocation(), Sound.CHEST_OPEN, u.getChestVolume()/100, 1);
                if(xpirationTime != null)
                   if(System.currentTimeMillis() >= xpirationTime)
                      openNewChest(bL, u);
@@ -73,10 +75,20 @@ public class LootEvents implements Listener {
          else if(b.getState() instanceof Furnace) onFuranceClick(e);
          else if(b.getState() instanceof Painting) onPaintingtingInteract(e);
          else if(b.getState() instanceof ItemFrame) onItemFrameInteract(e);
+         else if(b.getState() instanceof Hopper) onHopperClick(e);
+         else if(b.getState() instanceof EnderChest) onEnderChestClick(e);
       }
-      else if(e.getItem() != null && e.getItem().getType().equals(Material.COMPASS)){
+      else if(e.getItem() != null && User.getByPlayer(e.getPlayer()).isCop() && e.getItem().getType().equals(Material.COMPASS)){
          CopEvents.onCompassClick(e);
          RegionUtils.playSound(e.getPlayer().getLocation(), Sound.CLICK, 1, 1);
+      }
+   }
+
+   private void onEnderChestClick(PlayerInteractEvent e) {
+      User u = User.getByPlayer(e.getPlayer());
+      if(u.isCop()){
+         e.setCancelled(true);
+         u.sendPlayerMessage(StringUtils.Text.DENY_ACTION.create());
       }
    }
 

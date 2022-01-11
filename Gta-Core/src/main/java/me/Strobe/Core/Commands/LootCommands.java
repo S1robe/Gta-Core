@@ -31,6 +31,17 @@ public class LootCommands implements CommandExecutor {
          if(s.equalsIgnoreCase("loot")){
             String type = StringUtils.capitalizeFirst(args[0].toLowerCase());
             switch(type){
+               case "Sound": {
+                  try{
+                     sender.setChestVolume(Float.parseFloat(args[1]));
+                     sender.sendPlayerMessage("&b&l(!) &7Your chest sound has been set to " + args[1] + " %.");
+                  }
+                  catch(NumberFormatException e){
+                     sender.sendPlayerMessage("&b&l&7 Use the loot commands like this:\n" +
+                                              " &b/loot sound <amt> &7: Set the sounds of chests for yourself!");
+                  }
+                  return true;
+               }
                case "Reload":{
                   if(!sendr.hasPermission("loot.admin")) return false;
                   LootingUtils.reloadAllLoot();

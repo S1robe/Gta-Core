@@ -8,7 +8,10 @@ import org.bukkit.entity.Player;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -25,9 +28,9 @@ public final class StringUtils {
       DROPPED_MONEY(false, "&c&l(!) &7You dropped &c$ {0}&7. Your balance is now &n{1}&r&7."),
       GAINED_MONEY(false, "&a&l(!) &7You pick up &a&n$ {0}&7."),
       GAINED_MONEY_FOR_KILL_COP(false, "&a&l(!) &7You gained &a${0}&7 for killing someone with a wanted level of {1}."),
-      GAINED_MONEY_FOR_WANTED(false, "&a&l(!) &7You earned $ {0} for killing a cop!."),
+      GAINED_MONEY_FOR_WANTED(false, "&a&l(!) &7You earned $ {0} for killing with a wanted level of {1}!."),
 
-      INC_WL(false, "&a&l(!) &7Your &c&lWanted Level &7has increased by {0}, it is now {1}"),
+      INC_WL(false, "&a&l(!) &7Your &c&lWanted Level &7has increased by {0}"),
       R_WL(false, "&c&l(!) &7Your wanted level has reset!"),
 
       COPS_ENGAGE(false, "&e&l(!) &7Start Running!"),
@@ -114,6 +117,17 @@ public final class StringUtils {
 
 
       TELEPORTING(false,  "&e&l(!)&7 Teleporting... Dont Move! ({0} sec...)"),
+      RULES(false, "&e&l(!)&7 The rules of this server are as follows more may exist on the discord.\n" +
+                   "&e1. &7No Harassment\n" +
+                   "&e2.&7 No Advertising\n" +
+                   "&e3.&7 No IRL Deal Scamming \n" +
+                   "&e4.&7 No Racism or Discrimination \n" +
+                   "&e5.&7 No Alternative Accounts (Alt's) \n" +
+                   "&e6. &7No Abusing Glitches/Exploits \n" +
+                   "&e7.&7 No Hacking/Unfair Advantages - e.g: Macros, Player Mini-Map \n" +
+                   "&e8.&7 No Malicious Messages \n" +
+                   "&e9.&7 No Ban Evading \n" +
+                   "&e10.&7 No Spamming/Excessive Caps")
 
 
       ;
@@ -269,6 +283,10 @@ public final class StringUtils {
    public static String formatDouble(double d) {
       DecimalFormat df = new DecimalFormat("#,###.##");
       return df.format(d);
+   }
+
+   public static String formatDouble(double d, int places){
+      return String.format("%,."+ places+"f", d);
    }
 
    /*

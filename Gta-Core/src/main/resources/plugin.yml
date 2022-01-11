@@ -7,6 +7,7 @@ depend:
   - Vault
 prefix: "§9§l[§6§nGTA-MC§9§l]§7"
 commands:
+  rules:
   loot:
     description: Modify the loot table for chests
     permission: gtacore.commands.loot
@@ -19,6 +20,11 @@ commands:
   gta:
     permission: gtacore.commands.gta.admin
   help:
+  kstop:
+  wtop:
+  dtop:
+  ktop:
+  mktop:
 
 permissions:
   gtacore.commands:

@@ -42,6 +42,7 @@ public class User implements ConfigurationSerializable {
    private transient Map<Location, Long> chestLocations = new HashMap<>();
    private transient Map<Location, List<ItemStack>> chestLoot = new HashMap<>();
    private transient volatile Location viewedChestLocation;
+   private volatile float chestVolume = 100F;
 
    //PVP Game-Side
    private int pvpDeaths = 0;
@@ -96,7 +97,30 @@ public class User implements ConfigurationSerializable {
    }
 
    public User(Map<String, Object> serialized){
-      deserialize(serialized);
+      List<Location> locs = RegionUtils.locationDeserializer((List<String>) serialized.get("chestLocations"));
+      List<Long> times = (List<Long>) serialized.get("chestLocationTimes");
+      List<List<ItemStack>> loots = (List<List<ItemStack>>) serialized.get("chestLoot");
+      createHashMaps(this, locs, times, loots);
+      this.currentBoard = (int) serialized.get("currentBoard");
+      this.pvpDeaths = (int) serialized.get("pvpDeaths");
+      this.pvpKills = (int) serialized.get("pvpKills");
+      this.copKills = (int) serialized.get("copKills");
+      this.killstreak = (int) serialized.get("killstreak");
+      this.wantedlevel = (int) serialized.get("wantedLevel");
+      this.isCop = (boolean) serialized.get("isCop");
+      this.savedInventory = (List<ItemStack>) serialized.get("savedInventory");
+
+      this.attackedCop = (boolean) serialized.get("attackedCop");
+      this.mobDeaths = (int) serialized.get("mobDeaths");
+      this.mobKills = (int) serialized.get("mobKills");
+      this.skeletonKills = (int) serialized.get("skeletonKills");
+      this.witherSkeletonKills = (int) serialized.get("witherSkeletonKills");
+      this.zombieNormalKills = (int) serialized.get("zombieNormalKills");
+      this.endermanKills = (int) serialized.get("endermanKills");
+      this.villagerKills = (int) serialized.get("villagerKills");
+      this.npcCopKills = (int) serialized.get("npcCopKills");
+      if(serialized.containsKey("chestVolume"))
+      this.chestVolume = Float.parseFloat(String.valueOf((double) serialized.get("chestVolume")));
    }
 
    @Override
@@ -125,34 +149,12 @@ public class User implements ConfigurationSerializable {
       map.put("endermanKills", endermanKills);
       map.put("villagerKills", villagerKills);
       map.put("npcCopKills", npcCopKills);
+      map.put("chestVolume", chestVolume);
       return map;
    }
 
    public static User deserialize(Map<String, Object> serialized) {
-      User u = new User();
-      List<Location> locs = RegionUtils.locationDeserializer((List<String>) serialized.get("chestLocations"));
-      List<Long> times = (List<Long>) serialized.get("chestLocationTimes");
-      List<List<ItemStack>> loots = (List<List<ItemStack>>) serialized.get("chestLoot");
-      createHashMaps(u ,locs, times, loots);
-      u.currentBoard = (int) serialized.get("currentBoard");
-      u.pvpDeaths = (int) serialized.get("pvpDeaths");
-      u.pvpKills = (int) serialized.get("pvpKills");
-      u.copKills = (int) serialized.get("copKills");
-      u.killstreak = (int) serialized.get("killstreak");
-      u.wantedlevel = (int) serialized.get("wantedLevel");
-      u.isCop = (boolean) serialized.get("isCop");
-      u.savedInventory = (List<ItemStack>) serialized.get("savedInventory");
-
-      u.attackedCop = (boolean) serialized.get("attackedCop");
-      u.mobDeaths = (int) serialized.get("mobDeaths");
-      u.mobKills = (int) serialized.get("mobKills");
-      u.skeletonKills = (int) serialized.get("skeletonKills");
-      u.witherSkeletonKills = (int) serialized.get("witherSkeletonKills");
-      u.zombieNormalKills = (int) serialized.get("zombieNormalKills");
-      u.endermanKills = (int) serialized.get("endermanKills");
-      u.villagerKills = (int) serialized.get("villagerKills");
-      u.npcCopKills = (int) serialized.get("npcCopKills");
-      return u;
+      return new User(serialized);
    }
 
    private static void createHashMaps(User u, List<Location> locs, List<Long> times, List<List<ItemStack>> loot){
@@ -184,6 +186,13 @@ public class User implements ConfigurationSerializable {
    }
    public void removeMoney(double amt){
       Main.getMain().getEcon().withdrawPlayer(PLAYER, amt);
+   }
+
+   public void addKillstreak(int amt){
+      killstreak += amt;
+   }
+   public void removeKillstreak(int amt){
+     killstreak = Math.max(killstreak - amt, 0);
    }
 
    public void addDeaths(int amt) {
@@ -281,6 +290,10 @@ public class User implements ConfigurationSerializable {
       this.mobKills = Math.max((this.mobKills - amt), 0);
    }
 
+   public void setChestVolume(float amt){
+      this.chestVolume = (amt <= 0)? 0: (amt <= 100)? amt : 100;
+   }
+
 
    //potentially problematic methods that might need fixing or tweaking.
    public static void saveAllPlayerData() {
@@ -347,6 +360,7 @@ public class User implements ConfigurationSerializable {
                case 2:
                   ScoreboardManager.PVEBoardText(sender, hold);
             }
+            hold.getObjective(DisplaySlot.SIDEBAR).setDisplayName(StringUtils.color("&bGTA-MC.net"));
             ScoreboardManager.addScoreBoard(sender, hold);
             PLAYER.getPlayer().removeMetadata("VIEWINGOTHER", Main.getMain());
          }

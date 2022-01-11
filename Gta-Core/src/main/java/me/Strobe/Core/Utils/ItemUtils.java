@@ -41,17 +41,19 @@ public final class ItemUtils {
 
    //returns the skull of other people
    public static ItemStack getSkullOf(String otherOwners) {
-      ItemStack memberSkull = createItem(Material.SKULL_ITEM, 1, 3, "&6" + Bukkit.getOfflinePlayer(UUID.fromString(otherOwners)).getPlayer().getDisplayName());
+      String name = Bukkit.getOfflinePlayer(UUID.fromString(otherOwners)).getName();
+      ItemStack memberSkull = createItem(Material.SKULL_ITEM, 1, 3, "&6" + name);
       SkullMeta memberMeta = (SkullMeta) memberSkull.getItemMeta();
-      memberMeta.setOwner(Bukkit.getOfflinePlayer(UUID.fromString(otherOwners)).getName());
+      memberMeta.setOwner(name);
       memberSkull.setItemMeta(memberMeta);
       return memberSkull;
    }
 
    public static ItemStack getSkullOf(UUID otherOwners) {
-      ItemStack memberSkull = createItem(Material.SKULL_ITEM, 1, 3, "&6" + Bukkit.getOfflinePlayer(otherOwners).getPlayer().getDisplayName());
+      String name = Bukkit.getOfflinePlayer(otherOwners).getName();
+      ItemStack memberSkull = createItem(Material.SKULL_ITEM, 1, 3, "&6" + name);
       SkullMeta memberMeta = (SkullMeta) memberSkull.getItemMeta();
-      memberMeta.setOwner(Bukkit.getOfflinePlayer(otherOwners).getName());
+      memberMeta.setOwner(name);
 
       memberSkull.setItemMeta(memberMeta);
       return memberSkull;
@@ -175,7 +177,7 @@ public final class ItemUtils {
    public static void changeLine(ItemStack itemStack, int line, String newLine){
       ItemMeta im = itemStack.getItemMeta();
       List<String> lore = im.getLore();
-      if(lore == null){
+      if(lore == null || lore.isEmpty()){
          lore = new ArrayList<>();
       }
       if(line >= lore.size()){

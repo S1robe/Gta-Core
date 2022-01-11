@@ -10,3 +10,7 @@ percent-money-drop: 15
 loot-enabled-worlds: []
 
 mob-enabled-worlds: []
+
+unbreaking-1-damage-chance: 50
+unbreaking-2-damage-chance: 64
+unbreaking-3-damage-chance: 75

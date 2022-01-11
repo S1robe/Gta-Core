@@ -1,8 +1,9 @@
 rootProject.name = 'Gta-Core'
-include 'GTA-Gangs'
 include 'Gta-Gangs'
 include 'Gta-Core'
 include 'Housing'
 include 'BankRobberies'
-include 'ConfigAPI'
+include 'Gangs'
+include 'NoHitDelay'
+include 'GTAEnchanting'
 

@@ -2,20 +2,20 @@ package me.Strobe.Core.Events;
 
 import me.Strobe.Core.Utils.CopUtils;
 import me.Strobe.Core.Utils.Displays.ScoreboardManager;
-import me.Strobe.Core.Utils.RegionUtils;
+import me.Strobe.Core.Utils.LootingUtils;
 import me.Strobe.Core.Utils.StringUtils;
 import me.Strobe.Core.Utils.User;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 
 public class PlayerEvents implements Listener {
@@ -24,19 +24,16 @@ public class PlayerEvents implements Listener {
    public void onJoin(PlayerJoinEvent p) {
       Player player = p.getPlayer();
       User user = User.userJoined(player.getUniqueId());
+      if(user.isCop()) CopUtils.cops.putIfAbsent(user.getPlayerUUID(), user);
       ScoreboardManager.createScoreBoard(user);
+      CopUtils.plrPigmen.putIfAbsent(user.getPlayerUUID(), new LinkedList<>());
+      CopUtils.playerRunnableIds.putIfAbsent(user.getPlayerUUID(), new LinkedList<>());
    }
 
    @EventHandler
    public void onQuit(PlayerQuitEvent e) {
-      Player player = e.getPlayer();
-      User user = User.removeUser(player.getUniqueId());
-      if(CopUtils.playerRunnableIds.containsKey(player.getUniqueId())){
-         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(player.getUniqueId()));
-         CopUtils.despawnAllCops(player.getUniqueId());
-         CopUtils.playerRunnableIds.remove(player.getUniqueId());
-      }
-
+      final Player player = e.getPlayer();
+      final User user = User.removeUser(player.getUniqueId());
       if(user.getTrackedBy() != null)
          user.getTrackedBy().setTracked(null);
       user.savePlayerData();
@@ -45,11 +42,10 @@ public class PlayerEvents implements Listener {
    @EventHandler
    public void onTeleport(PlayerTeleportEvent e){
       Player player = e.getPlayer();
-      if(!RegionUtils.allowsPVP(e.getTo()) && CopUtils.playerRunnableIds.containsKey(player.getUniqueId())){
-         StringUtils.sendMessage(player, StringUtils.Text.COPS_DISENGAGE.create());
-         Bukkit.getScheduler().cancelTask(CopUtils.playerRunnableIds.get(player.getUniqueId()));
-         CopUtils.despawnAllCops(player.getUniqueId());
-         CopUtils.playerRunnableIds.remove(player.getUniqueId());
+      if(e.getCause().equals(PlayerTeleportEvent.TeleportCause.ENDER_PEARL)) return;
+      Queue<Integer> runIds = CopUtils.playerRunnableIds.get(player.getUniqueId());
+      if(!LootingUtils.isWorldMobActive(e.getFrom().getWorld()) && runIds != null){
+         runIds.poll();
       }
    }
 
@@ -94,12 +90,5 @@ public class PlayerEvents implements Listener {
       if(e.getEntity() instanceof Player && CopUtils.cops.containsKey(e.getEntity().getUniqueId()))
          e.setCancelled(true);
    }
-
-   @EventHandler(priority = EventPriority.MONITOR)
-   public void commitEnchant(final EnchantItemEvent e) {
-      e.getEnchanter().setLevel(e.getEnchanter().getLevel() - e.getExpLevelCost() + (e.whichButton() + 1));
-      e.setExpLevelCost(0);
-   }
-
 
 }

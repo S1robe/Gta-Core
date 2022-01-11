@@ -6,6 +6,8 @@ changeModeTimeOut: 7
 
 #The amount of money to award for killing a cop
 cop-kill-money: 1000
+#The amount of money for a wanted level of 1, stacks per wanted level.
+money-for-wanted: 500
 #The blacklisted commands for cops
 cop-blacklisted-commands: [ "" ]
 #The minimum amount of cops that can spawn on a player

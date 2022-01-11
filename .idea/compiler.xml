@@ -10,9 +10,8 @@
         <module name="Gta-Core.BankRobberies.main" />
         <module name="Gta-Core.Housing.main" />
         <module name="Gta-Core.Housing.test" />
-        <module name="Gta-Core.Gta-Gangs.main" />
         <module name="Gta-Core.Gta-Core.main" />
-        <module name="Gta-Core.Gta-Gangs.test" />
+        <module name="Gta-Core.Gangs.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8" />

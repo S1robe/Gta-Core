@@ -47,15 +47,16 @@ public class HouseEvents implements Listener {
                openCoveredHouseChest(e.getPlayer(), c);
             }
          }
-
       }
    }
 
    @EventHandler
    public void onBlockBreak(BlockBreakEvent e){
       Block b = e.getBlock();
-      if(b != null && HouseUtils.isHouseSign(b)){
-         onHouseSignBreak(e.getPlayer(), HouseUtils.getHouseBySignBlock(b));
+      if(e.getPlayer().hasPermission("houses.admin")) {
+         if(b != null && HouseUtils.isHouseSign(b)) {
+            onHouseSignBreak(e.getPlayer(), HouseUtils.getHouseBySignBlock(b));
+         }
       }
    }
 

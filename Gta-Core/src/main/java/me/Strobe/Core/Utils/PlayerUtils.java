@@ -1,5 +1,6 @@
 package me.Strobe.Core.Utils;
 
+import lombok.Getter;
 import me.Strobe.Core.Main;
 import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -8,6 +9,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutBlockChange;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -24,6 +26,12 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public final class PlayerUtils {
+
+   @Getter private static double unb1breakChance = 0;
+   @Getter private static double unb2breakChance = 0;
+   @Getter private static double unb3breakChance = 0;
+   @Getter private static double unb4breakChance = 0;
+   @Getter private static double unb5breakChance = 0;
 
    private PlayerUtils() {}
 
@@ -217,5 +225,14 @@ public final class PlayerUtils {
          if(i != null) list.add(i);
       });
       return list;
+   }
+
+   public static void init(){
+      FileConfiguration f = Main.getMain().getMainDataFile().getCustomConfig();
+      unb1breakChance = f.getDouble("unbreaking-1-damage-chance");
+      unb2breakChance = f.getDouble("unbreaking-2-damage-chance");
+      unb3breakChance = f.getDouble("unbreaking-3-damage-chance");
+      unb4breakChance = f.getDouble("unbreaking-4-damage-chance");
+      unb5breakChance = f.getDouble("unbreaking-5-damage-chance");
    }
 }

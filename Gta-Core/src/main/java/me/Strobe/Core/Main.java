@@ -92,6 +92,7 @@ public final class Main extends JavaPlugin {
       getCommand("cop").setExecutor(new UserRelatedCommands());
       getCommand("gta").setExecutor(new UserRelatedCommands());
       getCommand("help").setExecutor(new UserRelatedCommands());
+      getCommand("rules").setExecutor(new UserRelatedCommands());
    }
 
    private void startBoardUpdates() {

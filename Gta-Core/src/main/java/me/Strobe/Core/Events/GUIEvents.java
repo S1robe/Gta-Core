@@ -184,8 +184,7 @@ public class GUIEvents implements Listener {
       }
       else if(slot < 44 && clicked.getType().equals(Material.SKULL_ITEM)) {
          String uuid = ItemUtils.getStrippedLoreLine(clicked, 0);
-         System.out.println(uuid);
-         User tracked = User.getByUUID(UUID.fromString(uuid.substring(uuid.indexOf(" "))));
+         User tracked = User.getByUUID(UUID.fromString(uuid.substring(uuid.indexOf(" ") + 1)));
          u.setTracked(tracked);
          tracked.setTrackedBy(u);
          TrackerRunnable x = new TrackerRunnable(u);

@@ -1,0 +1,7 @@
+name: NoHitDelay
+version: 1
+main: me.strobe.NoHitDelay
+api-version: 1.8
+commands:
+  noHitDelay:
+    description: Main command for NoHitDelay.

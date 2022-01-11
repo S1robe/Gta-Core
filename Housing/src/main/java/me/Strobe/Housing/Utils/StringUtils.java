@@ -43,6 +43,14 @@ public final class StringUtils {
 
    public static final String houseReloadUsage = "&e&l(!)&7 You use the command like so: /house reload <houseID | all>";
 
+   public static final String houseUsage = "&e&l(!) &7You use the house command like this:\n" +
+                                           " &e/house &7: Base command will allow you to edit your house.\n" +
+                                           " &e/house setspawn &7: Stand in your house, will set your spawn location.\n" +
+                                           " &e/house add <name> &7: Will add the person you specify to your house.\n" +
+                                           " &e/house remove <name> &7: Will remove the person you specify from your house\n" +
+                                           " &e/house gift <name> &7: Transfers ownership to the person specified.";
+
+
    public static String[] msToDHMSColored(long timeLeft) {
       int days = (int) TimeUnit.MILLISECONDS.toDays(timeLeft);
       timeLeft -= TimeUnit.DAYS.toMillis(days);

@@ -1,7 +1,6 @@
 package me.Strobe.Core.Utils;
 
 import me.Strobe.Core.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,6 +11,8 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
@@ -23,8 +24,8 @@ import static me.Strobe.Core.Utils.ItemUtils.createItem;
 public final class CopUtils {
 
    public static final Map<UUID, User> cops = new HashMap<>();
-   public static final Map<UUID, Queue<List<PigZombie>>> plrPigmen = new HashMap<>();
-   public static final Map<UUID, Integer> playerRunnableIds = new HashMap<>();
+   public static final Map<UUID, List<PigZombie>> plrPigmen = new HashMap<>();
+   public static final Map<UUID, Queue<Integer>> playerRunnableIds = new HashMap<>();
    public static List<String> blackListedCommands;
    public static Location safeHouse;
    public static int modeChangeTimeout;
@@ -45,75 +46,37 @@ public final class CopUtils {
 
    private CopUtils() {}
 
-   public static void spawnCopsOnPlayer(User user, int num, int waves) {
-      plrPigmen.put(user.getPlayerUUID(), new LinkedList<>());
-      BukkitRunnable x;
-      user.sendPlayerMessage(StringUtils.Text.COPS_ENGAGE.create());
-      if(num != -1 && waves != 0){
-         x = new BukkitRunnable() {
-            private int times = 1;
+   public static void spawnCopsOnPlayer(final User user, int num, int waves) {
+      if(num >=1 && waves >= 1) {
+         user.sendPlayerMessage(StringUtils.Text.COPS_ENGAGE.create());
+         BukkitRunnable spawn =  new BukkitRunnable() {
+            private int copOfWaves = waves;
+            private final UUID uuid = user.getPlayerUUID();
             @Override
             public void run() {
-               if( !user.getPLAYER().isOnline()|| times == waves || !RegionUtils.allowsPVP(user.getPLAYER().getPlayer().getLocation())) {
+               if(!LootingUtils.isWorldMobActive(user.getPLAYER().getPlayer().getWorld()) || copOfWaves == 0) {
                   this.cancel();
                   return;
                }
-               List<PigZombie> temp = createPigmenCops(user, num);
-               plrPigmen.get(user.getPlayerUUID()).add(temp);
-               user.sendPlayerMessage(StringUtils.Text.COPS_BACKUP.create());
-               times++;
-               new BukkitRunnable(){
-
-                  @Override
-                  public void run() {
-                     despawnWave(user.getPlayerUUID());
-                  }
-               }.runTaskLater(Main.getMain(), 3200L);
-
-            }
-
-            @Override
-            public void cancel(){
-               if(user.getPLAYER().isOnline())
-                  user.sendPlayerMessage(StringUtils.Text.COPS_DISENGAGE.create());
-               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(user.getPlayerUUID()));
-               playerRunnableIds.remove(user.getPlayerUUID());
-               despawnAllCops(user.getPlayerUUID());
-            }
-         };
-      }
-      else{
-         x = new BukkitRunnable() {
-
-            @Override
-            public void run() {
-               if(!user.getPLAYER().isOnline() || GenUtils.getRandInt(0, 100) <= 50) {
-                  this.cancel();
+               if(!user.getPLAYER().isOnline())
                   return;
-               }
-               List<PigZombie> temp = createPigmenCops(user, GenUtils.getRandInt(minCopSpawn, maxCopSpawn));
-               plrPigmen.get(user.getPlayerUUID()).add(temp);
+
+               plrPigmen.get(uuid).addAll(createPigmenCops(user, num));
                user.sendPlayerMessage(StringUtils.Text.COPS_BACKUP.create());
-
-               new BukkitRunnable(){
-
-                  @Override
-                  public void run() {
-                     despawnWave(user.getPlayerUUID());
-                  }
-               }.runTaskLater(Main.getMain(), 3200L);
+               copOfWaves--;
             }
+
             @Override
-            public void cancel(){
+            public void cancel() {
                if(user.getPLAYER().isOnline())
                   user.sendPlayerMessage(StringUtils.Text.COPS_DISENGAGE.create());
-               Bukkit.getScheduler().cancelTask(playerRunnableIds.get(user.getPlayerUUID()));
-               playerRunnableIds.remove(user.getPlayerUUID());
-               despawnAllCops(user.getPlayerUUID());
+               playerRunnableIds.get(uuid).poll();
+               despawnAllCops(uuid);
+               super.cancel();
             }
          };
+         playerRunnableIds.get(user.getPlayerUUID()).add(spawn.runTaskTimer(Main.getMain(), 0L, 600L).getTaskId());
       }
-      playerRunnableIds.put(user.getPlayerUUID(), x.runTaskTimer(Main.getMain(), 0L, 1200L).getTaskId());
    }
 
    private static List<PigZombie> createPigmenCops(User target, int amtToSpawn) {
@@ -131,6 +94,7 @@ public final class CopUtils {
          piggie.setMetadata(target.getPlayer_Name(), new FixedMetadataValue(Main.getMain(), true));
          piggie.setTarget(target.getPLAYER().getPlayer());
          piggie.setAngry(true);
+         piggie.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 240, 1, false, false));
          pigList.add(piggie);
       }
       return pigList;
@@ -187,7 +151,6 @@ public final class CopUtils {
       else if(wL >= 10)
          itemStack = createItem(Material.STONE_SWORD, 1);
 
-      itemStack.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 2);
       if(wL > 100) {
          itemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 6);
          return itemStack;
@@ -319,22 +282,12 @@ public final class CopUtils {
       return createItem(Material.STAINED_GLASS_PANE, 1, (byte) 14, "&c&lNot Tracking Player");
    }
 
-   public static void despawnWave(UUID pID){
-      Queue<List<PigZombie>> q = plrPigmen.get(pID);
-      if(q.isEmpty()){
-         plrPigmen.remove(pID);
-         return;
-      }
-      Objects.requireNonNull(q.poll()).forEach(Entity::remove);
-   }
 
    public static void despawnAllCops(UUID pID){
-      Queue<List<PigZombie>> q = plrPigmen.get(pID);
-      if(q.isEmpty()){
-         plrPigmen.remove(pID);
-         return;
-      }
-      q.forEach(list -> list.forEach(Entity::remove));
+      List<PigZombie> x = plrPigmen.get(pID);
+      if(x != null)
+         x.forEach(Entity::remove);
+      plrPigmen.get(pID).clear();
    }
 
    public static void init(){
@@ -344,10 +297,15 @@ public final class CopUtils {
       f = Main.getMain().getCopDataFile().getCustomConfig();
       moneyForKillCop           = f.getDouble("cop-kill-money");
       lowWantedForCop           = f.getInt("low-WL-kill-Cop");
+      if(lowWantedForCop <= 0) lowWantedForCop = 2;
       highWantedForCop          = f.getInt("high-WL-kill-Cop");
+      if(highWantedForCop <= 0) highWantedForCop = 5;
+      lowWantedForCop           = Math.min(lowWantedForCop, highWantedForCop);
+
       modeChangeTimeout         = f.getInt("changeModeTimeOut");
       maxCopSpawn               = f.getInt("max-cops");
       minCopSpawn               = f.getInt("min-cops");
+      moneyForWanted            = f.getDouble("money-for-wanted");
       inventory                 = new ArrayList<>();
       String house              = f.getString("safeHouse");
 

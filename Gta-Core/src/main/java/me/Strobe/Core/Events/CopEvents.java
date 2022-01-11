@@ -1,7 +1,6 @@
 package me.Strobe.Core.Events;
 
 import me.Strobe.Core.Utils.Displays.GUIS;
-import me.Strobe.Core.Utils.StringUtils;
 import me.Strobe.Core.Utils.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,7 +20,6 @@ public class CopEvents implements Listener {
    public static void onCopDrop(User u, PlayerDropItemEvent e) {
       if(!e.isCancelled()) {
          e.setCancelled(true);
-         u.sendPlayerMessage(StringUtils.Text.DENY_ACTION.create());
       }
    }
 
@@ -31,18 +29,18 @@ public class CopEvents implements Listener {
    }
 
    public static void onCopDamage(User attacker, User defender, EntityDamageByEntityEvent e) {
-      System.out.println(attacker.isAttackedCop());
-      System.out.println(defender.isAttackedCop());
+      if(e.getCause().equals(EntityDamageEvent.DamageCause.FALL) && defender.isCop()){
+         e.setCancelled(true);
+      }
       if(attacker.isCop() && defender.isCop()) {
          e.setCancelled(true);
       }
-      else if(attacker.isCop() && !defender.isAttackedCop()) {
+      else if(attacker.isCop() && defender.getWantedlevel() == 0 && !defender.isAttackedCop()) {
          e.setCancelled(true);
       }
       else if(defender.isCop()) {
          if(!attacker.isAttackedCop()) {
-            // TOOD: How to handle shotguns and multihit weapons.
-            // perhaps resistance ?
+            e.setCancelled(true);
             attacker.setAttackedCop(true);
          }
       }

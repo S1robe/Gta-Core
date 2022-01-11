@@ -168,10 +168,8 @@ public class HouseUtils {
       for(House h : ownedHouses){
          if(h.getName().equalsIgnoreCase(name))
             return h;
-         else
-            return getHouseFromFileByName(name);
       }
-      return null;
+      return getHouseFromFileByName(name);
    }
    public static House getHouseByDisplayItem(Player p, ItemStack display) {
       for(House house : ownedHouses) {
@@ -191,10 +189,9 @@ public class HouseUtils {
       for(House house : ownedHouses) {
          if(house.getSignLocation().getBlock().equals(x))
             return house;
-         else{
-            return unownedHouses.remove(unownedHouses.size() - 1);
-         }
       }
+      if(unownedHouses.size() - 1 >= 0)
+         return unownedHouses.remove(unownedHouses.size() - 1);
       return null;
    }
    public static List<House> getHousesPlayerIsAddedTo(OfflinePlayer p) {
@@ -245,7 +242,7 @@ public class HouseUtils {
                }
             }
          }
-      }.runTaskTimer(Main.getMain(), 20L, 20L);
+      }.runTaskTimer(Main.getMain(), 20L, 400L);
    }
 
    public static boolean isHouseSign(Block b){
@@ -255,7 +252,6 @@ public class HouseUtils {
          Sign s = (Sign) b.getState();
          if(s.getLine(0).equals("FOR RENT") && !s.getLine(1).isEmpty()) {
             House h = (House) houseConfig.get(s.getLine(1));
-            System.out.println(h);
             if(h != null)
               return unownedHouses.add(h);
          }

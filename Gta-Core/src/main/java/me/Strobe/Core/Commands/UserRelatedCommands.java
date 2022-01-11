@@ -170,6 +170,15 @@ public class UserRelatedCommands implements CommandExecutor {
                }
                return true;
             }
+            case "rules":{
+               sender.sendPlayerMessage(StringUtils.Text.RULES.create());
+               return true;
+            }
+            case "kstop":
+            case "wtop":
+            case "dtop":
+            case "ktop":
+            case "mktop":
             // /gta
             //            case "gta": {
             //               if(args.length == 0){
@@ -294,8 +303,8 @@ public class UserRelatedCommands implements CommandExecutor {
             ScoreboardManager.createScoreBoard(sender);
          }
          sender.viewOtherPlayerStats(sender, other, type);
+         return true;
       }
-      return false;
    }
 
    private boolean cop(User executor) {
