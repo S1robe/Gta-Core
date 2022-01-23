@@ -174,14 +174,19 @@ public final class LootingUtils {
       switch(type){
          case "Chest":
             lootTable.removeEntryByInner(item);
+            break;
          case "Zombie":
             zomLootPool.removeEntryByInner(item);
+            break;
          case "Skeleton":
             skelLootPool.removeEntryByInner(item);
+            break;
          case "Enderman":
             enderLootPool.removeEntryByInner(item);
+            break;
          case "Villager":
             villLootPool.removeEntryByInner(item);
+            break;
          case "Cop":
             copLootPool.removeEntryByInner(item);
       }
@@ -424,14 +429,6 @@ public final class LootingUtils {
       saveSpecificLootFile("Enderman");
    }
 
-
-
-
-
-
-
-
-
    public static void loadActiveWorlds(){
       FileConfiguration f = Main.getMain().getMainDataFile().getCustomConfig();
       lootActiveWorlds = f.getStringList("loot-enabled-worlds");
@@ -479,14 +476,19 @@ public final class LootingUtils {
       switch(type){
          case "Zombie":
             zomMinMonDrop = Math.max(0, min);
+            return;
          case "Skeleton":
             skelMinMonDrop = Math.max(0, min);
+            return;
          case "Enderman":
             endMinMonDrop = Math.max(0, min);
+            return;
          case "Villager":
             villMinMonDrop = Math.max(0, min);
+            return;
          case "Cop":
             pigCopMinMonDrop = Math.max(0, min);
+            return;
          case "Chest":
             minItemChestdrop = Math.max(0, min);
       }
@@ -496,14 +498,19 @@ public final class LootingUtils {
       switch(type){
          case "Zombie":
             zomMaxMonDrop = Math.max(zomMinMonDrop, max);
+            return;
          case "Skeleton":
             skelMaxMonDrop = Math.max(skelMinMonDrop, max);
+            return;
          case "Enderman":
             endMaxMonDrop = Math.max(endMinMonDrop, max);
+            return;
          case "Villager":
             villMaxMonDrop = Math.max(villMinMonDrop, max);
+            return;
          case "Cop":
             pigCopMaxMonDrop = Math.max(pigCopMinMonDrop, max);
+            return;
          case "Chest":
             maxItemChestDrop = Math.max(minItemChestdrop, max);
       }
@@ -511,20 +518,23 @@ public final class LootingUtils {
 
    public static void init(){
       loadAllLoot();
-      chestResetTime    = Main.getMain().getMainDataFile().getCustomConfig().getInt("chest-reset-time") * 60000L;
-      maxItemDropMob    = Main.getMain().getMainDataFile().getCustomConfig().getInt("max-mob-drop");
-      minItemDropMob    = Main.getMain().getMainDataFile().getCustomConfig().getInt("min-mob-drop");
-
-      minItemChestdrop  = Main.getMain().getLootFile().getCustomConfig().getInt("Chest.min-chest-drop");
-      maxItemChestDrop  = Main.getMain().getLootFile().getCustomConfig().getInt("Chest.max-chest-drop");
-      zomMinMonDrop     = Main.getMain().getLootFile().getCustomConfig().getDouble("Zombie.minMon");
-      zomMaxMonDrop     = Main.getMain().getLootFile().getCustomConfig().getDouble("Zombie.maxMon");
-      skelMinMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Skeleton.minMon");
-      skelMaxMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Skeleton.maxMon");
-      villMinMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Villager.minMon");
-      villMaxMonDrop    = Main.getMain().getLootFile().getCustomConfig().getDouble("Villager.maxMon");
-      pigCopMinMonDrop  = Main.getMain().getLootFile().getCustomConfig().getDouble("Cop.minMon");
-      pigCopMaxMonDrop  = Main.getMain().getLootFile().getCustomConfig().getDouble("Cop.maxMon");
+      FileConfiguration f = Main.getMain().getMainDataFile().getCustomConfig();
+      chestResetTime      = f.getInt("chest-reset-time") * 60000L;
+      maxItemDropMob      = f.getInt("max-mob-drop");
+      minItemDropMob      = f.getInt("min-mob-drop");
+                        f = Main.getMain().getLootFile().getCustomConfig();
+      minItemChestdrop    = f.getInt("Chest.min-chest-drop");
+      maxItemChestDrop    = f.getInt("Chest.max-chest-drop");
+      zomMinMonDrop       = f.getDouble("Zombie.minMon");
+      zomMaxMonDrop       = f.getDouble("Zombie.maxMon");
+      skelMinMonDrop      = f.getDouble("Skeleton.minMon");
+      skelMaxMonDrop      = f.getDouble("Skeleton.maxMon");
+      villMinMonDrop      = f.getDouble("Villager.minMon");
+      villMaxMonDrop      = f.getDouble("Villager.maxMon");
+      endMinMonDrop       = f.getDouble("Enderman.minMon");
+      endMaxMonDrop       = f.getDouble("Enderman.maxMon");
+      pigCopMinMonDrop    = f.getDouble("Cop.minMon");
+      pigCopMaxMonDrop    = f.getDouble("Cop.maxMon");
       loadActiveWorlds();
    }
 }

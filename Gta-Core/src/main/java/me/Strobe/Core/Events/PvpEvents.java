@@ -27,6 +27,17 @@ public class PvpEvents implements Listener {
    private static final Random rand = new Random();
 
    @EventHandler
+   public void onDamage(EntityDamageEvent e){
+      if(e.getEntity() instanceof Player){
+         User u = User.getByPlayer((Player) e.getEntity());
+         if(u.isCop() &&  e.getCause().equals(EntityDamageEvent.DamageCause.FALL)){
+            e.setCancelled(true);
+            return;
+         }
+      }
+   }
+
+   @EventHandler
    public void onDamage(EntityDamageByEntityEvent e) {
       //increments damage dealt and accumulated.
       if(e.getDamager() instanceof Player && e.getEntity() instanceof Player) {
@@ -34,10 +45,6 @@ public class PvpEvents implements Listener {
          Player receiver = (Player) e.getEntity();
          User UDamager = User.getByPlayer(damager);
          User UReceiver = User.getByPlayer(receiver);
-         if(UReceiver != null && e.getCause().equals(EntityDamageEvent.DamageCause.FALL) && UReceiver.isCop()) {
-            e.setCancelled(true);
-            return;
-         }
          if(UReceiver != null && UDamager != null) {
             CopEvents.onCopDamage(UDamager, UReceiver, e);
          }
@@ -63,9 +70,7 @@ public class PvpEvents implements Listener {
                User UDamager = User.getByPlayer(damager);
                User UReceiver = User.getByPlayer(receiver);
                assert UDamager != null && UReceiver != null;
-               if(UReceiver.isCop()) {
-                  CopEvents.onCopDamage(UDamager, UReceiver, e);
-               }
+               CopEvents.onCopDamage(UDamager, UReceiver, e);
             }
          }
       }

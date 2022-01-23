@@ -22,7 +22,7 @@ public class EntityEvents implements Listener {
    public void onSpawn(CreatureSpawnEvent e) {
       Entity entity = e.getEntity();
       if(e.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.NATURAL)) {
-         if(entity instanceof Zombie || entity instanceof Skeleton || entity instanceof Enderman || entity instanceof Villager) {
+         if(entity instanceof Zombie || entity instanceof Skeleton || entity instanceof Enderman) {
             switch(entity.getType()) {
                case ZOMBIE:
                   entity.setCustomName(StringUtils.color("&6Crook"));
@@ -31,11 +31,7 @@ public class EntityEvents implements Listener {
                   entity.setCustomName(StringUtils.color("&6Thug"));
                   return;
                case ENDERMAN:
-                  e.setCancelled(true);
-                  e.getLocation().getWorld().spawnEntity(e.getLocation(), EntityType.VILLAGER);
-                  return;
-               case VILLAGER:
-                  entity.setCustomName(StringUtils.color("&6Citizen"));
+                  entity.setCustomName(StringUtils.color("&4Enderman"));
             }
          }
          else if(!(entity instanceof HumanEntity))
@@ -55,6 +51,5 @@ public class EntityEvents implements Listener {
       if(e.getRightClicked() instanceof Villager)
          e.setCancelled(true);
    }
-
 
 }

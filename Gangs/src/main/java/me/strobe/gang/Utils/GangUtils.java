@@ -18,9 +18,8 @@ public class GangUtils {
    private static CustomFile gangFile;
    private static FileConfiguration gangConfig;
 
-
    public static boolean validateName(String name){
-      return Pattern.matches(regexPattern, name);
+      return Pattern.matches(regexPattern, name) && !gangs.containsKey(name);
    }
 
    public static void updateGangName(Gang gang, String oldName, String newName) {
@@ -45,6 +44,10 @@ public class GangUtils {
       gangFile.saveCustomConfig();
    }
 
+   public static void addGang(Gang g){
+      gangs.putIfAbsent(g.getName(), g);
+   }
+
    public static void saveGang(String s){
       Gang g = getGangByName(s);
       if(g != null) {
@@ -60,6 +63,7 @@ public class GangUtils {
       gangConfig = gangFile.getCustomConfig();
       gangConfig.set(g.getName(), null);
       gangFile.saveCustomConfig();
+      gangs.remove(g.getName());
    }
 
    public static void deleteGang(String s){
@@ -73,8 +77,6 @@ public class GangUtils {
       }
    }
 
-
-
    public static Gang getGangWithMember(Member m){
       for(Gang value : gangs.values()) {
          if(value.getMembers().containsValue(m))
@@ -82,6 +84,7 @@ public class GangUtils {
       }
       return null;
    }
+
    public static Gang getGangByName(String name){
       return gangs.get(name);
    }
@@ -93,7 +96,6 @@ public class GangUtils {
       }
       return null;
    }
-
 
    public static void init(){
 

@@ -125,7 +125,7 @@ public class House implements ConfigurationSerializable {
    }
 
    public void sendOwnerMessage(String... message) {
-      if(owner.isOnline())
+      if(owner != null && owner.isOnline())
          StringUtils.sendBulkMessage(owner.getPlayer(), message);
    }
 

@@ -2,18 +2,30 @@ package me.strobe.gang.Utils;
 
 import me.strobe.gang.Files.CustomFile;
 import me.strobe.gang.Gang;
+import me.strobe.gang.Main;
 import me.strobe.gang.Member;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 public class MemberUtils {
 
+   private static HashMap<UUID, Member> members = new HashMap<>();
    private static CustomFile memberFile;
    private static FileConfiguration memberConfig;
 
    private MemberUtils(){}
 
-   public static void updateMember(Member m, Gang g){
+   public static void addNewMember(Member m){
+      members.put(m.getUuid(), m);
+   }
 
+   public static void loadAllMembers(){
+      memberConfig.getKeys(false).forEach(m -> {
+         members.put(UUID.fromString(m), (Member) memberConfig.get(m));
+      });
    }
 
    public static void saveMember(Member m){
@@ -23,7 +35,7 @@ public class MemberUtils {
       memberFile.saveCustomConfig();
    }
 
-   public static void saveAllMembers(){
+   public static void saveMembers(){
       memberFile.reloadCustomConfig();
       memberConfig = memberFile.getCustomConfig();
       for(Gang value : GangUtils.getGangs().values()) {
@@ -33,10 +45,24 @@ public class MemberUtils {
       }
    }
 
-   public static Member getMemberFromUUID(String uuid){
+   public static Member getMemberFromStringUUID(String uuid){
       return (Member) memberConfig.get(uuid);
    }
 
+   public static Member getMemberFromUUID(UUID uuid){
+      return members.get(uuid);
+   }
+
+   public static Member getMemberFromPlayer(Player p){
+      return members.get(p.getUniqueId());
+   }
+
+   public static void handleOnQuit(Player p){
+      Member m = members.get(p.getUniqueId());
+      saveMember(m);
+      m.setInGangChat(false);
+      p.removeMetadata(Member.inGangChatMeta, Main.getMain());
+   }
 
    public static void deleteMember(Member m){
       memberFile.reloadCustomConfig();
@@ -46,7 +72,7 @@ public class MemberUtils {
    }
 
    public static void init(){
-
+      loadAllMembers();
    }
 
 }

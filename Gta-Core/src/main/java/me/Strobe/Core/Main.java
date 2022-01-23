@@ -8,6 +8,7 @@ import me.Strobe.Core.Files.CustomFile;
 import me.Strobe.Core.Files.FileManager;
 import me.Strobe.Core.Utils.CopUtils;
 import me.Strobe.Core.Utils.Displays.ScoreboardManager;
+import me.Strobe.Core.Utils.Entity.CustomEntityType;
 import me.Strobe.Core.Utils.Looting.LootItem;
 import me.Strobe.Core.Utils.LootingUtils;
 import me.Strobe.Core.Utils.User;
@@ -59,13 +60,16 @@ public final class Main extends JavaPlugin {
       LootingUtils.saveActiveWorlds();
       CopUtils.save();
       fileMan.saveAllFiles();
+      super.onDisable();
    }
 
    @Override
    public void onEnable() {
+      CustomEntityType.registerEntities();
       init();
       registerEvents();
       startBoardUpdates();
+      super.onEnable();
    }
 
    private void init() {

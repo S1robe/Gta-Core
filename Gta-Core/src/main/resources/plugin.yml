@@ -18,7 +18,7 @@ commands:
     description: Become a Cop!
     permission: gtacore.commands.cop
   gta:
-    permission: gtacore.commands.gta.admin
+    permission:
   help:
   kstop:
   wtop:

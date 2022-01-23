@@ -113,8 +113,10 @@ public final class StringUtils {
       LOOT_SET_MIN(true, "&b&l(!)&7 The minimum amount of items in a chest is now {0}"),
       LOOT_SETMIN_USAGE(true, "&b&l(!) Use the loot command list this\n " + " &b/loot (mobtype) min <amt> &7: Set the minimum number of items in a chest or to drop from a mob."),
       LOOT_SET_MAX(true, "&b&l(!)&7 The maximim amount of items in a chest is now {0}"),
-      LOOT_SETMAX_USAGE(true, "&b&l(!) Use the loot command list this\n " + " &b/loot (mobtype) max <amt> &7: Set the maximum number of items in a chest or to drop from a mob."),
+      LOOT_SETMAX_USAGE(true, "&b&l(!) &7Use the loot command list this\n " + " &b/loot (mobtype) max <amt> &7: Set the maximum number of items in a chest or to drop from a mob."),
 
+      SUCCESS_CLEAR_WL(false, "&b&l(!) &7You have cleared your wanted level for {0}!"),
+      FAIL_CLEAR_WL(false, "&b&l(!) &7You do not have enough to clear your wanted level {0}"),
 
       TELEPORTING(false,  "&e&l(!)&7 Teleporting... Dont Move! ({0} sec...)"),
       RULES(false, "&e&l(!)&7 The rules of this server are as follows more may exist on the discord.\n" +

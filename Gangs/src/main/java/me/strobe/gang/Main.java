@@ -3,7 +3,10 @@ package me.strobe.gang;
 import lombok.Getter;
 import me.strobe.gang.Files.CustomFile;
 import me.strobe.gang.Files.FileManager;
+import me.strobe.gang.Utils.GangUtils;
+import me.strobe.gang.Utils.MemberUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,21 +21,20 @@ public class Main extends JavaPlugin {
    private Economy econ;
 
    Main(){
-      //ConfigurationSerialization.registerClass();
+      ConfigurationSerialization.registerClass(Gang.class);
+      ConfigurationSerialization.registerClass(Member.class);
    }
 
    @Override
    public void onEnable(){
       init();
       registerEvents();
-      if (!setupEconomy()) {
-         System.out.println("Vault not found, some parts of this plugin will not work....");
-      }
    }
 
    @Override
    public void onDisable(){
-
+      GangUtils.saveGangs();
+      MemberUtils.saveMembers();
    }
 
    private void init(){
@@ -42,10 +44,14 @@ public class Main extends JavaPlugin {
       fileMan.registerFile(memberFile);
       fileMan.registerFile(gangFile);
       initUtils();
+      if (!setupEconomy()) {
+         System.out.println("Vault not found, some parts of this plugin will not work....");
+      }
    }
 
    private void initUtils(){
-
+      MemberUtils.init();
+      GangUtils.init();
    }
 
    private void registerEvents() {

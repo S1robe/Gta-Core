@@ -127,7 +127,8 @@ public class UserRelatedCommands implements CommandExecutor {
                }
             }
             case "gta": {
-               // /gta pck add 2
+               if(args.length == 2)
+                  return gta(sender, args[0], args[1], null, -1);
                if(args.length == 3)
                   return gta(sender, args[0], args[1], null, Integer.parseInt(args[2]));
                else if(args.length == 4)
@@ -313,174 +314,190 @@ public class UserRelatedCommands implements CommandExecutor {
 
 
    private boolean gta(User sender, String stat, String addOrSub, String PlayerName, int amt){
-      if(PlayerName == null)
-         switch(stat){
-            case "pigcopkill":
-            case "pck":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addNPCCopKill(amt);
-               else
-                  sender.removeNPCCopKills(amt);
-               break;
-            case "death":
-            case "d":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addDeaths(amt);
-               else
-                  sender.removeDeaths(amt);
-               break;
-            case "kills":
-            case "k":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addPVPKills(amt);
-               else
-                  sender.removePVPKills(amt);
-               break;
-            case "skeletonkills":
-            case "sk":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addSkelKills(amt);
-               else
-                  sender.removeSkelKills(amt);
-               break;
-            case "zombiekills":
-            case "zk":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addZomKill(amt);
-               else
-                  sender.removeNPCCopKills(amt);
-               break;
-            case "mobdeaths":
-            case "md":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addMobDeaths(amt);
-               else
-                  sender.removeMobDeath(amt);
-               break;
-            case "wantedlevel":
-            case "wanted":
-            case "wl":
-            case "w":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addWantedLevel(amt);
-               else
-                  sender.removeWantedLevel(amt);
-               break;
-            case "witherskeletonkills":
-            case "wsk":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addWithSkelKills(amt);
-               else
-                  sender.removeWithSkelKills(amt);
-               break;
-            case "villagerkills":
-            case "vk":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addVillKills(amt);
-               else
-                  sender.removeVillagerKills(amt);
-               break;
-            case "copkills":
-            case "ck":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addCopKills(amt);
-               else
-                  sender.removeCopKills(amt);
-               break;
-            case "endermankills":
-            case "ek":
-               if(addOrSub.equalsIgnoreCase("add"))
-                  sender.addEndKill(amt);
-               else
-                  sender.removeEndKills(amt);
-               break;
-         }
-      OfflinePlayer other = PlayerUtils.getOfflinePlayer(PlayerName);
-
-      if(other != null) {
-         User Uother = User.getByOfflinePlayer(other);
-         if(Uother != null)
+      if(sender.getPLAYER().getPlayer().hasPermission("gtacore.commands.gta.admin") && amt != -1) {
+         if(PlayerName == null)
             switch(stat) {
                case "pigcopkill":
                case "pck":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addNPCCopKill(amt);
+                     sender.addNPCCopKill(amt);
                   else
-                     Uother.removeNPCCopKills(amt);
+                     sender.removeNPCCopKills(amt);
                   break;
                case "death":
                case "d":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addDeaths(amt);
+                     sender.addDeaths(amt);
                   else
-                     Uother.removeDeaths(amt);
+                     sender.removeDeaths(amt);
                   break;
                case "kills":
                case "k":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addPVPKills(amt);
+                     sender.addPVPKills(amt);
                   else
-                     Uother.removePVPKills(amt);
+                     sender.removePVPKills(amt);
                   break;
                case "skeletonkills":
                case "sk":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addSkelKills(amt);
+                     sender.addSkelKills(amt);
                   else
-                     Uother.removeSkelKills(amt);
+                     sender.removeSkelKills(amt);
                   break;
                case "zombiekills":
                case "zk":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addZomKill(amt);
+                     sender.addZomKill(amt);
                   else
-                     Uother.removeZomKills(amt);
+                     sender.removeNPCCopKills(amt);
                   break;
                case "mobdeaths":
                case "md":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addMobDeaths(amt);
+                     sender.addMobDeaths(amt);
                   else
-                     Uother.removeMobDeath(amt);
+                     sender.removeMobDeath(amt);
                   break;
                case "wantedlevel":
                case "wanted":
                case "wl":
                case "w":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addWantedLevel(amt);
+                     sender.addWantedLevel(amt);
                   else
-                     Uother.removeWantedLevel(amt);
+                     sender.removeWantedLevel(amt);
                   break;
                case "witherskeletonkills":
                case "wsk":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addWithSkelKills(amt);
+                     sender.addWithSkelKills(amt);
                   else
-                     Uother.removeWithSkelKills(amt);
+                     sender.removeWithSkelKills(amt);
                   break;
                case "villagerkills":
                case "vk":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addVillKills(amt);
+                     sender.addVillKills(amt);
                   else
-                     Uother.removeVillagerKills(amt);
+                     sender.removeVillagerKills(amt);
                   break;
                case "copkills":
                case "ck":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addCopKills(amt);
+                     sender.addCopKills(amt);
                   else
-                     Uother.removeCopKills(amt);
+                     sender.removeCopKills(amt);
                   break;
                case "endermankills":
                case "ek":
                   if(addOrSub.equalsIgnoreCase("add"))
-                     Uother.addEndKill(amt);
+                     sender.addEndKill(amt);
                   else
-                     Uother.removeEndKills(amt);
+                     sender.removeEndKills(amt);
                   break;
             }
+         OfflinePlayer other = PlayerUtils.getOfflinePlayer(PlayerName);
+
+         if(other != null) {
+            User Uother = User.getByOfflinePlayer(other);
+            if(Uother != null)
+               switch(stat) {
+                  case "pigcopkill":
+                  case "pck":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addNPCCopKill(amt);
+                     else
+                        Uother.removeNPCCopKills(amt);
+                     break;
+                  case "death":
+                  case "d":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addDeaths(amt);
+                     else
+                        Uother.removeDeaths(amt);
+                     break;
+                  case "kills":
+                  case "k":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addPVPKills(amt);
+                     else
+                        Uother.removePVPKills(amt);
+                     break;
+                  case "skeletonkills":
+                  case "sk":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addSkelKills(amt);
+                     else
+                        Uother.removeSkelKills(amt);
+                     break;
+                  case "zombiekills":
+                  case "zk":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addZomKill(amt);
+                     else
+                        Uother.removeZomKills(amt);
+                     break;
+                  case "mobdeaths":
+                  case "md":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addMobDeaths(amt);
+                     else
+                        Uother.removeMobDeath(amt);
+                     break;
+                  case "wantedlevel":
+                  case "wanted":
+                  case "wl":
+                  case "w":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addWantedLevel(amt);
+                     else
+                        Uother.removeWantedLevel(amt);
+                     break;
+                  case "witherskeletonkills":
+                  case "wsk":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addWithSkelKills(amt);
+                     else
+                        Uother.removeWithSkelKills(amt);
+                     break;
+                  case "villagerkills":
+                  case "vk":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addVillKills(amt);
+                     else
+                        Uother.removeVillagerKills(amt);
+                     break;
+                  case "copkills":
+                  case "ck":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addCopKills(amt);
+                     else
+                        Uother.removeCopKills(amt);
+                     break;
+                  case "endermankills":
+                  case "ek":
+                     if(addOrSub.equalsIgnoreCase("add"))
+                        Uother.addEndKill(amt);
+                     else
+                        Uother.removeEndKills(amt);
+                     break;
+               }
+         }
+         return false;
+      }
+      else{
+         if(stat.equalsIgnoreCase("wanted") && addOrSub.equalsIgnoreCase("clear")){
+            if(sender.getBalance() >= CopUtils.moneyForWanted * sender.getWantedlevel()){
+               sender.removeMoney(CopUtils.moneyForWanted * sender.getWantedlevel());
+               sender.setWantedlevel(0);
+               sender.sendPlayerMessage(StringUtils.Text.SUCCESS_CLEAR_WL.create(""+ CopUtils.moneyForWanted * sender.getWantedlevel()));
+               return true;
+            }
+            else {
+               sender.sendPlayerMessage(StringUtils.Text.FAIL_CLEAR_WL.create(""+ CopUtils.moneyForWanted * sender.getWantedlevel()));
+            }
+         }
       }
       return false;
    }

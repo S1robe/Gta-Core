@@ -80,10 +80,11 @@ public class PveEvents implements Listener {
                for(int i = 0; i < draw; i++)
                   loot.add(LootingUtils.getRandom("Cop").getRandom());
             break;
-//         case ENDERMAN:
-//               for(int i = 0; i < draw; i++)
-//                  loot.add(LootingUtils.getRandom("Enderman").getRandom());
-//            break;
+         case ENDERMAN:
+            loot.add(ItemUtils.createMoneyItem(LootingUtils.getEndMinMonDrop(), LootingUtils.getEndMaxMonDrop()));
+               for(int i = 0; i < draw; i++)
+                  loot.add(LootingUtils.getRandom("Enderman").getRandom());
+            break;
          //Counts both withers and skeletons
          case SKELETON:
             loot.add(ItemUtils.createMoneyItem(LootingUtils.getSkelMinMonDrop(), LootingUtils.getSkelMaxMonDrop()));

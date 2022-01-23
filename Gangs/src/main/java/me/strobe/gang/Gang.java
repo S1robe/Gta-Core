@@ -18,13 +18,17 @@ import java.util.stream.Collectors;
 public class Gang implements ConfigurationSerializable {
 
    @Getter private String name;
-   @Getter private double balance;
+   @Getter private double balance = 0;
+   @Getter private double points = 0;
+   @Getter private transient int totalKills = 0;
    @Getter @Setter private Member owner;
    @Getter private final HashMap<UUID, Member> members = new HashMap<>();
+   @Getter private final List<UUID> invitees = new ArrayList<>();
    @Getter private final HashMap<String, Location> gangHomes = new HashMap<>();
    @Getter private final HashMap<String, Gang> allies = new HashMap<>();
    @Getter private final HashMap<String, Gang> inRequests = new HashMap<>();
    @Getter private final HashMap<String, Gang> outRequests = new HashMap<>();
+   @Getter private final transient List<Gang> friendlyFireGangs = new ArrayList<>();
    @Getter @Setter private boolean friendlyFire;
 
    public Gang(Player leader, String name){
@@ -34,17 +38,16 @@ public class Gang implements ConfigurationSerializable {
       this.members.put(leader.getUniqueId(), this.owner);
       MemberUtils.saveMember(m);
       GangUtils.saveGang(this);
+      GangUtils.addGang(this);
    }
 
    public Gang(Map<String, Object> map){
       this.name = (String) map.get("name");
       this.balance = (double) map.get("balance");
-      this.owner = MemberUtils.getMemberFromUUID((String) map.get("owner"));
+      this.owner = MemberUtils.getMemberFromUUID(UUID.fromString((String) map.get("owner")));
 
       List<String> mems = (List<String>) map.get("members");
-      List<Member> mem = new ArrayList<>();
-      mems.forEach(m -> mem.add(MemberUtils.getMemberFromUUID(m)));
-      mem.forEach(m -> members.put(m.getUuid(), m));
+      mems.stream().map(UUID::fromString).forEach(uuid -> members.put(uuid, MemberUtils.getMemberFromUUID(uuid)));
 
       Map<String, String> houses = (Map<String, String>) map.get("homes");
       houses.forEach((n, l) -> this.gangHomes.put(n, RegionUtils.locationDeserializer(l)));
@@ -55,13 +58,50 @@ public class Gang implements ConfigurationSerializable {
       this.friendlyFire = (boolean) map.get("friendlyFire");
    }
 
+   public void disband(){
+      allies.forEach((gName, g) -> {
+         g.getAllies().remove(this.getName());
+      });
+      inRequests.forEach((gName, g) -> {
+         g.getOutRequests().remove(this.getName());
+      });
+      outRequests.forEach((gName, g) -> {
+         g.getInRequests().remove(this.getName());
+      });
+      friendlyFireGangs.forEach(g -> g.getFriendlyFireGangs().remove(this));
+      members.values().forEach(this::removeMember);
+      MemberUtils.deleteMember(owner);
+      GangUtils.deleteGang(this);
+   }
+
+   public boolean invite(Player p){
+      if(invitees.contains(p.getUniqueId()) || members.containsKey(p.getUniqueId())){
+         return false;
+      }
+      return invitees.add(p.getUniqueId());
+   }
+
    public boolean toggleFF(){
       friendlyFire = !friendlyFire;
       return friendlyFire;
    }
 
+   public boolean toggleFFGang(Gang g){
+      if(g.getFriendlyFireGangs().contains(this)){
+         g.getFriendlyFireGangs().remove(this);
+         friendlyFireGangs.remove(g);
+         return false;
+      }
+      else{
+         g.getFriendlyFireGangs().add(this);
+         friendlyFireGangs.add(g);
+         return true;
+      }
+   }
+
    public void acceptRequest(String name, Gang g){
       allies.putIfAbsent(name, g);
+      inRequests.remove(name);
    }
 
    public void requestAlly(String name, Gang g){
@@ -151,6 +191,15 @@ public class Gang implements ConfigurationSerializable {
 //   @Override
 //   public String toString(){}
 //
+
+   public boolean isAlly(Gang g){
+      return allies.get(g.getName()) != null;
+   }
+
+   public boolean isFriendlyFire(Gang g){
+      return friendlyFireGangs.contains(g);
+   }
+
 
    public static Gang deserialize(Map<String, Object> dict){
       return new Gang(dict);

@@ -20,7 +20,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.EnderChest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -42,7 +41,8 @@ public class LootEvents implements Listener {
       Block b = e.getClickedBlock();
       if(b != null) {
          Location bL = b.getLocation();
-         if(e.getAction() == Action.RIGHT_CLICK_BLOCK && b.getState() instanceof Chest && LootingUtils.isWorldLootActive(bL.getWorld()) && RegionUtils.allowsPVP(bL)) {
+         if(b.getType() == Material.ENDER_CHEST) onEnderChestClick(e);
+         else if(e.getAction() == Action.RIGHT_CLICK_BLOCK && b.getState() instanceof Chest && LootingUtils.isWorldLootActive(bL.getWorld()) && RegionUtils.allowsPVP(bL)) {
             Player p = e.getPlayer();
             User u = User.getByPlayer(p);
             if(u.isCop()) {
@@ -76,7 +76,6 @@ public class LootEvents implements Listener {
          else if(b.getState() instanceof Painting) onPaintingtingInteract(e);
          else if(b.getState() instanceof ItemFrame) onItemFrameInteract(e);
          else if(b.getState() instanceof Hopper) onHopperClick(e);
-         else if(b.getState() instanceof EnderChest) onEnderChestClick(e);
       }
       else if(e.getItem() != null && User.getByPlayer(e.getPlayer()).isCop() && e.getItem().getType().equals(Material.COMPASS)){
          CopEvents.onCompassClick(e);
