@@ -1,0 +1,25 @@
+#Vinny ID
+id:
+#Location he will spawn at
+location:
+#Time he spawned at
+timeSpawnedAt:
+#The time he spawns at IRL time in military time (24 hrs);
+# 12 am : 0000
+# 12 pm : 1200
+# 1159  : 2359
+timeToSpawnAt:
+
+#The numbre of times hes spawned in the last week.
+#If this is set to 7 he will spawn every day of the week,
+#As the week progresses if he has not spawned n times, and there are n days left he will spawn the next n days.
+# Ex 3 days, week start: monday,  doesnt spawn and its thursday, he will spawn friday saturday and sunday.
+numCanSpawn:
+
+#The number of times that vinny has already spawned in the current week
+numHasSpawned:
+
+#The day of the week to start at, see java.util.Date, for the exact list of date names.
+beginningDayOfWeek:
+
+numStockToSell:

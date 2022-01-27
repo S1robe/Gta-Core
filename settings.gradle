@@ -6,4 +6,5 @@ include 'BankRobberies'
 include 'Gangs'
 include 'NoHitDelay'
 include 'GTAEnchanting'
+include 'VinnyD'
 

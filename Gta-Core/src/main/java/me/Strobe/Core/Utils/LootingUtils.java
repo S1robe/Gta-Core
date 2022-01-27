@@ -85,7 +85,7 @@ public final class LootingUtils {
    /**
     * loot table for cops
     */
-   private static final WeightedRandomBag<LootItem> copLootPool = new WeightedRandomBag<LootItem>();
+   private static final WeightedRandomBag<LootItem> copLootPool = new WeightedRandomBag<>();
 
    private LootingUtils() {}
 
@@ -255,17 +255,17 @@ public final class LootingUtils {
    public static double getTotalBagWeight(String type){
       switch(type) {
          case "Chest":
-            return lootTable.getTotalWeight();
+            return lootTable.getAccumulatedWeight();
          case "Zombie":
-            return zomLootPool.getTotalWeight();
+            return zomLootPool.getAccumulatedWeight();
          case "Skeleton":
-            return skelLootPool.getTotalWeight();
+            return skelLootPool.getAccumulatedWeight();
          case "Enderman":
-            return enderLootPool.getTotalWeight();
+            return enderLootPool.getAccumulatedWeight();
          case "Villager":
-            return villLootPool.getTotalWeight();
+            return villLootPool.getAccumulatedWeight();
          case "Cop":
-            return copLootPool.getTotalWeight();
+            return copLootPool.getAccumulatedWeight();
       }
       return 0;
    }

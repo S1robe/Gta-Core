@@ -1,4 +1,4 @@
-//package me.Strobe.Core.Files;
+//package me.Strobe.Core.me.strobe.vinnyd.Files;
 //
 //import org.bukkit.configuration.ConfigurationSection;
 //import org.bukkit.configuration.file.FileConfiguration;

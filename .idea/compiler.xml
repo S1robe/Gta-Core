@@ -12,6 +12,7 @@
         <module name="Gta-Core.Housing.test" />
         <module name="Gta-Core.Gta-Core.main" />
         <module name="Gta-Core.Gangs.main" />
+        <module name="Gta-Core.VinnyD.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8" />

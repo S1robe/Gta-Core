@@ -1,0 +1,10 @@
+#This file will hold both the active stock for vinny and the total stock for vinny.
+#Pulled as a list, and readded To weighted bag, easier adding and removing of elements, plus i can reroll easier.
+# Costs memory tho, doesnt seem to be problem.
+
+#Read random amt from Stockpool : n < Stockpool.size:
+# Save into Active as standard list
+Stockpool:
+
+
+Active:

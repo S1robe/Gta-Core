@@ -208,6 +208,22 @@ public final class ItemUtils {
       return ItemUtils.createItem(Material.GOLD_NUGGET, 1, (byte)0, true, "" + amt);
    }
 
+
+//------------------------------------------------------------------------------------------Actual Items
+
+   public static ItemStack rankVoucher(String rankName){
+      //attempt to call luck perms for checking if the rank exists (lp group info) should return true, else it doesnt exist
+      // if its true then provde the item, else let the runner know that hte rank doesnt exist.
+      return null;
+   }
+
+   public static ItemStack oddCurrency(int amt){
+      return amt > 0? createItem(Material.SLIME_BALL, 1, (byte) 0, "&a&lOdd Currency", "&7Take this to VinnyD, He'll know what to do....") : null;
+   }
+
+
+
+
 }
 
 

@@ -69,7 +69,8 @@ public class Gang implements ConfigurationSerializable {
          g.getInRequests().remove(this.getName());
       });
       friendlyFireGangs.forEach(g -> g.getFriendlyFireGangs().remove(this));
-      members.values().forEach(this::removeMember);
+      members.forEach((u, m) -> MemberUtils.deleteMember(m));
+      members.clear();
       MemberUtils.deleteMember(owner);
       GangUtils.deleteGang(this);
    }
@@ -199,7 +200,6 @@ public class Gang implements ConfigurationSerializable {
    public boolean isFriendlyFire(Gang g){
       return friendlyFireGangs.contains(g);
    }
-
 
    public static Gang deserialize(Map<String, Object> dict){
       return new Gang(dict);
