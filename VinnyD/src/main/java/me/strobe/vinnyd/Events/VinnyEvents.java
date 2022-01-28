@@ -5,13 +5,14 @@ import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 
-public class VinnyEvents {
+public class VinnyEvents implements Listener {
 
    public static final HashMap<Player, Integer> playersLookingAtVinny = new HashMap<>();
    public static final String VINNYD_META = "VINNYD";

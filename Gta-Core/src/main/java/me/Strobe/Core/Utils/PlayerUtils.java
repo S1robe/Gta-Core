@@ -21,6 +21,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -182,6 +183,15 @@ public final class PlayerUtils {
          return true;
       }
       return false;
+   }
+
+   public static boolean doesPlayerHaveItems(Player p, ItemStack... items){
+      return Arrays.asList(p.getInventory().getContents()).containsAll(Arrays.asList(items));
+   }
+
+   public static void takeItemsFromPlayer(Player p, ItemStack... items){
+      Arrays.asList(p.getInventory().getContents()).removeAll(Arrays.asList(items));
+      //TODO check if this takes every iteration of the item, or the first found.
    }
 
    // Plays a spigot effect at the the players given location

@@ -1,19 +1,24 @@
 package me.strobe.vinnyd.Utils;
 
+import me.Strobe.Core.Utils.ItemUtils;
 import me.Strobe.Core.Utils.Looting.WeightedRandomBag;
+import me.Strobe.Core.Utils.PlayerUtils;
+import me.Strobe.Core.Utils.StringUtils;
+import me.Strobe.Core.Utils.User;
 import me.strobe.vinnyd.Events.VinnyEvents;
 import me.strobe.vinnyd.Files.CustomFile;
 import me.strobe.vinnyd.Main;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 public class VinnyUtils {
 
@@ -21,21 +26,22 @@ public class VinnyUtils {
    private static FileConfiguration stockFileConfig;
    private static CustomFile upgradesFile;
    private static FileConfiguration upgradesFileConfig;
+   private static boolean canUpgrade;
 
    private static UUID vinnyID;
-   private static Location spawedAt;
+   private static Location location;
    private static long timeVinnySpawned;
-   private static short timeToSpawnAt; //might not evne use this and just have it spawn for a full 24 hours
    private static byte numCanSpawn;
    private static byte numHasSpawned;
    private static DayOfWeek beginningOfWeek;
    private static byte numStockToSell;
 
    private static VinnyD vinny;
+   private static NPC npc;
 
    private VinnyUtils(){}
 
-   public static void init(){
+   public static void init(boolean isUpgrading){
       Main m = Main.getMain();
       stockFile = m.getStock();
       stockFile.reloadCustomConfig();
@@ -43,14 +49,32 @@ public class VinnyUtils {
       upgradesFile = m.getUpgrades();
       upgradesFile.reloadCustomConfig();
       upgradesFileConfig = upgradesFile.getCustomConfig();
+      canUpgrade = isUpgrading;
    }
 
-   public static void shoutVinnyArrival(){}
-   public static void shoutVinnyDepart(){}
+   public static void shoutVinnyArrival(){
+      User.sendAllUsersMessage("&a&lVinnyD&7: Hey all! Im in town, ive got about a 20 hours to spare. Come see me at spawn.");
+   }
+   public static void shoutVinnyDepart(){
+      User.sendAllUsersMessage("&a&lVinnyD&7: Gotta run! Ill be back later.");
+   }
 
-   public static void spawnVinny(){}
-   public static void despawnVinny(){}
-
+   public static void spawnVinny(){
+      npc = CitizensAPI.getNPCRegistry().getByUniqueIdGlobal(vinnyID);
+      npc.spawn(location);
+      vinny = new VinnyD();
+      shoutVinnyArrival();
+   }
+   public static void despawnVinny(){
+      npc.despawn();
+      VinnyEvents.playersLookingAtVinny.forEach((p, i) -> {
+         Bukkit.getScheduler().cancelTask(i);
+         StringUtils.sendMessage(p, "&a&lVinnyD&7: Gotta run! See ya later.");
+      });
+      VinnyEvents.playersLookingAtVinny.clear();
+      vinny = null;
+      shoutVinnyDepart();
+   }
 
    private static final BukkitRunnable vinnyDespawnChecker = new BukkitRunnable() {
          @Override
@@ -62,19 +86,16 @@ public class VinnyUtils {
          }
       };
 
+   private static boolean doesVinnySpawnToday(){
+
+   }
+
    private static class VinnyD{
       private WeightedRandomBag<StockItem> stock;
-      private final boolean canDoUpgrades;
       private List<Upgrade> upgrades;
       private List<StockItem> activeStock;
 
-      private boolean isSpawned;
-
-      /**
-       * @param canUpgrade    This is whether or not he can upgrade weapons: determined at plugin load.
-       */
-      protected VinnyD(boolean canUpgrade){
-         this.canDoUpgrades = canUpgrade;
+      protected VinnyD(){
          if(canUpgrade) loadUpgrades();
          loadStock();
       }
@@ -91,7 +112,10 @@ public class VinnyUtils {
          activeStock = stock.getRandomAmtUnique(numStockToSell);
       }
 
-      public void performUpgrade(Upgrade u, Player p){}
+      public void performUpgrade(Upgrade u, Player p){
+         PlayerUtils.takeItemsFromPlayer(p, u.getRequiredItems());
+         Main.getMain().getEcon().withdrawPlayer(p, u.getMoneyPrice());
+      }
       public void purchaseItem(StockItem i, Player p){}
 
       public void rollNewVinnyLoot(){
@@ -121,7 +145,11 @@ public class VinnyUtils {
       public void addUpgrade(Upgrade upgrade){}
       public void removeUpgrade(){}
       public void showUpgrades(Player p){}
-      public boolean doesPlayerHaveEnoughForUpgrade(Player p){}
+      public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
+         return (Main.getMain().getEcon().getBalance(p) > u.getMoneyPrice())
+                && PlayerUtils.doesPlayerHaveItems(p, ItemUtils.oddCurrency(u.getOddCurrencyPrice()))
+                 && PlayerUtils.doesPlayerHaveItems(p, u.getRequiredItems());
+      }
 
    }
 

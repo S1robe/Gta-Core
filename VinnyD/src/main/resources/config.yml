@@ -4,11 +4,6 @@ id:
 location:
 #Time he spawned at
 timeSpawnedAt:
-#The time he spawns at IRL time in military time (24 hrs);
-# 12 am : 0000
-# 12 pm : 1200
-# 1159  : 2359
-timeToSpawnAt:
 
 #The numbre of times hes spawned in the last week.
 #If this is set to 7 he will spawn every day of the week,

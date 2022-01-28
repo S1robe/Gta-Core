@@ -5,6 +5,7 @@ import com.shampaggon.crackshot.CSUtility;
 import lombok.Getter;
 import me.strobe.vinnyd.Files.CustomFile;
 import me.strobe.vinnyd.Files.FileManager;
+import me.strobe.vinnyd.Utils.VinnyUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,9 +36,6 @@ public class Main extends JavaPlugin {
          getServer().getPluginManager().disablePlugin(this);
          System.out.println("VinnyD was disabled due to no Vault.jar in plugins folder");
       }
-      if(!hookCrackshot()) {
-         System.out.println("VinnyD did not find any weapons, he will not offer upgrades.");
-      }
       init();
    }
 
@@ -50,6 +48,7 @@ public class Main extends JavaPlugin {
       fileMan.registerFile(config);
       fileMan.registerFile(stock);
       fileMan.registerFile(upgrades);
+      VinnyUtils.init(hookCrackshot());
    }
 
    private boolean setupEconomy() {
@@ -63,14 +62,13 @@ public class Main extends JavaPlugin {
 
    private boolean hookCrackshot(){
       CSDirector s = (CSDirector) getServer().getPluginManager().getPlugin("CrackShot");
-      if(s == null)
+      if(s == null) {
+         System.out.println("VinnyD did not find any weapons, he will not offer upgrades.");
          return false;
+      }
       csUtil = new CSUtility();
       return true;
    }
-
-
-
 }
 
 

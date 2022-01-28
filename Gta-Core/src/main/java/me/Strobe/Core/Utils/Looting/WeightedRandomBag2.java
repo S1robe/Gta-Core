@@ -11,10 +11,12 @@
 // * An Implementaiton of a Loot Table, supports full modification.
 // */
 //@SerializableAs("LootBag")
-//public class WeightedRandomBag1 implements ConfigurationSerializable {
+//public class WeightedRandomBag2 implements ConfigurationSerializable {
 //
-//   private final HashMap<ConfigurationSerializable, Entry> table = new HashMap<>();
-//
+//   /**
+//    * The list of entries to be drawn from, these should not be modified
+//    */
+//   private final List<Entry<? extends ConfigurationSerializable>> entries = new ArrayList<>();
 //   /**
 //    * The inner references to each entry, used to find the exact entry within the table
 //    */
@@ -27,7 +29,7 @@
 //   /**
 //    * Default constructor for empty initialzation
 //    */
-//   public WeightedRandomBag1(){}
+//   public WeightedRandomBag2(){}
 //
 //   /**
 //    * This constructor is to be used during deseralization, but can also be used if you
@@ -35,17 +37,17 @@
 //    *
 //    * @param dict The entries maplist to be constructed
 //    */
-//   public WeightedRandomBag1(Map<String, Object> dict) {
+//   public WeightedRandomBag2(Map<String, Object> dict) {
 //      ((List<?>) dict.get("entries")).forEach(map -> {
-//         Entry x = (Entry) map;
-//         table.put(x.object, x);
+//         Entry<? extends ConfigurationSerializable> x = (Entry<? extends ConfigurationSerializable>) map;
+//         entries.add(x);
 //         innerObjects.add(x.object);
 //      });
 //      accumulatedWeight = (double) dict.get("accumulatedWeight");
 //   }
 //
-//   public static WeightedRandomBag1 deserialize(Map<String, Object> dict){
-//      return new WeightedRandomBag1(dict);
+//   public static WeightedRandomBag2 deserialize(Map<String, Object> dict){
+//      return new WeightedRandomBag2(dict);
 //   }
 //
 //   /**
@@ -62,8 +64,7 @@
 //      if(!innerObjects.contains(item)) {
 //         accumulatedWeight += weight;
 //         innerObjects.add(item);
-//         table.put(item, new Entry(item, weight, accumulatedWeight));
-//         return true;
+//         return entries.add(new Entry(item, weight, accumulatedWeight));
 //      }
 //      return false;
 //   }
@@ -76,7 +77,16 @@
 //    *                the table held the item previously
 //    */
 //   public boolean removeEntry(Entry e){
-//      return table.remove(e.object) != null;
+//      int idx = entries.indexOf(e);
+//      if(idx != -1) {
+//         entries.remove(idx);
+//         innerObjects.remove(idx);
+//         double weight = e.weight;
+//         while(idx < entries.size())
+//            entries.get(idx++).accumulatedWeight -= weight;
+//         return true;
+//      }
+//      return false;
 //   }
 //
 //   /**
@@ -89,7 +99,16 @@
 //    * @return        If the inner object was found and removed.
 //    */
 //   public boolean removeEntryByInner(ConfigurationSerializable inner){
-//      return table.remove(inner) != null;
+//      int idx = innerObjects.indexOf(inner);
+//      if(idx != -1) {
+//         innerObjects.remove(idx);
+//         double weight = entries.get(idx).weight;
+//         entries.remove(idx);
+//         while(idx < entries.size())
+//            entries.get(idx++).accumulatedWeight -= weight;
+//         return true;
+//      }
+//      return false;
 //   }
 //
 //   /**
@@ -101,8 +120,8 @@
 //    * @param inner A copy of or psuedo item that is close enough for x.equals(inner) to be true.
 //    * @return      The direct entry reference from the loottable,
 //    */
-//   public Entry getEntryByInner(ConfigurationSerializable inner){
-//      return table.get(inner);
+//   public Entry<? extends ConfigurationSerializable> getEntryByInner(ConfigurationSerializable inner){
+//      return entries.get(innerObjects.indexOf(inner));
 //   }
 //
 //   /**
@@ -111,37 +130,37 @@
 //    *
 //    * @return  An object stored in this table.
 //    */
-//   public ConfigurationSerializable getRandom() {
+//   public Object getRandom() {
 //      double r = ThreadLocalRandom.current().nextDouble() * accumulatedWeight;
-//      for(Entry entry : table.values())
+//      for(Entry<? extends ConfigurationSerializable> entry : entries)
 //         if(entry.accumulatedWeight >= r)
 //            return entry.object;
 //      return null;
 //   }
 //
 //   /**
-//    * Similar to WeightedRandomBag#getRandom, this will return a number of items from the bag on a weighted system
+//    * Similar to WeightedRandomBag2#getRandom, this will return a number of items from the bag on a weighted system
 //    * Items pulled are not guaranteed to be unique.
 //    *
 //    * @param amt  The amount of items to draw from the pool.
 //    * @return     The list of items drawn from the pool
 //    */
-//   public List<ConfigurationSerializable> getRandomAmt(int amt){
-//      List<ConfigurationSerializable> hand = new ArrayList<>();
+//   public List<? extends ConfigurationSerializable> getRandomAmt(int amt){
+//      List<? extends ConfigurationSerializable> hand = new ArrayList<>();
 //      while(hand.size() < amt)
 //         hand.add(getRandom());
 //      return hand;
 //   }
 //
 //   /**
-//    * Similar to WeightedRandomBag#getRandomAmt, this will also return a number of items from the bag on a weighted
+//    * Similar to WeightedRandomBag2#getRandomAmt, this will also return a number of items from the bag on a weighted
 //    * system. However, this guarantees uniqueness between items so that no two items fulfill the predicate : x.equals(y)
 //    *
 //    * @param amt The amount of unique items to draw from the bag
 //    * @return     The list of unique items.
 //    */
-//   public List<ConfigurationSerializable> getRandomAmtUnique(int amt){
-//      Set<ConfigurationSerializable> hand = new HashSet<>();
+//   public List<? extends ConfigurationSerializable> getRandomAmtUnique(int amt){
+//      Set<? extends ConfigurationSerializable> hand = new HashSet<>();
 //      while(hand.size() < amt)
 //         hand.add(getRandom());
 //      return new ArrayList<>(hand);
@@ -152,37 +171,37 @@
 //    */
 //   public void clear() {
 //      accumulatedWeight = 0;
-//      table.clear();
+//      entries.clear();
 //      innerObjects.clear();
 //   }
 //
 //   /**
 //    * @return The current size of the bag, also known as the number of entries present in the table.
 //    */
-//   public int size() { return table.size();}
+//   public int size() { return entries.size();}
 //
 //   @Override
 //   public Map<String, Object> serialize() {
 //      Map<String, Object> x = new HashMap<>();
-//      x.put("entries", table.values());
+//      x.put("entries", entries);
 //      x.put("accumulatedWeight", accumulatedWeight);
 //      return x;
 //   }
 //
 //   @SerializableAs("LootEntry")
-//   public class Entry implements ConfigurationSerializable{
-//      @Getter private final ConfigurationSerializable object;
+//   public static class Entry<T extends ConfigurationSerializable> implements ConfigurationSerializable{
+//      @Getter private final T object;
 //      @Getter private double accumulatedWeight;
 //      @Getter private final double weight;
 //
-//      private Entry(ConfigurationSerializable item, double initialWeight,  double accumulatedWeight) {
+//      private Entry(T item, double initialWeight,  double accumulatedWeight) {
 //         this.object            = item;
 //         this.accumulatedWeight = accumulatedWeight;
 //         this.weight            = initialWeight;
 //      }
 //
 //      public Entry(Map<String, Object> dict){
-//         this.object            = (ConfigurationSerializable) dict.get("obj");
+//         this.object            = (T) dict.get("obj");
 //         this.accumulatedWeight = (double) dict.get("accumulatedWeight");
 //         this.weight            = (double) dict.get("weight");
 //      }
