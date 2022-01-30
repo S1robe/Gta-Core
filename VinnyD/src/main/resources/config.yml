@@ -14,7 +14,4 @@ numCanSpawn:
 #The number of times that vinny has already spawned in the current week
 numHasSpawned:
 
-#The day of the week to start at, see java.util.Date, for the exact list of date names.
-beginningDayOfWeek:
-
 numStockToSell:

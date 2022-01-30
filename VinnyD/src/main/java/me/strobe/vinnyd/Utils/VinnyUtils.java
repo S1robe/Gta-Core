@@ -17,8 +17,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class VinnyUtils {
 
@@ -33,7 +35,6 @@ public class VinnyUtils {
    private static long timeVinnySpawned;
    private static byte numCanSpawn;
    private static byte numHasSpawned;
-   private static DayOfWeek beginningOfWeek;
    private static byte numStockToSell;
 
    private static VinnyD vinny;
@@ -64,7 +65,9 @@ public class VinnyUtils {
       npc.spawn(location);
       vinny = new VinnyD();
       shoutVinnyArrival();
+      numHasSpawned++;
    }
+
    public static void despawnVinny(){
       npc.despawn();
       VinnyEvents.playersLookingAtVinny.forEach((p, i) -> {
@@ -87,7 +90,21 @@ public class VinnyUtils {
       };
 
    private static boolean doesVinnySpawnToday(){
+      DayOfWeek today = DayOfWeek.from(LocalDate.now());// today
+      if(numCanSpawn > numHasSpawned) {
+         resetCounter(today); // resets if today is the last day of the week.
+         if(7 - numCanSpawn > today.getValue())
+            return true;
+         return ThreadLocalRandom.current().nextBoolean();
+      }
+      resetCounter(today);
+      return false;
+   }
 
+   private static void resetCounter(DayOfWeek today){
+      if(today.getValue() == 7) {
+         numHasSpawned = 0;
+      }
    }
 
    private static class VinnyD{
@@ -116,13 +133,20 @@ public class VinnyUtils {
          PlayerUtils.takeItemsFromPlayer(p, u.getRequiredItems());
          Main.getMain().getEcon().withdrawPlayer(p, u.getMoneyPrice());
       }
-      public void purchaseItem(StockItem i, Player p){}
+      public void purchaseItem(StockItem i, Player p){
+         Main.getMain().getEcon().withdrawPlayer(p, i.getMoneyPrice());
+      }
 
       public void rollNewVinnyLoot(){
-         VinnyEvents.playersLookingAtVinny.forEach((p, i) -> p.closeInventory());
+         npc.despawn();
+         VinnyEvents.playersLookingAtVinny.forEach((p, i) -> {
+            p.closeInventory();
+            Bukkit.getScheduler().cancelTask(i);
+         });
          VinnyEvents.playersLookingAtVinny.clear();
          stock.clear();
          loadStock();
+         npc.spawn(location);
       }
 
       public void addEntryToStock(StockItem stock, boolean reload){
@@ -141,15 +165,25 @@ public class VinnyUtils {
          rollNewVinnyLoot();
       }
 
-      public void showStock(Player p){}
-      public void addUpgrade(Upgrade upgrade){}
-      public void removeUpgrade(){}
+      public void showStock(Player p){
+
+      }
+      public void addUpgrade(Upgrade upgrade){
+         upgrades.add(upgrade);
+      }
+      public void removeUpgrade(Upgrade upgrade){
+         upgrades.remove(upgrade);
+      }
       public void showUpgrades(Player p){}
       public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
          return (Main.getMain().getEcon().getBalance(p) > u.getMoneyPrice())
                 && PlayerUtils.doesPlayerHaveItems(p, ItemUtils.oddCurrency(u.getOddCurrencyPrice()))
                  && PlayerUtils.doesPlayerHaveItems(p, u.getRequiredItems());
       }
+
+
+
+
 
    }
 

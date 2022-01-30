@@ -20,10 +20,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PlayerUtils {
@@ -185,13 +183,40 @@ public final class PlayerUtils {
       return false;
    }
 
-   public static boolean doesPlayerHaveItems(Player p, ItemStack... items){
-      return Arrays.asList(p.getInventory().getContents()).containsAll(Arrays.asList(items));
+   /**
+    * Checks if the player has the specified amount of a given item in their current inventory
+    * This does not check in armor slots nor in the off hand.
+    *
+    * @param p       The player to be checking
+    * @param item    The item we are looking for
+    * @param amt     The amount of the item we are looking for
+    * @return        True, if they have the amount of item, false otherwise
+    */
+   public static boolean doesPlayerHaveEnoughOfItem(Player p, ItemStack item, int amt){
+      return Arrays.stream(p.getInventory().getContents()).filter(i -> i.isSimilar(item)).map(ItemStack::getAmount).reduce(0, Integer::sum) > amt;
    }
 
-   public static void takeItemsFromPlayer(Player p, ItemStack... items){
-      Arrays.asList(p.getInventory().getContents()).removeAll(Arrays.asList(items));
-      //TODO check if this takes every iteration of the item, or the first found.
+   private static void takeSpecificItemFromPlayer(int amt, Player p, ItemStack key){
+      while(amt > 0){
+         for(int i  = 0; i < 36; i++) {
+            ItemStack stack = p.getInventory().getContents()[i];
+            if(stack.isSimilar(key)){
+               int newAmt = stack.getAmount() - amt;
+               if(newAmt> 0){
+                  stack.setAmount(newAmt);
+                  return;
+               }
+               else{
+                  amt -= stack.getAmount();
+                  p.getInventory().clear(i);
+               }
+            }
+         }
+      }
+   }
+
+   private static void takeMultipleSpecificItemsFromPlayer(Player p, Map<ItemStack, Integer> itemAmt){
+      itemAmt.forEach((item, amt) -> takeSpecificItemFromPlayer(amt, p, item));
    }
 
    // Plays a spigot effect at the the players given location
@@ -199,42 +224,15 @@ public final class PlayerUtils {
       p.getWorld().spigot().playEffect(loc, Effect.STEP_SOUND, blockID, 0, (float) 0, (float) 0, (float) 0, (float) 0.01, 5, 10);
    }
 
-   public static List<ItemStack> purgeNullsFromInventory(List<ItemStack> inventory){
-      List<ItemStack> list = new ArrayList<>();
-      for(int i = 0; i < inventory.size(); i++)
-            list.add(inventory.remove(i));
 
-      switch(inventory.size()){
-         case 0:
-            list.add(null);
-            list.add(null);
-            list.add(null);
-            list.add(null);
-            break;
-         case 1:
-            list.add(null);
-            list.add(null);
-            list.add(null);
-            break;
-         case 2:
-            list.add(null);
-            list.add(null);
-            break;
-         case 3:
-            list.add(null);
-      }
-      inventory.forEach(i -> {
-         if(i != null) list.add(i);
-      });
+   public static List<ItemStack> purgeNulls(List<ItemStack> inventory){
+      List<ItemStack> list = new ArrayList<>(inventory.subList(0, 3)); //first 4 slots for the armor, will just copy them over and preserve them regardless
+      inventory.subList(0,3).stream().filter(Objects::nonNull).collect(Collectors.toList());
       return list;
    }
 
    public static List<ItemStack> purgeNullsFromLoot(List<ItemStack> inventory){
-      List<ItemStack> list = new ArrayList<>();
-      inventory.forEach(i -> {
-         if(i != null) list.add(i);
-      });
-      return list;
+      return inventory.stream().filter(Objects::nonNull).collect(Collectors.toList());
    }
 
    public static void init(){
