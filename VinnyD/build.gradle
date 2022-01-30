@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/UnModded/GTA/GTACore2/Gta-Core/build/libs/'
+        // <-- folder in your project where jars are located
+    }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.18'
+    annotationProcessor 'org.projectlombok:lombok:1.18.18'
+    implementation name: 'paperPatched 1.8'
+    implementation name: 'Vault'
+    implementation name: 'Citizens_2'
+    implementation name: 'Gta-Core-1.0'
+    implementation name: 'Crackshot-2.4'
+}
+
+test {
+    useJUnitPlatform()
+}

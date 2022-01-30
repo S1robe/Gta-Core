@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+group 'me.Strobe'
+version '1.0'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
+        // <-- folder in your project where jars are located
+    }
+
+    maven { url "https://maven.enginehub.org/repo/" }
+//    // spigot
+//    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+
+}
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.18'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    //implementation name: 'AtomSpigot-2.3-stable'
+    implementation name: 'paperPatched 1.8'
+
+}
+
+test {
+    useJUnitPlatform()
+}
