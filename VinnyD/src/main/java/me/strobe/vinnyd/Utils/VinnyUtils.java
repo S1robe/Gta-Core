@@ -18,7 +18,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -131,11 +130,13 @@ public class VinnyUtils {
       }
 
       public void performUpgrade(Upgrade u, Player p){
-         PlayerUtils.takeItemsFromPlayer(p, u.getRequiredItems());
+         PlayerUtils.takeMultipleSpecificItemsFromPlayer(p, u.getRequiredItems(), null, true);
          Main.getMain().getEcon().withdrawPlayer(p, u.getMoneyPrice());
+         PlayerUtils.takeSpecificItemFromPlayer(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice());
       }
       public void purchaseItem(StockItem i, Player p){
          Main.getMain().getEcon().withdrawPlayer(p, i.getMoneyPrice());
+         PlayerUtils.takeSpecificItemFromPlayer(p, ItemUtils.oddCurrency(1), i.getOddCurrencyPrice());
       }
 
       public void rollNewVinnyLoot(){
@@ -178,7 +179,8 @@ public class VinnyUtils {
       public void showUpgrades(Player p){}
       public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
          return (Main.getMain().getEcon().getBalance(p) > u.getMoneyPrice())
-                 && PlayerUtils.doesPlayerHaveAllItems(p, Arrays.asList(u.getRequiredItems()), )
+                 && PlayerUtils.doesPlayerHaveEnoughOfAllItems(p, u.getRequiredItems(), null, true )
+                 && PlayerUtils.doesPlayerHaveEnoughOfItem(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice(), false);
       }
 
 

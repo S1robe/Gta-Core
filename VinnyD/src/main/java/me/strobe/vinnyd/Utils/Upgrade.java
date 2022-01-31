@@ -7,6 +7,8 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @SerializableAs("Upgrade")
@@ -15,7 +17,7 @@ public class Upgrade implements ConfigurationSerializable {
    @Getter @Setter private ItemStack resultItem;
    @Getter @Setter private double moneyPrice;
    @Getter @Setter private int oddCurrencyPrice;
-   @Getter @Setter private ItemStack[] requiredItems; // one of these should be the base item.
+   @Getter @Setter private List<ItemStack> requiredItems; // one of these should be the base item.
 
    //if cs not exist deny.
    //Need to pull item_name + t(n)
@@ -27,7 +29,7 @@ public class Upgrade implements ConfigurationSerializable {
       if(this.resultItem == null) throw new IllegalArgumentException("Weapon not found: " + weaponToUpgradeTo);
       this.moneyPrice = moneyPrice;
       this.oddCurrencyPrice = oddCurrencyPrice;
-      this.requiredItems = requiredItems;
+      this.requiredItems = Arrays.asList(requiredItems);
    }
 
    @Override

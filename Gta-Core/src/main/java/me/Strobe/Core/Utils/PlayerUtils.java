@@ -6,6 +6,7 @@ import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutBlockChange;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -20,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,31 +191,48 @@ public final class PlayerUtils {
     *
     * @param p       The player to be checking
     * @param item    The item we are looking for
-    * @param amt     The amount of the item we are looking for
     * @return        True, if they have the amount of item, false otherwise
+    * @apiNote       Amounts for each item are embedded into the itemstack, the amount of the items required should be
+    *                within the itemstack.
     */
-   public static boolean doesPlayerHaveEnoughOfItem(Player p, ItemStack item, int amt){
-      return Arrays.stream(p.getInventory().getContents()).filter(i -> i.isSimilar(item)).map(ItemStack::getAmount).reduce(0, Integer::sum) > amt;
+   public static boolean doesPlayerHaveEnoughOfItem(Player p, ItemStack item, int amt, boolean isItemAmountAmt){
+      int sumOfDesiredItem = Arrays.stream(p.getInventory().getContents()).filter(i -> i.isSimilar(item)).map(ItemStack::getAmount).reduce(0, Integer::sum);
+      if(isItemAmountAmt)
+         return sumOfDesiredItem >= item.getAmount();
+      else
+         return sumOfDesiredItem >= amt;
+   }
+
+
+   public static boolean doesPlayerHaveEnoughOfAllItems(Player p, List<ItemStack> items, @Nullable List<Integer> amts, boolean itemAmountsAreAmounts){
+      if(itemAmountsAreAmounts){
+         return items.stream().allMatch((item)-> doesPlayerHaveEnoughOfItem(p, item, item.getAmount(), true));
+      }
+      else {
+         Validate.notNull(amts);
+         boolean[] pass = {true};
+         GenUtils.mapFromTwoCollections(items, amts).forEach((item, amt) -> {
+            if(!doesPlayerHaveEnoughOfItem(p, item, amt, false))
+               pass[0] = false;
+         });
+         return pass[0];
+      }
    }
 
    /**
-    * Checks if the player has the specified amount of all items present in the parallel lists (items & amts)
+    * This method should be used to take only one type of item from a Player, this method will search through the players
+    * inventory for all matches of the specified key item and gradually take away untill the amt is zero.
     *
-    * @param p       The Player we are checking on
-    * @param items   The items we are checking for
-    * @param amts    The amount of each item we are checking for.
-    * @return        IF the player has enough ( could be more than )
-    * @apiNote    The actual amounts references by ItemStack#getAmount are ignored when running this method. All amounts are pulled from @param amts
+    * @apiNote       It is assumed by using this method that the ItemStack (key) is already present in the players
+    *                inventory. This method will not break if this false, but it will run the same regardless.
+    *
+    *
+    * @param amt     The amount of the item to take, may be at most 2304, at least 1.
+    * @param p       the player we are taking from
+    * @param key     The item we are taking from them,
+    *
     */
-   public static boolean doesPlayerHaveAllItems(Player p, List<ItemStack> items, List<Integer> amts){
-      for (int i = 0; i < items.size(); i++){
-         if(!doesPlayerHaveEnoughOfItem(p, items.get(i), amts.get(i)))
-            return false;
-      }
-      return true;
-   }
-
-   private static void takeSpecificItemFromPlayer(int amt, Player p, ItemStack key){
+   public static void takeSpecificItemFromPlayer(Player p,  ItemStack key, int amt){
       while(amt > 0){
          for(int i  = 0; i < 36; i++) {
             ItemStack stack = p.getInventory().getContents()[i];
@@ -232,19 +251,38 @@ public final class PlayerUtils {
       }
    }
 
-   private static void takeMultipleSpecificItemsFromPlayer(Player p, Map<ItemStack, Integer> itemAmt){
-      itemAmt.forEach((item, amt) -> takeSpecificItemFromPlayer(amt, p, item));
+   /**
+    * This method will repeatedly take a specific amount of a list of items from the provided player,
+    * IF the ItemStacks provided in 'items' contains the exact amount that you wish to take from a player then you may safely
+    * set 'itemAmountsAreAmounts' to true, this will ignore the list 'amts' which is safely nullable
+    *
+    * Otherwise, it will take the items from 'items' and the amounts from 'amts' and remove this pairing from a player
+    *
+    * @apiNote       This has the same effect as calling PlayerUtils#takeSpecificItemFromPlayer multiple times.
+    *
+    * @param p       The player we are taking from
+    * @param items   The items we are going to take
+    * @param amts    The amount of each items we are going to take (nullable only if itemAmountsAreAmounts is set to true)
+    * @param itemAmountsAreAmounts  Set to true if the ItemStacks in @param items also contain the specified amounts, else set it to false.
+    */
+   public static void takeMultipleSpecificItemsFromPlayer(Player p, List<ItemStack> items, @Nullable List<Integer> amts, boolean itemAmountsAreAmounts){
+      if(itemAmountsAreAmounts)
+         items.forEach(i -> takeSpecificItemFromPlayer( p, i, i.getAmount()));
+      else{
+         Validate.notNull(amts);
+         GenUtils.mapFromTwoCollections(items, amts).forEach((item, amt) -> takeSpecificItemFromPlayer(p, item, amt));
+      }
    }
 
-   // Plays a spigot effect at the the players given location
+   // Plays a spigot effect at the players given location
    public static void playBlockEffect(Player p, Location loc, int blockID) {
       p.getWorld().spigot().playEffect(loc, Effect.STEP_SOUND, blockID, 0, (float) 0, (float) 0, (float) 0, (float) 0.01, 5, 10);
    }
 
 
    public static List<ItemStack> purgeNulls(List<ItemStack> inventory){
-      List<ItemStack> list = new ArrayList<>(inventory.subList(0, 3)); //first 4 slots for the armor, will just copy them over and preserve them regardless
-      inventory.subList(0,3).stream().filter(Objects::nonNull).collect(Collectors.toList());
+      List<ItemStack> list = new ArrayList<>(inventory.subList(0, 3));
+      list.addAll(inventory.subList(0,3).stream().filter(Objects::nonNull).collect(Collectors.toList()));
       return list;
    }
 

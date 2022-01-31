@@ -1,10 +1,13 @@
 package me.Strobe.Core.Utils;
 
+import org.apache.commons.lang3.Validate;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static me.Strobe.Core.Utils.StringUtils.color;
 import static me.Strobe.Core.Utils.StringUtils.repeat;
@@ -95,6 +98,29 @@ public final class GenUtils {
       nf.setMaximumFractionDigits(0);
       String rounded = nf.format(percent * 100);
       return sb + color("&f&l " + rounded + "%");
+   }
+
+   /**
+    * This method will construct from two potentially Different Collections a Mapping between the first arg and the second
+    * This map is guaranteed to be of size (n*2) where n is either arg's size
+    *
+    * @apiNote          The sizes of both collections must be the same, null elements are not allowed.
+    *
+    * @param keys       The keys of the new map
+    * @param values     The values of the new map
+    * @param <K>        The key type parameter
+    * @param <V>        The value type parameter
+    * @return           A Map: Map<K, V>, a pairing of both key  and value collections into one map.
+    *
+    */
+   public static <K, V> Map<K, V> mapFromTwoCollections(Collection<K> keys, Collection<V> values){
+      Validate.isTrue(keys.size() == values.size());
+      Validate.noNullElements(keys);
+      Validate.noNullElements(values);
+      Iterator<K> keyIterator = keys.iterator();
+      Iterator<V> valIterator = values.iterator();
+      return IntStream.range(0, keys.size()).boxed()
+              .collect(Collectors.toMap($i -> keyIterator.next(), $i -> valIterator.next()));
    }
 
 }
