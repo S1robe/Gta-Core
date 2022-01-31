@@ -101,8 +101,8 @@ public class HelpUtils {
       p.sendMessage(color("&7Because &bTier 5’s &7are unique in that they do not drop on death and are the most powerful of all" +
                              " the tiers, they are not sellable in the &6Gun Store &7at spawn. Instead, &bTier 5 &7weapons are traded among other players" +
                              " in exchange for hefty amounts of money or other valuable items! What you charge is up to you! Just keep in mind that" +
-                             " not all Tier 5’s go for the same price. You can enter trades with other players by typing “&d/trade [playername]&7”, or by" +
-                             " clicking “&aAccept&7” when invited to a trade."));
+                              " not all Tier 5’s go for the same price. You can enter trades with other players by typing \"&d/trade [playername]&7\", or by" +
+                             " clicking \"&aAccept&7\" when invited to a trade."));
    }
 
    //    public static void sendBankBlockHelp(Player p) {
@@ -117,7 +117,7 @@ public class HelpUtils {
    public static void sendBankHelp(Player p) {
       p.sendMessage(color("&d&lBank"));
       p.sendMessage(color("&7Once you start selling weapons and getting some of that sweet, sweet money, you may be a bit perplexed about where exactly" +
-                             " to store it. Your Balance (displayed on your player HUD to the right) shows the amount of money you have next to the word “&aBalance&7” However," +
+                             " to store it. Your Balance (displayed on your player HUD to the right) shows the amount of money you have next to the word \"&aBalance&7\" However," +
                              " if you die with points in your Balance, you’ll lose a portion of them on death. To prevent losing your hard-earned money to other players out" +
                              " in the city, you can store your money by turning your Balance into a holdable currency at the Bank (located in /spawn). At the bank, you can" +
                              " choose to materialize your balance into a &c$100&7, &c$1000&7, or &c$5000&7 coin, depending on how much money you need to store."));

@@ -18,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -177,8 +178,7 @@ public class VinnyUtils {
       public void showUpgrades(Player p){}
       public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
          return (Main.getMain().getEcon().getBalance(p) > u.getMoneyPrice())
-                && PlayerUtils.doesPlayerHaveItems(p, ItemUtils.oddCurrency(u.getOddCurrencyPrice()))
-                 && PlayerUtils.doesPlayerHaveItems(p, u.getRequiredItems());
+                 && PlayerUtils.doesPlayerHaveAllItems(p, Arrays.asList(u.getRequiredItems()), )
       }
 
 

@@ -196,6 +196,23 @@ public final class PlayerUtils {
       return Arrays.stream(p.getInventory().getContents()).filter(i -> i.isSimilar(item)).map(ItemStack::getAmount).reduce(0, Integer::sum) > amt;
    }
 
+   /**
+    * Checks if the player has the specified amount of all items present in the parallel lists (items & amts)
+    *
+    * @param p       The Player we are checking on
+    * @param items   The items we are checking for
+    * @param amts    The amount of each item we are checking for.
+    * @return        IF the player has enough ( could be more than )
+    * @apiNote    The actual amounts references by ItemStack#getAmount are ignored when running this method. All amounts are pulled from @param amts
+    */
+   public static boolean doesPlayerHaveAllItems(Player p, List<ItemStack> items, List<Integer> amts){
+      for (int i = 0; i < items.size(); i++){
+         if(!doesPlayerHaveEnoughOfItem(p, items.get(i), amts.get(i)))
+            return false;
+      }
+      return true;
+   }
+
    private static void takeSpecificItemFromPlayer(int amt, Player p, ItemStack key){
       while(amt > 0){
          for(int i  = 0; i < 36; i++) {
