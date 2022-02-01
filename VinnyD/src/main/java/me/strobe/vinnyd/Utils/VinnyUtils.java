@@ -1,10 +1,7 @@
 package me.strobe.vinnyd.Utils;
 
-import me.Strobe.Core.Utils.ItemUtils;
+import me.Strobe.Core.Utils.*;
 import me.Strobe.Core.Utils.Looting.WeightedRandomBag;
-import me.Strobe.Core.Utils.PlayerUtils;
-import me.Strobe.Core.Utils.StringUtils;
-import me.Strobe.Core.Utils.User;
 import me.strobe.vinnyd.Events.VinnyEvents;
 import me.strobe.vinnyd.Files.CustomFile;
 import me.strobe.vinnyd.Main;
@@ -18,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,6 +26,8 @@ public class VinnyUtils {
    private static FileConfiguration stockFileConfig;
    private static CustomFile upgradesFile;
    private static FileConfiguration upgradesFileConfig;
+   private static CustomFile mainFile;
+   private static FileConfiguration mainFileConfig;
    private static boolean canUpgrade;
 
    private static UUID vinnyID;
@@ -43,21 +43,23 @@ public class VinnyUtils {
    private VinnyUtils(){}
 
    public static void init(boolean isUpgrading){
-      Main m = Main.getMain();
-      stockFile = m.getStock();
+      Main m             = Main.getMain();
+      stockFile          = m.getStock();
       stockFile.reloadCustomConfig();
-      stockFileConfig = stockFile.getCustomConfig();
-      upgradesFile = m.getUpgrades();
+      stockFileConfig    = stockFile.getCustomConfig();
+      upgradesFile       = m.getUpgrades();
       upgradesFile.reloadCustomConfig();
       upgradesFileConfig = upgradesFile.getCustomConfig();
-      canUpgrade = isUpgrading;
-   }
+      mainFile           = m.getConfig();
+      mainFileConfig     = mainFile.getCustomConfig();
+      canUpgrade         = isUpgrading;
 
-   public static void shoutVinnyArrival(){
-      User.sendAllUsersMessage("&a&lVinnyD&7: Hey all! Im in town, ive got about a 20 hours to spare. Come see me at spawn.");
-   }
-   public static void shoutVinnyDepart(){
-      User.sendAllUsersMessage("&a&lVinnyD&7: Gotta run! Ill be back later.");
+      vinnyID            = UUID.fromString(mainFileConfig.getString("id"));
+      location           = RegionUtils.locationDeserializer(mainFileConfig.getString("location"));
+      timeVinnySpawned   = mainFileConfig.getLong("timeSpawnedAt");
+      numCanSpawn        = (byte) mainFileConfig.getInt("numCanSpawn");
+      numHasSpawned      = (byte) mainFileConfig.getInt("numHasSpawned");
+      numStockToSell     = (byte) mainFileConfig.getInt("numStockToSell");
    }
 
    public static void spawnVinny(){
@@ -66,8 +68,8 @@ public class VinnyUtils {
       vinny = new VinnyD();
       shoutVinnyArrival();
       numHasSpawned++;
+      vinnyDespawnChecker.runTaskTimer(Main.getMain(), 0, 6000L);
    }
-
    public static void despawnVinny(){
       npc.despawn();
       VinnyEvents.playersLookingAtVinny.forEach((p, i) -> {
@@ -77,6 +79,13 @@ public class VinnyUtils {
       VinnyEvents.playersLookingAtVinny.clear();
       vinny = null;
       shoutVinnyDepart();
+   }
+
+   private static void shoutVinnyArrival(){
+      User.sendAllUsersMessage("&a&lVinnyD&7: Hey all! Im in town, ive got about a 20 hours to spare. Come see me at spawn.");
+   }
+   private static void shoutVinnyDepart(){
+      User.sendAllUsersMessage("&a&lVinnyD&7: Gotta run! Ill be back later.");
    }
 
    private static final BukkitRunnable vinnyDespawnChecker = new BukkitRunnable() {
@@ -108,9 +117,9 @@ public class VinnyUtils {
    }
 
    private static class VinnyD{
-      private WeightedRandomBag<StockItem> stock;
-      private List<Upgrade> upgrades;
-      private List<StockItem> activeStock;
+      private final WeightedRandomBag<StockItem> stock = new WeightedRandomBag<>();
+      private final List<Upgrade> upgrades             = new ArrayList<>();
+      private List<StockItem> activeStock              = new ArrayList<>();
 
       protected VinnyD(){
          if(canUpgrade) loadUpgrades();
@@ -127,6 +136,22 @@ public class VinnyUtils {
             stock.addEntry(s, s.getWeightToBeChosenForSale());
          });
          activeStock = stock.getRandomAmtUnique(numStockToSell);
+         saveActiveStock();
+      }
+
+      private void saveActiveStock(){
+         stockFileConfig.set("Active", activeStock);
+         stockFile.saveCustomConfig();
+      }
+
+      private void saveStock(){
+         stockFileConfig.set("Stockpool", activeStock);
+         stockFile.saveCustomConfig();
+      }
+
+      private void saveUpgrades(){
+         upgradesFileConfig.set("Upgrades", activeStock);
+         upgradesFile.saveCustomConfig();
       }
 
       public void performUpgrade(Upgrade u, Player p){
@@ -155,6 +180,7 @@ public class VinnyUtils {
          this.stock.addEntry(stock, stock.getWeightToBeChosenForSale());
          if(reload)
             rollNewVinnyLoot();
+         saveStock();
       }
 
       /**
@@ -165,6 +191,7 @@ public class VinnyUtils {
       public void removeEntryFromStock(StockItem item){
          stock.removeEntryByInner(item);
          rollNewVinnyLoot();
+         saveStock();
       }
 
       public void showStock(Player p){
@@ -172,9 +199,11 @@ public class VinnyUtils {
       }
       public void addUpgrade(Upgrade upgrade){
          upgrades.add(upgrade);
+         saveUpgrades();
       }
       public void removeUpgrade(Upgrade upgrade){
          upgrades.remove(upgrade);
+         saveUpgrades();
       }
       public void showUpgrades(Player p){}
       public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
@@ -182,11 +211,6 @@ public class VinnyUtils {
                  && PlayerUtils.doesPlayerHaveEnoughOfAllItems(p, u.getRequiredItems(), null, true )
                  && PlayerUtils.doesPlayerHaveEnoughOfItem(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice(), false);
       }
-
-
-
-
-
    }
 
 }
