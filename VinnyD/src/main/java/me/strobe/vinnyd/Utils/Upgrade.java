@@ -56,7 +56,6 @@ public class Upgrade implements ConfigurationSerializable {
       return new Upgrade(x);
    }
 
-
    @Override
    public Map<String, Object> serialize() {
       Map<String, Object> x = new HashMap<>();
