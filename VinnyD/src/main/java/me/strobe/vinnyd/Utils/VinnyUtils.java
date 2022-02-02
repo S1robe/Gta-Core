@@ -78,6 +78,7 @@ public class VinnyUtils {
       });
       VinnyEvents.playersLookingAtVinny.clear();
       vinny = null;
+      timeVinnySpawned = 0;
       shoutVinnyDepart();
    }
 
@@ -102,7 +103,7 @@ public class VinnyUtils {
       DayOfWeek today = DayOfWeek.from(LocalDate.now());// today
       if(numCanSpawn > numHasSpawned) {
          resetCounter(today); // resets if today is the last day of the week.
-         if(7 - numCanSpawn > today.getValue())
+         if(7 - numCanSpawn > today.getValue()) // This is for if
             return true;
          return ThreadLocalRandom.current().nextBoolean();
       }
@@ -197,6 +198,7 @@ public class VinnyUtils {
       public void showStock(Player p){
 
       }
+
       public void addUpgrade(Upgrade upgrade){
          upgrades.add(upgrade);
          saveUpgrades();
