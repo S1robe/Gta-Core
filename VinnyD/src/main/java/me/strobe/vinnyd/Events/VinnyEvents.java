@@ -22,8 +22,7 @@ public class VinnyEvents implements Listener {
       final Player p = e.getClicker();
       final NPC npc  = e.getNPC();
       if(npc.getEntity().hasMetadata(VINNYD_META)){
-         //Run GUI, handle clicks ,etc
-         playersLookingAtVinny.put(p, /*start runnable*/);
+
       }
    }
 

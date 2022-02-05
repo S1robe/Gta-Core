@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 public class VinnyUtils {
 
@@ -29,16 +32,16 @@ public class VinnyUtils {
    private static FileConfiguration upgradesFileConfig;
    private static CustomFile mainFile;
    private static FileConfiguration mainFileConfig;
-   private static boolean canUpgrade;
+   @Getter private static boolean canUpgrade;
 
    private static UUID vinnyID;
    private static Location location;
-   private static long timeVinnySpawned;
+   @Getter private static long timeVinnyLeaves;
    private static byte numCanSpawn;
    private static byte numHasSpawned;
    private static byte numStockToSell;
 
-   private static VinnyD vinny;
+   @Getter private static VinnyD vinny;
    private static NPC npc;
 
    private VinnyUtils(){}
@@ -57,7 +60,7 @@ public class VinnyUtils {
 
       vinnyID            = UUID.fromString(mainFileConfig.getString("id"));
       location           = RegionUtils.locationDeserializer(mainFileConfig.getString("location"));
-      timeVinnySpawned   = mainFileConfig.getLong("timeSpawnedAt");
+      timeVinnyLeaves    = mainFileConfig.getLong("timeLeavesAt");
       numCanSpawn        = (byte) mainFileConfig.getInt("numCanSpawn");
       numHasSpawned      = (byte) mainFileConfig.getInt("numHasSpawned");
       numStockToSell     = (byte) mainFileConfig.getInt("numStockToSell");
@@ -69,6 +72,8 @@ public class VinnyUtils {
       vinny = new VinnyD();
       shoutVinnyArrival();
       numHasSpawned++;
+      if(timeVinnyLeaves == 0)
+         timeVinnyLeaves = System.currentTimeMillis() + 86400000;
       vinnyDespawnChecker.runTaskTimer(Main.getMain(), 0, 6000L);
    }
    public static void despawnVinny(){
@@ -79,7 +84,7 @@ public class VinnyUtils {
       });
       VinnyEvents.playersLookingAtVinny.clear();
       vinny = null;
-      timeVinnySpawned = 0;
+      timeVinnyLeaves = 0;
       shoutVinnyDepart();
    }
 
@@ -93,12 +98,13 @@ public class VinnyUtils {
    private static final BukkitRunnable vinnyDespawnChecker = new BukkitRunnable() {
          @Override
          public void run() {
-            if(System.currentTimeMillis() - timeVinnySpawned >= 86400000){
+            if(timeVinnyLeaves >= System.currentTimeMillis()){
                //Dont forget to check and count times spawned
                despawnVinny();
             }
          }
       };
+
 
    private static boolean doesVinnySpawnToday(){
       DayOfWeek today = DayOfWeek.from(LocalDate.now());// today
@@ -116,6 +122,16 @@ public class VinnyUtils {
       if(today.getValue() == 7) {
          numHasSpawned = 0;
       }
+   }
+
+   public static String[] msToDHMColored(long timeLeft) {
+      int days = (int) TimeUnit.MILLISECONDS.toDays(timeLeft);
+      timeLeft -= TimeUnit.DAYS.toMillis(days);
+      int hours = (int)TimeUnit.MILLISECONDS.toHours(timeLeft);
+      timeLeft -= TimeUnit.HOURS.toMillis(hours);
+      int min = (int)TimeUnit.MILLISECONDS.toMinutes(timeLeft);
+      return me.Strobe.Core.Utils.StringUtils.colorBulk(
+              "&aDays: &8" + days, "&aHours: &8" + hours, "&aMinutes: &8" + min);
    }
 
    public static class VinnyD{
@@ -215,5 +231,23 @@ public class VinnyUtils {
                  && PlayerUtils.doesPlayerHaveEnoughOfItem(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice(), false);
       }
    }
+
+   public static class VinnyRunnable extends BukkitRunnable {
+
+      private final Inventory inv;
+      private final int slot;
+
+      public VinnyRunnable(Inventory inv, int slot){
+         this.inv = inv;
+         this.slot = slot;
+      }
+
+      @Override
+      public void run() {
+         ItemStack clock = inv.getItem(slot);
+         ItemUtils.applyLore(clock, msToDHMColored(System.currentTimeMillis() - timeVinnyLeaves));
+      }
+   }
+
 
 }
