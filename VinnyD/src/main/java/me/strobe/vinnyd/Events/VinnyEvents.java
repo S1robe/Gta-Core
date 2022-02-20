@@ -23,7 +23,7 @@ public class VinnyEvents implements Listener {
       final NPC npc  = e.getNPC();
       if(npc.getEntity().hasMetadata(VINNYD_META)){
          //Run GUI, handle clicks ,etc
-         playersLookingAtVinny.put(p, /*start runnable*/);
+         playersLookingAtVinny.put(p, );
       }
    }
 
@@ -35,12 +35,25 @@ public class VinnyEvents implements Listener {
       if(inv == null) return;
       final String iTitle  = ChatColor.stripColor(inv.getTitle());
       if(item == null) return;
-      if(iTitle.equalsIgnoreCase("Vinny's Stock")){
+      if(iTitle.equalsIgnoreCase("Vinny's Upgrades")){
          //Handle purchasing an item
 
          //Handle Upgrading a weapon
 
          //Handle attachments
+      }
+      else if(iTitle.equalsIgnoreCase("Vinny's Supplies")){
+         //Handle purchasing an item
+
+         //Handle Upgrading a weapon
+
+         //Handle attachments
+      }
+      else if (iTitle.equalsIgnoreCase("Vinny's Shop")){
+         //handle click on upgrades,
+
+
+         //Handle click on shop
       }
    }
 

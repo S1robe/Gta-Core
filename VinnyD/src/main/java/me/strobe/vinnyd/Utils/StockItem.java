@@ -7,6 +7,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -28,9 +29,27 @@ public class StockItem implements ConfigurationSerializable {
         this.representation = ItemUtils.applyLore(item.clone(), "&aPrice: " + moneyPrice, "&eOdd Currency Required: " + oddCurrencyPrice);
    }
 
+   public StockItem(Map<String, Object> dict){
+      actualItem               = (ItemStack) dict.get("actualItem");
+      representation           = (ItemStack) dict.get("representation");
+      moneyPrice               = (double) dict.get("moneyPrice");
+      oddCurrencyPrice         = (int) dict.get("oddCurrencyPrice");
+      weightToBeChosenForSale  = (double) dict.get("weightToBeChosenForSale");
+   }
+
+   public static StockItem deserialize(Map<String, Object> dict){
+      return new StockItem(dict);
+   }
+
    @Override
    public Map<String, Object> serialize() {
-      return null;
+      Map<String, Object> x = new HashMap<>();
+      x.put("actualItem", actualItem);
+      x.put("representation", representation);
+      x.put("moneyPrice", moneyPrice);
+      x.put("oddCurrencyPrice", oddCurrencyPrice);
+      x.put("weightToBeChosenForSale", weightToBeChosenForSale);
+      return x;
    }
 
 

@@ -1,5 +1,6 @@
 package me.strobe.vinnyd.Utils;
 
+import lombok.Getter;
 import me.Strobe.Core.Utils.*;
 import me.Strobe.Core.Utils.Looting.WeightedRandomBag;
 import me.strobe.vinnyd.Events.VinnyEvents;
@@ -28,7 +29,7 @@ public class VinnyUtils {
    private static FileConfiguration upgradesFileConfig;
    private static CustomFile mainFile;
    private static FileConfiguration mainFileConfig;
-   private static boolean canUpgrade;
+   @Getter private static boolean canUpgrade;
 
    private static UUID vinnyID;
    private static Location location;
@@ -37,7 +38,7 @@ public class VinnyUtils {
    private static byte numHasSpawned;
    private static byte numStockToSell;
 
-   private static VinnyD vinny;
+   @Getter private static VinnyD vinny;
    private static NPC npc;
 
    private VinnyUtils(){}
@@ -116,10 +117,10 @@ public class VinnyUtils {
       }
    }
 
-   private static class VinnyD{
+   public static class VinnyD{
       private final WeightedRandomBag<StockItem> stock = new WeightedRandomBag<>();
-      private final List<Upgrade> upgrades             = new ArrayList<>();
-      private List<StockItem> activeStock              = new ArrayList<>();
+      @Getter private final List<Upgrade> upgrades     = new ArrayList<>();
+      @Getter private List<StockItem> activeStock      = new ArrayList<>();
 
       protected VinnyD(){
          if(canUpgrade) loadUpgrades();

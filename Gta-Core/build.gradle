@@ -14,7 +14,7 @@ repositories {
     mavenCentral()
     flatDir {
         //dirs 'C:\\Users\\-_-\\Documents\\Programming\\Java Resources\\Jars'
-        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
+        dirs '/home/kira/Documents/Programming/Minecraft (Java)/Jars/'
         // <-- folder in your project where jars are located
     }
 

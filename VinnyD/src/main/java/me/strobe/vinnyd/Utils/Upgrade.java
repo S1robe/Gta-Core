@@ -8,6 +8,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,28 @@ public class Upgrade implements ConfigurationSerializable {
       this.requiredItems = Arrays.asList(requiredItems);
    }
 
+   public Upgrade(Map<String, Object> dict){
+      resultItem        = (ItemStack) dict.get("resultItem");
+      if(this.resultItem == null) throw new IllegalArgumentException("Resulting Weapon is null after serialziation.");
+      if(Main.getMain().getCsUtil().getWeaponTitle(resultItem) == null) throw new IllegalArgumentException("Resulting Weapon is not in crackshot's weapons folder!");
+      moneyPrice        = (double) dict.get("moneyPrice");
+      oddCurrencyPrice  = (int) dict.get("oddCurrencyPrice");
+      requiredItems     = (List<ItemStack>) dict.get("requiredItems");
+   }
+
+   public static Upgrade deserialize(Map<String, Object> dict){
+      return new Upgrade(dict);
+   }
+
+
    @Override
    public Map<String, Object> serialize() {
-      return null;
+      Map<String, Object> x = new HashMap<>();
+      x.put("resultItem", resultItem);
+      x.put("moneyPrice", moneyPrice);
+      x.put("oddCurrencyPrice", oddCurrencyPrice);
+      x.put("requiredItems", requiredItems);
+      return x;
    }
 
 

@@ -13,8 +13,8 @@ configurations.all {
 repositories {
     mavenCentral()
     flatDir {
-        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/Jars/'
-        dirs '/home/kira/Documents/Programming/Java/Minecraft (Java)/UnModded/GTA/GTACore2/Gta-Core/build/libs/'
+        dirs '/home/kira/Documents/Programming/Minecraft (Java)/Jars/'
+        dirs '/home/kira/Documents/Programming/Minecraft (Java)/UnModded/GTA/GTACore2/Gta-Core/build/libs/'
         // <-- folder in your project where jars are located
     }
 
