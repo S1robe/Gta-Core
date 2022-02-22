@@ -1,12 +1,19 @@
 package me.strobe.vinnyd.Events;
 
+import me.Strobe.Core.Utils.Title;
+import me.strobe.vinnyd.Utils.GUIS;
+import me.strobe.vinnyd.Utils.StockItem;
+import me.strobe.vinnyd.Utils.Upgrade;
+import me.strobe.vinnyd.Utils.VinnyUtils;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,10 +28,9 @@ public class VinnyEvents implements Listener {
    public void onNPCInteract(NPCRightClickEvent e){
       final Player p = e.getClicker();
       final NPC npc  = e.getNPC();
-      if(npc.getEntity().hasMetadata(VINNYD_META)){
-         //Run GUI, handle clicks ,etc
-         playersLookingAtVinny.put(p, );
-      }
+      if(npc.getEntity().hasMetadata(VINNYD_META))
+         GUIS.openShop(p, VinnyUtils.getVinny());
+
    }
 
    @EventHandler
@@ -35,25 +41,57 @@ public class VinnyEvents implements Listener {
       if(inv == null) return;
       final String iTitle  = ChatColor.stripColor(inv.getTitle());
       if(item == null) return;
+      final String itemTitle = item.hasItemMeta()?
+                                       ChatColor.stripColor(item.getItemMeta().getDisplayName())
+                                       : item.getType().name();
       if(iTitle.equalsIgnoreCase("Vinny's Upgrades")){
-         //Handle purchasing an item
-
          //Handle Upgrading a weapon
-
-         //Handle attachments
+         Upgrade u = VinnyUtils.getUpgradeByResult(item);
+         assert u != null;
+         if(VinnyUtils.getVinny().performUpgrade(u, p)){
+            p.closeInventory();
+            Title.sendTitle(p, 0, 5, 3, null, "&aItem Successfully Purchased!");
+         }
+         else{
+            p.closeInventory();
+            Title.sendTitle(p, 0, 5, 3, null, "&cYou lack the required items or currency!");
+         }
       }
-      else if(iTitle.equalsIgnoreCase("Vinny's Supplies")){
+      else if(iTitle.equalsIgnoreCase("Vinny's Stock")){
          //Handle purchasing an item
+         StockItem s = VinnyUtils.getStockItemByDisplay(item);
+         assert s != null;
+         if(VinnyUtils.getVinny().purchaseItem(s, p)) {
+            p.closeInventory();
+            Title.sendTitle(p, 0, 5, 3, null, "&aItem Successfully Purchased!");
+         }
+         else {
+            p.closeInventory();
+            Title.sendTitle(p, 0, 5, 3, null, "&7You need &a" + s.getOddCurrencyPrice() + "OC &7and &a$" + s.getMoneyPrice());
+         }
 
-         //Handle Upgrading a weapon
-
-         //Handle attachments
       }
       else if (iTitle.equalsIgnoreCase("Vinny's Shop")){
-         //handle click on upgrades,
-
-
          //Handle click on shop
+         if(itemTitle.equals("Vinny's Stock")){
+            p.closeInventory();
+            GUIS.openShop(p, VinnyUtils.getVinny());
+         }
+         //handle click on upgrades,
+         else if(itemTitle.equals("Vinny's Upgrades")){
+            p.closeInventory();
+            GUIS.openUpgrades(p, VinnyUtils.getVinny());
+         }
+      }
+   }
+
+   @EventHandler
+   public void onVinnyGUIClose(InventoryCloseEvent e){
+      if(e.getInventory().getTitle().equals("Vinny's Shop")){
+         Player viewer = (Player) e.getPlayer();
+         int x = playersLookingAtVinny.get(viewer);
+         Bukkit.getScheduler().cancelTask(x);
+         playersLookingAtVinny.remove(viewer);
       }
    }
 

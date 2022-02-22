@@ -4,6 +4,7 @@ import me.strobe.gang.Gang;
 import me.strobe.gang.Member;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -72,17 +73,29 @@ public class GangCommands implements CommandExecutor {
       return false;
    }
    private boolean disband(Member sender){
-      if(sender.getRank().equals(Gang.Rank.MASTERMIND)){
+      if(sender.getRank().compareTo(Gang.Rank.MASTERMIND) == 0){
          sender.getGang().disband();
          return true;
       }
       return false;
    }
-   private boolean promote(Member sender){
-      if()
+   private boolean promote(Member sender, Member promotee){
+      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && promotee.getRank().compareTo(Gang.Rank.EXALTED) < 0){
+         promotee.setRank(promotee.getRank().ordinal() + 1);
+         return true;
+      }
+      return false;
    }
-   private boolean invite(Member sender){}
-   private boolean kick(Member sender){}
+   private boolean invite(Member sender, OfflinePlayer invitee){
+      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0){
+
+      }
+   }
+   private boolean kick(Member sender, Member kicked){
+      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && kicked.getRank().compareTo(Gang.Rank.EXALTED) < 0 && Gang.areMembersOfSameGang(sender, kicked)){
+
+      }
+   }
    private boolean ally(Member sender){}
    private boolean enemy(Member sender){}
    private boolean fftoggle(Member sender){}

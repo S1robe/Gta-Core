@@ -183,15 +183,6 @@ public class Gang implements ConfigurationSerializable {
    public void withdraw(double amt){
       this.balance = Math.max(balance - amt, 0);
    }
-   
-   //Provides the breakdown for the gang of all categories
-//   public String statsByKillsCont(){}
-//   public String statsByMoneyCont(){}
-//   public String statsByPointsCont(){}
-//
-//   @Override
-//   public String toString(){}
-//
 
    public boolean isAlly(Gang g){
       return allies.get(g.getName()) != null;
@@ -201,8 +192,19 @@ public class Gang implements ConfigurationSerializable {
       return friendlyFireGangs.contains(g);
    }
 
+   public static boolean areMembersOfSameGang(Member $1, Member $2){
+      return $1.getGang().equals($2.getGang());
+   }
+
    public static Gang deserialize(Map<String, Object> dict){
       return new Gang(dict);
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if(o.getClass().equals(this.getClass()))
+         return this.name.equalsIgnoreCase(((Gang) o).getName());
+      return false;
    }
 
    @Override

@@ -43,23 +43,23 @@ public class GUIS {
     }
 
     public static void openUpgrades(Player p, VinnyUtils.VinnyD vinny){
-        List<ItemStack> stock = vinny.getActiveStock().stream().map(StockItem::getRepresentation).collect(Collectors.toList());
+        List<ItemStack> stock = vinny.getUpgrades().stream().map(Upgrade::getResultItem).collect(Collectors.toList());
         Inventory i;
 
         if(stock.size() <= 9)
-            i = Bukkit.createInventory(null, 9, "Vinny's Upgrade Supply");
-        if(stock.size() <= 18)
-            i = Bukkit.createInventory(null, 18, "Vinny's Upgrade Supply");
-        if(stock.size() <= 27)
-            i = Bukkit.createInventory(null, 27, "Vinny's Upgrade Supply");
-        if(stock.size() <= 36)
-            i = Bukkit.createInventory(null, 36, "Vinny's Upgrade Supply");
-        if(stock.size() <= 45)
-            i = Bukkit.createInventory(null, 45, "Vinny's Upgrade Supply");
-        if(stock.size() <= 54)
-            i = Bukkit.createInventory(null, 54, "Vinny's Upgrade Supply");
+            i = Bukkit.createInventory(null, 9, "Vinny's Upgrades");
+        else if(stock.size() <= 18)
+            i = Bukkit.createInventory(null, 18, "Vinny's Upgrades");
+        else if(stock.size() <= 27)
+            i = Bukkit.createInventory(null, 27, "Vinny's Upgrades");
+        else if(stock.size() <= 36)
+            i = Bukkit.createInventory(null, 36, "Vinny's Upgrades");
+        else if(stock.size() <= 45)
+            i = Bukkit.createInventory(null, 45, "Vinny's Upgrades");
+        else if(stock.size() <= 54)
+            i = Bukkit.createInventory(null, 54, "Vinny's Upgrades");
         else
-            i = Bukkit.createInventory(null, 63, "Vinny's Upgrade Supply");
+            i = Bukkit.createInventory(null, 63, "Vinny's Upgrades");
 
         GenUtils.fill(i, ItemUtils.blankFill());
         GenUtils.setMiddle(i, ItemUtils.blankFill(), stock);
@@ -71,13 +71,13 @@ public class GUIS {
         Inventory i = Bukkit.createInventory(null, 9, "Vinny's Shop");
         GenUtils.fill(i, ItemUtils.blankFill());
         if(VinnyUtils.isCanUpgrade()){
-            i.setItem(1, ItemUtils.createItem(Material.EMERALD, 1, (byte) 0 , true, "&aVinny's Shop"));
+            i.setItem(1, ItemUtils.createItem(Material.EMERALD, 1, (byte) 0 , true, "&aVinny's Stock"));
             i.setItem(4, ItemUtils.createItem(Material.WATCH, "Vinny's Time Left:"));
-            i.setItem(8, ItemUtils.createItem(Material.SLIME_BALL, 1, (byte) 0, true, "&eVinny's Upgrades") );
+            i.setItem(8, ItemUtils.createItem(Material.SLIME_BALL, 1, (byte) 0, true, "&eVinny's Upgrades"));
             VinnyEvents.playersLookingAtVinny.put(p, new VinnyUtils.VinnyRunnable(i, 4).runTaskTimer(Main.getMain(), 20L, 120L).getTaskId());
         }
         else{
-            i.setItem(3, ItemUtils.createItem(Material.EMERALD, 1, (byte) 0 , true, "&aVinny's Shop"));
+            i.setItem(3, ItemUtils.createItem(Material.EMERALD, 1, (byte) 0 , true, "&aVinny's Stock"));
             i.setItem(6, ItemUtils.createItem(Material.WATCH, "Vinny's Time Left:"));
             VinnyEvents.playersLookingAtVinny.put(p, new VinnyUtils.VinnyRunnable(i, 6).runTaskTimer(Main.getMain(), 20L, 120L).getTaskId());
         }

@@ -1,6 +1,7 @@
 package me.strobe.vinnyd.Utils;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import me.Strobe.Core.Utils.ItemUtils;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -20,7 +21,7 @@ public class StockItem implements ConfigurationSerializable {
    @Getter @Setter private int oddCurrencyPrice;
    @Getter @Setter private double weightToBeChosenForSale;
 
-   public StockItem(ItemStack item, double moneyPrice, int oddCurrencyPrice, double weightToBeChosenForSale){
+   public StockItem(@NonNull ItemStack item, double moneyPrice, int oddCurrencyPrice, double weightToBeChosenForSale){
         this.actualItem = item;
         this.moneyPrice = moneyPrice;
         this.oddCurrencyPrice = oddCurrencyPrice;

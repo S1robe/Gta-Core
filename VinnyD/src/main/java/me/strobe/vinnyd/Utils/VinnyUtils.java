@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.DayOfWeek;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 public class VinnyUtils {
 
@@ -63,13 +66,20 @@ public class VinnyUtils {
       numStockToSell     = (byte) mainFileConfig.getInt("numStockToSell");
    }
 
-   public static void spawnVinny(){
+   public static void spawnVinny(Location x){
+
       npc = CitizensAPI.getNPCRegistry().getByUniqueIdGlobal(vinnyID);
-      npc.spawn(location);
+
+      if(x == null)
+         npc.spawn(location);
+      else
+         npc.spawn(x);
+
       vinny = new VinnyD();
       shoutVinnyArrival();
       numHasSpawned++;
       vinnyDespawnChecker.runTaskTimer(Main.getMain(), 0, 6000L);
+
    }
    public static void despawnVinny(){
       npc.despawn();
@@ -99,6 +109,16 @@ public class VinnyUtils {
          }
       };
 
+   private static String[] getTimeLeft(){
+      StringBuilder x = new StringBuilder();
+      long timeLeftMS = System.currentTimeMillis() - timeVinnySpawned;
+      long hold = TimeUnit.MILLISECONDS.toHours(timeLeftMS);
+      x.append("&7Hours: &6").append(hold).append("\n");
+      timeLeftMS -= TimeUnit.HOURS.toMillis(hold);
+      x.append("&7Minutes: &6").append(TimeUnit.MILLISECONDS.toMinutes(timeLeftMS));
+      return x.toString().split("\n");
+   }
+
    private static boolean doesVinnySpawnToday(){
       DayOfWeek today = DayOfWeek.from(LocalDate.now());// today
       if(numCanSpawn > numHasSpawned) {
@@ -116,6 +136,22 @@ public class VinnyUtils {
          numHasSpawned = 0;
       }
    }
+
+   public static Upgrade getUpgradeByResult(ItemStack x){
+      for(int i = 0; i < vinny.upgrades.size(); i++) {
+         if(x.isSimilar(vinny.upgrades.get(i).getResultItem()))
+            return vinny.upgrades.get(i);
+      }
+      return null;
+   }
+   public static StockItem getStockItemByDisplay(ItemStack x){
+      for(int i = 0; i < vinny.activeStock.size(); i++) {
+         if(x.isSimilar(vinny.activeStock.get(i).getRepresentation()))
+            return vinny.activeStock.get(i);
+      }
+      return null;
+   }
+
 
    public static class VinnyD{
       private final WeightedRandomBag<StockItem> stock = new WeightedRandomBag<>();
@@ -155,14 +191,20 @@ public class VinnyUtils {
          upgradesFile.saveCustomConfig();
       }
 
-      public void performUpgrade(Upgrade u, Player p){
+      public boolean performUpgrade(Upgrade u, Player p){
+         if(!doesPlayerHaveEnoughForUpgrade(u, p)) return false;
          PlayerUtils.takeMultipleSpecificItemsFromPlayer(p, u.getRequiredItems(), null, true);
          Main.getMain().getEcon().withdrawPlayer(p, u.getMoneyPrice());
          PlayerUtils.takeSpecificItemFromPlayer(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice());
+         PlayerUtils.offerPlayerItem(p, u.getResultItem());
+         return true;
       }
-      public void purchaseItem(StockItem i, Player p){
+      public boolean purchaseItem(StockItem i, Player p){
+         if(!doesPlayerHaveEnoughForStockItem(i, p)) return false;
          Main.getMain().getEcon().withdrawPlayer(p, i.getMoneyPrice());
          PlayerUtils.takeSpecificItemFromPlayer(p, ItemUtils.oddCurrency(1), i.getOddCurrencyPrice());
+         PlayerUtils.offerPlayerItem(p, i.getActualItem());
+         return true;
       }
 
       public void rollNewVinnyLoot(){
@@ -194,9 +236,16 @@ public class VinnyUtils {
          rollNewVinnyLoot();
          saveStock();
       }
+      public void removeEntryFromStock(int stockIndex){
+         StockItem item = activeStock.get(stockIndex);
+         stock.removeEntryByInner(item);
+         rollNewVinnyLoot();
+         saveStock();
+      }
 
       public void showStock(Player p){
-
+         //Special non-interactable of the sellable items GUI.
+         //Displays all the valid stocks
       }
       public void addUpgrade(Upgrade upgrade){
          upgrades.add(upgrade);
@@ -206,11 +255,38 @@ public class VinnyUtils {
          upgrades.remove(upgrade);
          saveUpgrades();
       }
-      public void showUpgrades(Player p){}
+      public void removeUpgrade(int upgradeIndex){
+         upgrades.remove(upgradeIndex);
+         saveUpgrades();
+      }
+      public void showUpgrades(Player p){
+         //Special non-interactable of the upgrades items GUI.
+         //Displays all the valid upgrades
+      }
       public boolean doesPlayerHaveEnoughForUpgrade(Upgrade u, Player p){
          return (Main.getMain().getEcon().getBalance(p) > u.getMoneyPrice())
                  && PlayerUtils.doesPlayerHaveEnoughOfAllItems(p, u.getRequiredItems(), null, true )
                  && PlayerUtils.doesPlayerHaveEnoughOfItem(p, ItemUtils.oddCurrency(1), u.getOddCurrencyPrice(), false);
+      }
+      public boolean doesPlayerHaveEnoughForStockItem(StockItem s, Player p){
+         return (Main.getMain().getEcon().getBalance(p) > s.getMoneyPrice())
+                 && PlayerUtils.doesPlayerHaveEnoughOfItem(p, ItemUtils.oddCurrency(1), s.getOddCurrencyPrice(), false);
+      }
+   }
+
+   public static class VinnyRunnable extends BukkitRunnable{
+
+      private final Inventory inv;
+      private final int slotClockIsIn;
+
+      VinnyRunnable( Inventory inv, int slotClockIsIn){
+         this.inv = inv;
+         this.slotClockIsIn = slotClockIsIn;
+      }
+
+      @Override
+      public void run() {
+         ItemUtils.applyLore(inv.getItem(slotClockIsIn), getTimeLeft());
       }
    }
 
