@@ -17,8 +17,7 @@ public class Main extends JavaPlugin {
    @Getter private CustomFile memberFile;
    @Getter private CustomFile gangFile;
    @Getter private FileManager fileMan;
-   @Getter
-   private Economy econ;
+   @Getter private Economy econ;
 
    Main(){
       ConfigurationSerialization.registerClass(Gang.class);

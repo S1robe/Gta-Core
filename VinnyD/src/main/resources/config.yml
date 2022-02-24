@@ -5,6 +5,8 @@ location:
 #Time he spawned at
 timeSpawnedAt:
 
+todayIs:
+
 #The numbre of times hes spawned in the last week.
 #If this is set to 7 he will spawn every day of the week,
 #As the week progresses if he has not spawned n times, and there are n days left he will spawn the next n days.

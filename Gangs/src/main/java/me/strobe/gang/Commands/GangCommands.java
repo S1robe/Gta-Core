@@ -1,6 +1,9 @@
 package me.strobe.gang.Commands;
 
+import me.Strobe.Core.Utils.PlayerUtils;
+import me.Strobe.Core.Utils.Title;
 import me.strobe.gang.Gang;
+import me.strobe.gang.Main;
 import me.strobe.gang.Member;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
@@ -9,6 +12,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class GangCommands implements CommandExecutor {
 
@@ -79,27 +84,62 @@ public class GangCommands implements CommandExecutor {
       }
       return false;
    }
-   private boolean promote(Member sender, Member promotee){
+   private boolean promote(Member sender, OfflinePlayer promotee){
+      Member promoted = MemberUtils.getMemberFromPlayer()
       if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && promotee.getRank().compareTo(Gang.Rank.EXALTED) < 0){
-         promotee.setRank(promotee.getRank().ordinal() + 1);
+         sender.getGang().promoteMember(promotee, null);
          return true;
       }
       return false;
    }
-   private boolean invite(Member sender, OfflinePlayer invitee){
+   private boolean invite(Member sender, Player invitee){
       if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0){
-
+         Member x = MemberUtils.getMemberFromPlayer(invitee);
+         if(x == null)
+            sender.getGang().invite(invitee);
       }
+      return false;
    }
    private boolean kick(Member sender, Member kicked){
-      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && kicked.getRank().compareTo(Gang.Rank.EXALTED) < 0 && Gang.areMembersOfSameGang(sender, kicked)){
+      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0
+            && kicked.getRank().compareTo(Gang.Rank.EXALTED) < 0
+            && Gang.areMembersOfSameGang(sender, kicked)){
 
+         sender.getGang().kickMember(kicked);
+         return true;
       }
+      return false;
    }
-   private boolean ally(Member sender){}
-   private boolean enemy(Member sender){}
-   private boolean fftoggle(Member sender){}
-   private boolean ffToggleOther(Member sender){}
+   private boolean ally(Member sender, String gangName){
+      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+         sender.getGang().requestAlly(gangName);
+         return true;
+      }
+      return false;
+   }
+   private boolean enemy(Member sender, String gangName){
+      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+         sender.getGang().enemy(gangName);
+         return true;
+      }
+      return false;
+   }
+   private boolean fftoggle(Member sender){
+      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+         sender.getGang().toggleFF();
+         return true;
+      }
+      return false;
+   }
+   private boolean ffToggleOther(Member sender, String gangName){
+      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+         Gang g = GangUtils.getGangByName(gangName);
+         if(g == null) return false;
+         sender.getGang().toggleFFGang(g);
+         return true;
+      }
+      return false;
+   }
    private boolean sethome(Member sender){}
    private boolean homes(Member sender){}
    private boolean delhome(Member sender){}

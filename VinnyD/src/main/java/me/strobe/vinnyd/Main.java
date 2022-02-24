@@ -3,6 +3,7 @@ package me.strobe.vinnyd;
 import com.shampaggon.crackshot.CSDirector;
 import com.shampaggon.crackshot.CSUtility;
 import lombok.Getter;
+import me.strobe.vinnyd.Events.VinnyEvents;
 import me.strobe.vinnyd.Files.CustomFile;
 import me.strobe.vinnyd.Files.FileManager;
 import me.strobe.vinnyd.Utils.VinnyUtils;
@@ -16,11 +17,11 @@ public class Main extends JavaPlugin {
    @Getter private Economy econ;
    @Getter private CSUtility csUtil;
 
-   @Getter private FileManager fileMan;
+   @Getter private final FileManager fileMan;
 
-   @Getter private CustomFile config;
-   @Getter private CustomFile stock;
-   @Getter private CustomFile upgrades;
+   @Getter private final CustomFile config;
+   @Getter private final CustomFile stock;
+   @Getter private final CustomFile upgrades;
 
    public Main(){
       main = this;
@@ -37,11 +38,14 @@ public class Main extends JavaPlugin {
          System.out.println("VinnyD was disabled due to no Vault.jar in plugins folder");
       }
       init();
+
+      if(VinnyUtils.doesVinnySpawnToday())
+         VinnyUtils.spawnVinny(null);
    }
 
    @Override
    public void onDisable(){
-
+      VinnyUtils.saveState();
    }
 
    private void init(){
@@ -49,6 +53,11 @@ public class Main extends JavaPlugin {
       fileMan.registerFile(stock);
       fileMan.registerFile(upgrades);
       VinnyUtils.init(hookCrackshot());
+      registerEvents();
+   }
+
+   private void registerEvents(){
+      getServer().getPluginManager().registerEvents(new VinnyEvents(), this);
    }
 
    private boolean setupEconomy() {

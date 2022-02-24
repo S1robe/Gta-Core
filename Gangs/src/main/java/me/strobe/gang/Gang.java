@@ -3,6 +3,7 @@ package me.strobe.gang;
 import lombok.Getter;
 import lombok.Setter;
 import me.Strobe.Core.Utils.RegionUtils;
+import me.Strobe.Core.Utils.Title;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
 import org.bukkit.Location;
@@ -10,6 +11,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,11 +26,10 @@ public class Gang implements ConfigurationSerializable {
    @Getter private transient int totalKills = 0;
    @Getter @Setter private Member owner;
    @Getter private final HashMap<UUID, Member> members = new HashMap<>();
-   @Getter private final List<UUID> invitees = new ArrayList<>();
    @Getter private final HashMap<String, Location> gangHomes = new HashMap<>();
    @Getter private final HashMap<String, Gang> allies = new HashMap<>();
-   @Getter private final HashMap<String, Gang> inRequests = new HashMap<>();
-   @Getter private final HashMap<String, Gang> outRequests = new HashMap<>();
+   @Getter private final transient HashMap<String, Gang> inRequests = new HashMap<>();
+   @Getter private final transient HashMap<String, Gang> outRequests = new HashMap<>();
    @Getter private final transient List<Gang> friendlyFireGangs = new ArrayList<>();
    @Getter @Setter private boolean friendlyFire;
 
@@ -53,8 +55,6 @@ public class Gang implements ConfigurationSerializable {
       houses.forEach((n, l) -> this.gangHomes.put(n, RegionUtils.locationDeserializer(l)));
 
       ((List<String>) map.get("allies")).forEach(n -> allies.put(n, GangUtils.getGangByName(n)));
-      ((List<String>) map.get("inRequests")).forEach(n -> inRequests.put(n, GangUtils.getGangByName(n)));
-      ((List<String>) map.get("outRequests")).forEach(n -> outRequests.put(n, GangUtils.getGangByName(n)));
       this.friendlyFire = (boolean) map.get("friendlyFire");
    }
 
@@ -76,10 +76,15 @@ public class Gang implements ConfigurationSerializable {
    }
 
    public boolean invite(Player p){
-      if(invitees.contains(p.getUniqueId()) || members.containsKey(p.getUniqueId())){
-         return false;
-      }
-      return invitees.add(p.getUniqueId());
+      Title.sendTitle(p, 0, 10, 3, null, "&7You have been invited to " + getName() + "!");
+      p.setMetadata("GangInvite", new FixedMetadataValue(Main.getMain(), getName()));
+      new BukkitRunnable(){
+         @Override
+         public void run() {
+            p.removeMetadata("GangInvite", Main.getMain());
+         }
+      }.runTaskTimer(Main.getMain(), 0, 6000);
+      return true;
    }
 
    public boolean toggleFF(){
@@ -95,29 +100,29 @@ public class Gang implements ConfigurationSerializable {
       }
       else{
          g.getFriendlyFireGangs().add(this);
-         friendlyFireGangs.add(g);
          return true;
       }
    }
 
-   public void acceptRequest(String name, Gang g){
-      allies.putIfAbsent(name, g);
+   public void acceptRequest(String name){
+      allies.putIfAbsent(name, inRequests.get(name));
       inRequests.remove(name);
    }
 
-   public void requestAlly(String name, Gang g){
-      outRequests.putIfAbsent(name, g);
+   public void requestAlly(String name){
+      Gang g = GangUtils.getGangByName(name);
       g.inRequests.putIfAbsent(this.name, this);
+      outRequests.putIfAbsent(name, g);
    }
 
-   public void cancelRequest(String name, Gang g){
+   public void cancelRequest(String name){
+      GangUtils.getGangByName(name).inRequests.remove(this.name);
       outRequests.remove(name);
-      g.inRequests.remove(this.name);
    }
 
-   public void enemy(String name, Gang g){
+   public void enemy(String name){
+      allies.get(name).allies.remove(this.name);
       allies.remove(name);
-      g.allies.remove(this.name);
    }
 
    public void setName(String newName){
@@ -131,13 +136,13 @@ public class Gang implements ConfigurationSerializable {
       this.members.putIfAbsent(p.getUniqueId(), m);
    }
 
-   public void removeMember(OfflinePlayer p){
+   public void kickMember(OfflinePlayer p){
       Member m = this.members.get(p.getUniqueId());
       this.members.remove(p.getUniqueId());
       MemberUtils.deleteMember(m);
    }
 
-   public void removeMember(Member m){
+   public void kickMember(Member m){
       this.members.remove(m.getUuid());
       MemberUtils.deleteMember(m);
    }
@@ -218,22 +223,19 @@ public class Gang implements ConfigurationSerializable {
       gangHomes.forEach((s, l) -> homes.put(s, RegionUtils.locationSerializer(l)));
       x.put("homes", homes);
       x.put("allies", new ArrayList<>(allies.keySet()));
-      x.put("inRequests", new ArrayList<>(inRequests.keySet()));
-      x.put("outRequests", new ArrayList<>(outRequests.keySet()));
       x.put("friendlyFire", friendlyFire);
       return x;
    }
 
    public enum Rank{
       KNOWN( "&8[&7Known&8]&r"), //Deposit, Teleport, Leave, Gang stats,
-      HONORED( "&8[&aHonored&8]"), //withdraw, upgrades, toggle ff
-      EXALTED("&8[&9&mExalted&8]"), //sethome, delhome, kick, invite, ally, enemy, claim/unclaim
+      HONORED( "&8[&aHonored&8]"), //withdraw, upgrades, toggle ff, ally, enemy,
+      EXALTED("&8[&9&mExalted&8]"), //sethome, delhome, kick, invite claim/unclaim
       MASTERMIND("&8[&3&lMastermind&8]&r") //Rename, delete,
 
       ;
 
       final String prefix;
-
 
       Rank(String prefix){
          this.prefix = prefix;

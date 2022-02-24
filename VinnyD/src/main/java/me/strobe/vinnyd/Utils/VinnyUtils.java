@@ -37,6 +37,7 @@ public class VinnyUtils {
    private static UUID vinnyID;
    private static Location location;
    private static long timeVinnySpawned;
+   private static DayOfWeek today;
    private static byte numCanSpawn;
    private static byte numHasSpawned;
    private static byte numStockToSell;
@@ -61,26 +62,28 @@ public class VinnyUtils {
       vinnyID            = UUID.fromString(mainFileConfig.getString("id"));
       location           = RegionUtils.locationDeserializer(mainFileConfig.getString("location"));
       timeVinnySpawned   = mainFileConfig.getLong("timeSpawnedAt");
+      today              = DayOfWeek.valueOf(mainFileConfig.getString("todayIs"));
       numCanSpawn        = (byte) mainFileConfig.getInt("numCanSpawn");
       numHasSpawned      = (byte) mainFileConfig.getInt("numHasSpawned");
       numStockToSell     = (byte) mainFileConfig.getInt("numStockToSell");
    }
 
    public static void spawnVinny(Location x){
-
       npc = CitizensAPI.getNPCRegistry().getByUniqueIdGlobal(vinnyID);
 
       if(x == null)
          npc.spawn(location);
-      else
+      else {
          npc.spawn(x);
+         location = x;
+      }
 
       vinny = new VinnyD();
       shoutVinnyArrival();
       numHasSpawned++;
       vinnyDespawnChecker.runTaskTimer(Main.getMain(), 0, 6000L);
-
    }
+
    public static void despawnVinny(){
       npc.despawn();
       VinnyEvents.playersLookingAtVinny.forEach((p, i) -> {
@@ -95,6 +98,7 @@ public class VinnyUtils {
    private static void shoutVinnyArrival(){
       User.sendAllUsersMessage("&a&lVinnyD&7: Hey all! Im in town, ive got about a 20 hours to spare. Come see me at spawn.");
    }
+
    private static void shoutVinnyDepart(){
       User.sendAllUsersMessage("&a&lVinnyD&7: Gotta run! Ill be back later.");
    }
@@ -119,12 +123,15 @@ public class VinnyUtils {
       return x.toString().split("\n");
    }
 
-   private static boolean doesVinnySpawnToday(){
+   public static boolean doesVinnySpawnToday(){
       DayOfWeek today = DayOfWeek.from(LocalDate.now());// today
+      if(VinnyUtils.today == today) return false;
       if(numCanSpawn > numHasSpawned) {
          resetCounter(today); // resets if today is the last day of the week.
-         if(7 - numCanSpawn > today.getValue())
+         if(7 - numCanSpawn > today.getValue()) {
+            VinnyUtils.today = today;
             return true;
+         }
          return ThreadLocalRandom.current().nextBoolean();
       }
       resetCounter(today);
@@ -144,6 +151,7 @@ public class VinnyUtils {
       }
       return null;
    }
+
    public static StockItem getStockItemByDisplay(ItemStack x){
       for(int i = 0; i < vinny.activeStock.size(); i++) {
          if(x.isSimilar(vinny.activeStock.get(i).getRepresentation()))
@@ -152,6 +160,16 @@ public class VinnyUtils {
       return null;
    }
 
+   public static void saveState(){
+      mainFileConfig.set("id", vinnyID);
+      mainFileConfig.set("location", RegionUtils.locationSerializer(location));
+      mainFileConfig.set("timeSpawnedAt", timeVinnySpawned);
+      mainFileConfig.set("todayIs", today);
+      mainFileConfig.set("numCanSpawn", numCanSpawn);
+      mainFileConfig.set("numHasSpawned", numHasSpawned);
+      mainFileConfig.set("numStockToSell", numStockToSell);
+      mainFile.saveCustomConfig();
+   }
 
    public static class VinnyD{
       private final WeightedRandomBag<StockItem> stock = new WeightedRandomBag<>();
