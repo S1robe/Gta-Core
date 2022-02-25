@@ -14,10 +14,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * This is Member.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:09 PM
+ * Last Edit     : 2/24/2022 4:09 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 @SerializableAs("Member")
 public class Member implements ConfigurationSerializable {
 
+   /**
+    * The fixed string for a metadatavalue representing if the player is in Gang Chat
+    */
    public static final String inGangChatMeta = "GANGCHATMETA";
+   /**
+    * The fixed string for a metadata vlue representing if the player has any current invites to other gangs.
+    */
+   public static final String invitedToGang = "GangInvites";
 
    @Getter private final OfflinePlayer p;
    @Getter private final UUID uuid;
@@ -26,8 +43,18 @@ public class Member implements ConfigurationSerializable {
    @Getter private double totalMoneyCont = 0;
    @Getter private int totalKillCont = 0;
    @Getter private int totalPointCont = 0;
+   @Getter private short permission = 0b0;
    @Getter @Setter private boolean inGangChat = false;
 
+   /**
+    * Used to create a Member from players, typically on join and for the first time
+    *
+    * @param p The player they wrap
+    * @param g The Gang they are apart of
+    * @param r The rank they have within the gang.
+    *
+    * @apiNote Permissions are inherited from their rank.
+    */
    protected Member(OfflinePlayer p, Gang g, Gang.Rank r){
       this.p = p;
       this.uuid = p.getUniqueId();
@@ -36,6 +63,11 @@ public class Member implements ConfigurationSerializable {
       MemberUtils.addNewMember(this);
    }
 
+   /**
+    * Strictly used to load members that have already been created from a file.
+    *
+    * @param x The map representing the field : data pair from the data file.
+    */
    public Member(Map<String, Object> x) {
       this.uuid = UUID.fromString((String) x.get("uuid"));
       this.p = Bukkit.getOfflinePlayer(uuid);
@@ -46,6 +78,12 @@ public class Member implements ConfigurationSerializable {
       this.totalPointCont = (int) x.get("totalPointCont");
    }
 
+   /**
+    * Sets the rank of this member to the rank specified
+    * Used locally to handle Enum.ordinal calculations, primarily for one-rank promotion/demotion
+    *
+    * @param rank The integer representation of {@link Gang.Rank} that will be this member's new rank.
+    */
    public void setRank(int rank){
       switch(rank){
          case 0: //Known
@@ -60,15 +98,26 @@ public class Member implements ConfigurationSerializable {
       }
    }
 
+   /**
+    * The normal way to set a Member's rank, this is used for singular and multi-step promotion/demotion within the Gang
+    *
+    * @param r The {@link Gang.Rank} that is the new rank of this Member within the gang
+    */
    public void setRank(Gang.Rank r){
       this.rank = r;
    }
 
+   /**
+    * Forces this member to the leave the current Gang, will also delete this object. Since it is no longer used.
+    */
    public void leaveGang(){
-      gang.removeMember(this);
+      gang.kickMember(this);
       p.getPlayer().removeMetadata(inGangChatMeta, Main.getMain());
    }
 
+   /**
+    * Used to switch between global channel Minecraft chat and Gang chat
+    */
    public void toggleGangChat(){
       if(!inGangChat)
          p.getPlayer().setMetadata(inGangChatMeta, new FixedMetadataValue(Main.getMain(), true));
@@ -78,41 +127,157 @@ public class Member implements ConfigurationSerializable {
       inGangChat = !inGangChat;
    }
 
-   public void incKillCont(int amt){
-      this.totalKillCont += amt;
+   /**
+    * Increases the amount of kills this member has individually contributed to the gang they are apart of by 1.
+    *
+    * @apiNote This method is called everytime a {@link org.bukkit.event.entity.PlayerDeathEvent} is called
+    */
+   public void incKillCont(){
+      this.totalKillCont++;
    }
+
+   /**
+    * Increases the amount of money that this member has contributed to the specific gang they're apart of.
+    *
+    * @param amt The amount of money they have just contributed.
+    */
    public void incMoneyCont(double amt){
       this.totalMoneyCont += amt;
    }
+
+   /**
+    * Increases the amount of points that this member has contributed to the specific gang they're apart of.
+    *
+    * @param amt The amount of points they have earned for the gang.
+    */
    public void incPointCont(int amt){
       this.totalPointCont += amt;
    }
 
-   //Minimum 0
-   public void decKillCont(int amt){
-      this.totalKillCont = Math.max(0, totalKillCont - amt);
-   }
+   /**
+    * Decreases the money that this member has contributed to their gang.
+    *
+    * @param amt The amount they have lost due to withdrawal.
+    * @apiNote This method is always called when a Member invokes the method {@link Gang#withdraw(double)}
+    */
    public void decMoneyCont(double amt){
       this.totalMoneyCont = Math.max(0, totalMoneyCont - amt);
    }
+
+   /**
+    * Decreases the amount of points this member has contributed to their gang.
+    *
+    * @param amt The amount of points lost, due to death to other player, or some other loss cause.
+    * @apiNote This method is called in various Event methods apart of bukkit. Todo: add these methods here
+    */
    public void decPointCont(int amt){
       this.totalPointCont = Math.max(0, totalPointCont - amt);
    }
 
+   /**
+    * Used to parse data during a desearlize call from {@link SerializableAs}
+    *
+    * @param serialized the map that contains all the data needed to construct a new Member instance.
+    * @return A new Member Reference Object.
+    */
    public static Member deserialize(Map<String, Object> serialized){
       return new Member(serialized);
    }
 
+   /**
+    * Auxillary method used to simplify and de-clutter the balance calls in various places.
+    * Makes a call to {@link net.milkbowl.vault.economy.Economy#getBalance(OfflinePlayer)}
+    *
+    * @return The balance of this Member
+    */
    public double getBalance(){
       return Main.getMain().getEcon().getBalance(this.p);
    }
+
+   /**
+    * Auxiliary method used to simplify and de-clutter the deposit calls in various places
+    * @param amt the amount this player is receiving.
+    * @apiNote makes a call to {@link net.milkbowl.vault.economy.Economy#depositPlayer(OfflinePlayer, double)}
+    */
    public void depositPersonal(double amt){
       Main.getMain().getEcon().depositPlayer(p, amt);
    }
+
+   /**
+    * Auxiliary method used to simplify and de-clutter the withdraw calls in various places
+    * @param amt the amount this player is losing.
+    * @apiNote makes a call to {@link net.milkbowl.vault.economy.Economy#withdrawPlayer(OfflinePlayer, double)}
+    */
    public void withdrawPersonal(double amt){
       Main.getMain().getEcon().withdrawPlayer(p, amt);
    }
 
+   /**
+    * Assigns permissions based on an internal representation of bits, that represent a permission node
+    * @see Gang.Rank#defPermissions
+    *
+    * @param bit The bit # to set starting from 0
+    */
+   public void assignPermission(byte bit){
+      this.permission |= ((short) Math.pow(2, bit));
+   }
+
+   /**
+    * Assigns permissions based on an internal representation of bits, that represent a permission node
+    * @see Gang.Rank#defPermissions
+    *
+    * @param bits The bit # to set starting from 0
+    */
+   public void assignPermissions(byte... bits){
+      for (byte bit : bits) {
+         assignPermission(bit);
+      }
+   }
+
+   /**
+    * Inverts the permission bit at the specified index
+    *
+    * @param bit the bit to invert
+    */
+   public void invertPermission(byte bit){
+      this.permission ^= (1 << bit);
+   }
+
+   /**
+    * Inverts the permission bit at the specified index
+    *
+    * @param bits the bits to invert
+    */
+   public void invertPermissions(byte... bits){
+      for (byte bit : bits) {
+         invertPermission(bit);
+      }
+   }
+
+   /**
+    * Clears the bit at the specified bit position
+    *
+    * @param bit the bit index to be cleared starting from 0.
+    */
+   public void removePermission(byte bit){
+      this.permission &= ~(1 << bit);
+   }
+
+   /**
+    * Clears the bit at the specified bit position
+    *
+    * @param bits the bits indices to be cleared starting from 0.
+    */
+   public void removePermissions(byte... bits){
+      for(byte bit : bits)
+         removePermission(bit);
+   }
+
+   /**
+    * Used to compress the unique data of a given Member implementation so that it may be stored.
+    *
+    * @return A Map representing the storable data of this Member.
+    */
    @Override
    public Map<String, Object> serialize() {
       Map<String, Object> x = new HashMap<>();

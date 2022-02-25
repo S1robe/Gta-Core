@@ -12,6 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is Upgrade.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:08 PM
+ * Last Edit     : 2/24/2022 4:08 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 @SerializableAs("Upgrade")
 public class Upgrade implements ConfigurationSerializable {
 

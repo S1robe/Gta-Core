@@ -11,6 +11,16 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * This is Main.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:07 PM
+ * Last Edit     : 2/24/2022 4:07 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 public class Main extends JavaPlugin {
 
    @Getter private static Main main;

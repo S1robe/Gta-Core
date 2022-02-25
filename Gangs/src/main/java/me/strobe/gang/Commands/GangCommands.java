@@ -7,13 +7,19 @@ import me.strobe.gang.Main;
 import me.strobe.gang.Member;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GangCommands implements CommandExecutor {
 
@@ -31,7 +37,17 @@ public class GangCommands implements CommandExecutor {
          if(args.length != 0) {
             switch(args[0]) {
                case "join":
+                  List<MetadataValue> invs = sender.getMetadata("GangInvite");
+                  List<Object> invites = invs.stream().map(MetadataValue::value).collect(Collectors.toList());
+                  for (Object invite : invites)
+                     if(((String) invite).equalsIgnoreCase(args[1])) {
+                        GangUtils.getGangByName((String) invite).addMember(sender);
+                        return true;
+                     }
+                  break;
                case "create":
+                  if(GangUtils.validateName(args[1]))
+                     new Gang(sender, args[1]);
             }
          }
          return false;
@@ -85,9 +101,9 @@ public class GangCommands implements CommandExecutor {
       return false;
    }
    private boolean promote(Member sender, OfflinePlayer promotee){
-      Member promoted = MemberUtils.getMemberFromPlayer()
-      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && promotee.getRank().compareTo(Gang.Rank.EXALTED) < 0){
-         sender.getGang().promoteMember(promotee, null);
+      Member promoted = MemberUtils.getMemberFromPlayer(promotee);
+      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && promoted.getRank().compareTo(Gang.Rank.EXALTED) < 0){
+         sender.getGang().promoteMember(promoted, null);
          return true;
       }
       return false;
@@ -140,9 +156,15 @@ public class GangCommands implements CommandExecutor {
       }
       return false;
    }
-   private boolean sethome(Member sender){}
-   private boolean homes(Member sender){}
-   private boolean delhome(Member sender){}
+   private boolean sethome(Member sender, Location loc){
+      if(sender.getRank().compareTo())
+   }
+   private boolean homes(Member sender){
+
+   }
+   private boolean delhome(Member sender, String homeName){
+
+   }
    private boolean join(Player sender, String gangName){
       Gang g = GangUtils.getGangByName(gangName);
       g.addMember(sender);

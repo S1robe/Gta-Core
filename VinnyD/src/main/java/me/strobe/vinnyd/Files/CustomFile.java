@@ -9,7 +9,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 
-
+/**
+ * This is CustomFile.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:08 PM
+ * Last Edit     : 2/24/2022 4:08 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 public class CustomFile {
 
    //local reference for readability

@@ -59,7 +59,7 @@ public class PlayerEvents implements Listener {
          Player killer = dead.getKiller();
          if(MemberUtils.getMemberFromPlayer(killer) != null){
             Member mKiller = MemberUtils.getMemberFromPlayer(killer);
-            mKiller.incKillCont(1);
+            mKiller.incKillCont();
             mKiller.incPointCont(1);
          }
       }

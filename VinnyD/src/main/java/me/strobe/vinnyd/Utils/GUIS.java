@@ -13,6 +13,16 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This is GUIS.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:08 PM
+ * Last Edit     : 2/24/2022 4:08 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 public class GUIS {
 
     private GUIS(){}

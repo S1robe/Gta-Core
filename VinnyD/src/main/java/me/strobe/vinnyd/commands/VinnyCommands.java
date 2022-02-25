@@ -15,6 +15,16 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
+/**
+ * This is VinnyCommands.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:08 PM
+ * Last Edit     : 2/24/2022 4:08 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 public class VinnyCommands implements CommandExecutor {
 
    //Root : /vinny or /vin

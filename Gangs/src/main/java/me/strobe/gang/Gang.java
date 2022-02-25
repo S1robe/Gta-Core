@@ -17,8 +17,41 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * This is Gang.java in Project: (Gta-Core) : But you already knew that
+ * @author G.P of Prentice Productions
+ * @version 1.0
+ * Created On    : 2/24/2022 4:38 PM
+ * Last Edit     : 2/24/2022 4:38 PM(Update Me!)
+ * Time to Write : (Rough Estimate)
+ *
+ * (Class Description)
+*/
 @SerializableAs("Gang")
 public class Gang implements ConfigurationSerializable {
+
+   public static final short DEFAULT_MASTERMIND_PERMS = 0b111111111111110;
+   public static final short DEFAULT_EXALTED_PERMS    = 0b011111111110110;
+   public static final short DEFAULT_HONORED_PERMS    = 0b001001011000000;
+   public static final short DEFAULT_KNOWN_PERMS      = 0b000000000000000;
+
+   public static final short MASTERMIND_MIND_BIT = 0b100000000000000;
+   public static final short EXALTED_BIT         = 0b010000000000000;
+   public static final short HONORED_BIT         = 0b001000000000000;
+
+   public static final short WITHDRAW_BIT        = 0b000100000000000;
+   public static final short UPGRADE_BIT         = 0b000010000000000;
+   public static final short FF_BIT              = 0b000001000000000;
+   public static final short ALLY_ENEMY_BIT      = 0b000000100000000;
+   public static final short SET_HOME_BIT        = 0b000000010000000;
+   public static final short DEL_HOME_BIT        = 0b000000001000000;
+   public static final short KICK_BIT            = 0b000000000100000;
+   public static final short INVITE_BIT          = 0b000000000010000;
+   public static final short RENAME_BIT          = 0b000000000001000;
+   public static final short MANAGEMENT_BIT      = 0b000000000000100;
+   public static final short PERMISSION_BIT      = 0b000000000000010;
+   public static final short LOCK_OUT_BIT        = 0b000000000000001;
+
 
    @Getter private String name;
    @Getter private double balance = 0;
@@ -77,11 +110,11 @@ public class Gang implements ConfigurationSerializable {
 
    public boolean invite(Player p){
       Title.sendTitle(p, 0, 10, 3, null, "&7You have been invited to " + getName() + "!");
-      p.setMetadata("GangInvite", new FixedMetadataValue(Main.getMain(), getName()));
+      p.setMetadata(Member.invitedToGang, new FixedMetadataValue(Main.getMain(), getName()));
       new BukkitRunnable(){
          @Override
          public void run() {
-            p.removeMetadata("GangInvite", Main.getMain());
+            p.removeMetadata(Member.invitedToGang, Main.getMain());
          }
       }.runTaskTimer(Main.getMain(), 0, 6000);
       return true;
@@ -227,18 +260,74 @@ public class Gang implements ConfigurationSerializable {
       return x;
    }
 
+   /**
+    * The ranks of any gang each rank has its repsective perms, however, each permission can be enablekd or disabled
+    * individually per rank, and per member in the gang.
+    */
    public enum Rank{
-      KNOWN( "&8[&7Known&8]&r"), //Deposit, Teleport, Leave, Gang stats,
-      HONORED( "&8[&aHonored&8]"), //withdraw, upgrades, toggle ff, ally, enemy,
-      EXALTED("&8[&9&mExalted&8]"), //sethome, delhome, kick, invite claim/unclaim
-      MASTERMIND("&8[&3&lMastermind&8]&r") //Rename, delete,
-
+      KNOWN( "&8[&7Known&8]&r", DEFAULT_KNOWN_PERMS),
+      HONORED( "&8[&aHonored&8]", DEFAULT_HONORED_PERMS),
+      EXALTED("&8[&9&mExalted&8]", DEFAULT_EXALTED_PERMS),
+      MASTERMIND("&8[&3&lMastermind&8]&r", DEFAULT_MASTERMIND_PERMS)
       ;
 
+      /**
+       * Prefix used in gang chat.
+       */
       final String prefix;
+      /**
+       * This is a byte representation of a general member's permissions
+       * each bit within this number represents a permission, a value of 1 is enabled
+       * and 0 is disabled:
+       *
+       *       The first 3 bits are used for detemining rank within the rank, they are modifable externally via owner
+       *       permissions.
+       *
+       *       Those with the permission bit will be granted the ability to set these bits. They are only intended as a
+       *       quick way of setting up permissisons.
+       *
+       *       The remaining 12 bits are for individual Permissions, this allows for every member/rank to be modified as
+       *       seen fit.
+       *       I.e You could have a lowest rank (Member) with sethome abilities, but have the rest untrustworthy members
+       *       without this permission
+       *
+       *    0b :
+       *      15 : Mastermind Bit (Psuedo Mastermind)
+       *      14 : Exalted Bit    (Psuedo Exalted)
+       *      13 : Honored Bit    (Psuedo Honored)
+       *
+       *      12 : Withdraw bit   ( Enables Withdrawing from the bank without restriction )
+       *      11 : Upgrades Bit   ( Enable buying Upgrades with the gang's money )
+       *      10 : FF Bit         ( Enables Toggling ff for allies, and current gang )
+       *      9  : Ally/Enemy Bit ( Enables Allying and Enemying Other gangs )
+       *
+       *      8  : Sethome Bit    ( Enables Setting homes for the gang )
+       *      7  : DelHome BIt    ( Enables Deleting homes of the gang )
+       *      6  : Kick Bit       ( Enables kicking other members from the gang [they must be lower in rank] )
+       *      5  : Invite Bit     ( Enables inviting other players to this gang )
+       *
+       *      4  : Rename Bit     ( Enables renaming of the gang )
+       *      3  : Management Bit ( Enables Accepting Withdraw Requests )
+       *      2  : Permission Bit ( Enables regulation of permissions for members )
+       *      1  : Lockout Bit    ( Disables all permissions, regardless of rank or other set permissions )
+       *
+       *   Default Values with permissions:
+       *   Known:       0b000 0000 0000 0000 : No auxillary permissions
+       *   Honored:     0b001 0010 1100 0000 : Access to toggle FF, set/del homes
+       *   Exalted:     0b011 1111 1111 0110 : All Permissions except renaming.
+       *   Mastermind:  0b111 1111 1111 1110 : All permissions, full control.
+       */
+      final short defPermissions;
 
-      Rank(String prefix){
+      /**
+       * Wraps the ranks for members, to give a general idea of permissions and hierarchy.
+       *
+       * @param prefix colorcode formatted (&8) title to be used as a prefix in gang chat
+       * @param permissions default short-binary formatted numbers with bits that represent permissions.
+       */
+      Rank(String prefix, short permissions){
          this.prefix = prefix;
+         this.defPermissions = permissions;
       }
    }
 

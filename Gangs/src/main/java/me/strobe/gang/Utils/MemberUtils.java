@@ -4,6 +4,7 @@ import me.strobe.gang.Files.CustomFile;
 import me.strobe.gang.Gang;
 import me.strobe.gang.Main;
 import me.strobe.gang.Member;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -53,7 +54,7 @@ public class MemberUtils {
       return members.get(uuid);
    }
 
-   public static Member getMemberFromPlayer(Player p){
+   public static Member getMemberFromPlayer(OfflinePlayer p){
       return members.get(p.getUniqueId());
    }
 
