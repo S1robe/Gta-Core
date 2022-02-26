@@ -3,6 +3,7 @@ package me.strobe.gang.Utils;
 import lombok.Getter;
 import me.strobe.gang.Files.CustomFile;
 import me.strobe.gang.Gang;
+import me.strobe.gang.Main;
 import me.strobe.gang.Member;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,6 +36,12 @@ public class GangUtils {
       gangConfig = gangFile.getCustomConfig();
       gangs.forEach((s, g) -> gangConfig.set(s, g));
       gangFile.saveCustomConfig();
+   }
+
+   public static void loadGangs(){
+      gangConfig.getKeys(false).forEach(g -> {
+         gangs.put(g, (Gang) gangConfig.get(g));
+      });
    }
 
    public static void saveGang(Gang g){
@@ -71,7 +78,7 @@ public class GangUtils {
       if(g != null) {
          gangFile.reloadCustomConfig();
          gangConfig = gangFile.getCustomConfig();
-         gangConfig.set(g.getName(), null);
+         gangConfig.set(s, null);
          gangFile.saveCustomConfig();
          gangs.remove(s);
       }
@@ -98,7 +105,9 @@ public class GangUtils {
    }
 
    public static void init(){
-
+      gangFile = Main.getMain().getGangFile();
+      gangConfig = gangFile.getCustomConfig();
+      loadGangs();
    }
 
 }

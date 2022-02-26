@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class MemberUtils {
 
-   private static HashMap<UUID, Member> members = new HashMap<>();
+   private static final HashMap<UUID, Member> members = new HashMap<>();
    private static CustomFile memberFile;
    private static FileConfiguration memberConfig;
 
@@ -73,6 +73,8 @@ public class MemberUtils {
    }
 
    public static void init(){
+      memberFile = Main.getMain().getMemberFile();
+      memberConfig = memberFile.getCustomConfig();
       loadAllMembers();
    }
 

@@ -75,7 +75,7 @@ public class Member implements ConfigurationSerializable {
       this.uuid = UUID.fromString((String) x.get("uuid"));
       this.p = Bukkit.getOfflinePlayer(uuid);
       this.gang = GangUtils.getGangByName((String) x.get("gang"));
-      this.rank = (Gang.Rank) x.get(Gang.Rank.valueOf((String) x.get("rank")));
+      this.rank = Gang.Rank.valueOf((String) x.get("rank"));
       this.totalMoneyCont = (double) x.get("totalMoneyCont");
       this.totalKillCont = (int) x.get("totalKillCont");
       this.totalPointCont = (int) x.get("totalPointCont");
@@ -248,7 +248,7 @@ public class Member implements ConfigurationSerializable {
    }
 
    public boolean isPermissionSet(Gang.Permission permission){
-      return
+      return (this.permission & permission.permissionBit) > 0b0;
    }
    /**
     * Assigns permissions based on an internal representation of bits, that represent a permission node

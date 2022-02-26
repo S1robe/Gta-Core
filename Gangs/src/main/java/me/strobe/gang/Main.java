@@ -1,6 +1,8 @@
 package me.strobe.gang;
 
 import lombok.Getter;
+import me.strobe.gang.Commands.GangCommands;
+import me.strobe.gang.Events.PlayerEvents;
 import me.strobe.gang.Files.CustomFile;
 import me.strobe.gang.Files.FileManager;
 import me.strobe.gang.Utils.GangUtils;
@@ -65,7 +67,8 @@ public class Main extends JavaPlugin {
    }
 
    private void registerEvents() {
-
+      getServer().getPluginManager().registerEvents(new PlayerEvents(), this);
+      getCommand("gang").setExecutor(new GangCommands());
    }
 
    private boolean setupEconomy() {

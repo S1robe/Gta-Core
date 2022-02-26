@@ -38,17 +38,10 @@ public class GangCommands implements CommandExecutor {
          if(args.length != 0) {
             switch(args[0]) {
                case "join":
-                  List<MetadataValue> invs = sender.getMetadata("GangInvite");
-                  List<Object> invites = invs.stream().map(MetadataValue::value).collect(Collectors.toList());
-                  for (Object invite : invites)
-                     if(((String) invite).equalsIgnoreCase(args[1])) {
-                        GangUtils.getGangByName((String) invite).addMember(sender);
-                        return true;
-                     }
-                  break;
+                  return join(sender, args[1]);
+
                case "create":
-                  if(GangUtils.validateName(args[1]))
-                     new Gang(sender, args[1]);
+                  return create(sender, args[1]);
             }
          }
          return false;
@@ -61,23 +54,28 @@ public class GangCommands implements CommandExecutor {
          case "disband":
             return disband(m);
          case "promote":
-            return promote(m);
+            return promote(m, PlayerUtils.getPlayer(args[1]));
          case "invite":
-            return invite(m);
+            return invite(m, PlayerUtils.getPlayer(args[1]));
          case "kick":
-            return kick(m);
+            return kick(m, MemberUtils.getMemberFromPlayer(PlayerUtils.getPlayer(args[1])));
          case "ally":
-            return ally(m);
+            return ally(m, args[1]);
+         case "enemy":
+            return enemy(m, args[1]);
          case "ff":
             return fftoggle(m);
          case "ffOther":
-            return ffToggleOther(m);
+            return ffToggleOther(m, args[1]);
          case "sethome":
-            return sethome(m);
+            return sethome(m, sender.getLocation(), args[1]);
          case "homes":
             return homes(m);
          case "delhome":
-            return delhome(m);
+            return delhome(m, args[1]);
+         case "rename":
+            GangUtils.updateGangName(m.getGang(), m.getGang().getName(), args[1]);
+            return true;
          default:
             return noArg(m);
       }
@@ -85,6 +83,7 @@ public class GangCommands implements CommandExecutor {
 
    private boolean noArg(Member sender){
       //open gui for gang if someone has it
+      return false;
    }
 
    private boolean create(Player sender, String gangName){
@@ -103,14 +102,15 @@ public class GangCommands implements CommandExecutor {
    }
    private boolean promote(Member sender, OfflinePlayer promotee){
       Member promoted = MemberUtils.getMemberFromPlayer(promotee);
-      if(sender.isPermissionSet(Gang.Permission.M) >= 0 && sender.getRank().ordinal() < promoted.getRank().ordinal()){
+      if(sender.isPermissionSet(Gang.Permission.PERMISSION)
+              && promoted.getRank().ordinal() < sender.getRank().ordinal()){
          sender.getGang().promoteMember(promoted, null);
          return true;
       }
       return false;
    }
    private boolean invite(Member sender, Player invitee){
-      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0){
+      if(sender.isPermissionSet(Gang.Permission.INVITE)){
          Member x = MemberUtils.getMemberFromPlayer(invitee);
          if(x == null)
             sender.getGang().invite(invitee);
@@ -118,9 +118,9 @@ public class GangCommands implements CommandExecutor {
       return false;
    }
    private boolean kick(Member sender, Member kicked){
-      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0
-            && kicked.getRank().compareTo(Gang.Rank.EXALTED) < 0
-            && Gang.areMembersOfSameGang(sender, kicked)){
+      if(sender.isPermissionSet(Gang.Permission.KICK)
+              && Gang.areMembersOfSameGang(sender, kicked)
+              && kicked.getRank().ordinal() < sender.getRank().ordinal()){
 
          sender.getGang().kickMember(kicked);
          return true;
@@ -128,28 +128,28 @@ public class GangCommands implements CommandExecutor {
       return false;
    }
    private boolean ally(Member sender, String gangName){
-      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+      if(sender.isPermissionSet(Gang.Permission.ALLY)){
          sender.getGang().requestAlly(gangName);
          return true;
       }
       return false;
    }
    private boolean enemy(Member sender, String gangName){
-      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+      if(sender.isPermissionSet(Gang.Permission.ALLY)) {
          sender.getGang().enemy(gangName);
          return true;
       }
       return false;
    }
    private boolean fftoggle(Member sender){
-      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+      if(sender.isPermissionSet(Gang.Permission.FF)){
          sender.getGang().toggleFF();
          return true;
       }
       return false;
    }
    private boolean ffToggleOther(Member sender, String gangName){
-      if(sender.getRank().compareTo(Gang.Rank.HONORED) >= 0){
+      if(sender.isPermissionSet(Gang.Permission.FF)){
          Gang g = GangUtils.getGangByName(gangName);
          if(g == null) return false;
          sender.getGang().toggleFFGang(g);
@@ -157,20 +157,36 @@ public class GangCommands implements CommandExecutor {
       }
       return false;
    }
-   private boolean sethome(Member sender, Location loc){
-      if(sender.getRank().compareTo())
+   private boolean sethome(Member sender, Location loc, String homeName){
+      if(sender.isPermissionSet(Gang.Permission.SETHOME)){
+         sender.getGang().setGangHome(loc, homeName);
+         return true;
+      }
+      return false;
    }
    private boolean homes(Member sender){
-
-   }
-   private boolean delhome(Member sender, String homeName){
-
-   }
-   private boolean join(Player sender, String gangName){
-      Gang g = GangUtils.getGangByName(gangName);
-      g.addMember(sender);
       return true;
    }
+   private boolean delhome(Member sender, String homeName){
+      if(sender.isPermissionSet(Gang.Permission.DELHOME)){
+         sender.getGang().deleteGangHome(homeName);
+         return true;
+      }
+      return false;
+   }
+   private boolean join(Player sender, String gangName){
+
+      List<MetadataValue> invs = sender.getMetadata("GangInvite");
+      List<Object> invites = invs.stream().map(MetadataValue::value).collect(Collectors.toList());
+      for (Object invite : invites)
+         if(((String) invite).equalsIgnoreCase(gangName)) {
+            GangUtils.getGangByName((String) invite).addMember(sender);
+            return true;
+         }
+
+      return false;
+   }
+
    private boolean leave(Member sender){
       if(sender.getRank().equals(Gang.Rank.MASTERMIND)){
          return disband(sender);

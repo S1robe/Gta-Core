@@ -1,6 +1,7 @@
 package me.strobe.gang.Events;
 
 import me.strobe.gang.Member;
+import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -8,9 +9,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerEvents implements Listener {
+
+   @EventHandler
+   public void onJoin(PlayerJoinEvent e){
+      Player p = e.getPlayer();
+      Member m = MemberUtils.getMemberFromPlayer(p);
+      if(m == null) return;
+
+   }
 
    @EventHandler
    public void onLeave(PlayerQuitEvent e){
