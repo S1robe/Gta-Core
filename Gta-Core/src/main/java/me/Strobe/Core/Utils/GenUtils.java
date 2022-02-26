@@ -60,18 +60,6 @@ public final class GenUtils {
       }
    }
 
-   public static void setMiddle(Inventory inventory, ItemStack filler, List<ItemStack> items){
-      short loops = (short) inventory.getSize();
-      for(int l = 0; l < loops; l++){
-         for(int i = 0, s = (9 * l) + 3; s < 9 * l + 6; s++, i++){
-            if(i >= items.size())
-               inventory.setItem(s, filler);
-            else
-               inventory.setItem(s, items.get(i));
-         }
-      }
-   }
-
    public static void setLeft(Inventory inv, ItemStack filler, ArrayList<ItemStack> items) {
       short loops = (short) (inv.getSize() / 9);
       for(int l = 0; l < loops; l++) {

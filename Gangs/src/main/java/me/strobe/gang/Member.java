@@ -2,6 +2,8 @@ package me.strobe.gang;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
+import me.Strobe.Core.Utils.StringUtils;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -212,6 +215,41 @@ public class Member implements ConfigurationSerializable {
       Main.getMain().getEcon().withdrawPlayer(p, amt);
    }
 
+   private short convertStringToPermission(String permissionTag){
+      permissionTag = permissionTag.toUpperCase();
+      try {
+         Gang.Permission p = Gang.Permission.valueOf(permissionTag);
+         return p.permissionBit;
+      }
+      catch(IllegalArgumentException e){
+         return -1;
+      }
+   }
+
+   /**
+    * Checks if the permission at the specified bit index for the current member is set.
+    *
+    * @param bit the bit that is being checked for high position
+    * @return if the requested bit has a value of 1 (true)
+    */
+   public boolean isPermissionSet(int bit){
+      return ((this.permission >> bit )& 1) == 1;
+   }
+
+   /**
+    * Converts a user provided string to a permission tag {@link Gang.Permission}
+    *
+    * @param permissionTag The tag we are looking for.
+    * @return If the specified tag is set for this member.
+    */
+   public boolean isPermissionSet(String permissionTag){
+      short x = convertStringToPermission(permissionTag);
+      return x != -1 && isPermissionSet(x);
+   }
+
+   public boolean isPermissionSet(Gang.Permission permission){
+      return this.
+   }
    /**
     * Assigns permissions based on an internal representation of bits, that represent a permission node
     * @see Gang.Rank#defPermissions

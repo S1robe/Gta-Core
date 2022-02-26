@@ -336,4 +336,8 @@ public final class StringUtils {
       return "Days: " + days + " Hours: " + hours + " Minutes: " + minutes + " Seconds: " + seconds;
    }
 
+   public static boolean areStringsSimilar(String $1, String $2, float minSimilarlyPercentage){
+      return org.apache.commons.lang3.StringUtils.getJaroWinklerDistance($1, $2) < minSimilarlyPercentage;
+   }
+
 }

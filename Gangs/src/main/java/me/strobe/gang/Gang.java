@@ -30,28 +30,35 @@ import java.util.stream.Collectors;
 @SerializableAs("Gang")
 public class Gang implements ConfigurationSerializable {
 
-   public static final short DEFAULT_MASTERMIND_PERMS = 0b111111111111110;
-   public static final short DEFAULT_EXALTED_PERMS    = 0b011111111110110;
-   public static final short DEFAULT_HONORED_PERMS    = 0b001001011000000;
-   public static final short DEFAULT_KNOWN_PERMS      = 0b000000000000000;
+   public enum Permission {
+      MASTERMIND_PERMS  ((short) 0b111111111111110),
+      EXALTED_PERMS     ((short) 0b011111111110110),
+      HONORED_PERMS     ((short) 0b001001011000000),
+      KNOWN_PERMS       ((short) 0b000000000000000),
+      MASTERMIND        ((short) 0b100000000000000),
+      EXALTED           ((short) 0b010000000000000),
+      HONORED           ((short) 0b001000000000000),
+      WITHDRAW          ((short) 0b000100000000000),
+      UPGRADE           ((short) 0b000010000000000),
+      FF                ((short) 0b000001000000000),
+      ALLY              ((short) 0b000000100000000),
+      SETHOME           ((short) 0b000000010000000),
+      DELHOME           ((short) 0b000000001000000),
+      KICK              ((short) 0b000000000100000),
+      INVITE            ((short) 0b000000000010000),
+      RENAME            ((short) 0b000000000001000),
+      MANAGEMENT        ((short) 0b000000000000100),
+      PERMISSION        ((short) 0b000000000000010),
+      LOCKOUT           ((short) 0b000000000000001)
 
-   public static final short MASTERMIND_MIND_BIT = 0b100000000000000;
-   public static final short EXALTED_BIT         = 0b010000000000000;
-   public static final short HONORED_BIT         = 0b001000000000000;
+      ;
 
-   public static final short WITHDRAW_BIT        = 0b000100000000000;
-   public static final short UPGRADE_BIT         = 0b000010000000000;
-   public static final short FF_BIT              = 0b000001000000000;
-   public static final short ALLY_ENEMY_BIT      = 0b000000100000000;
-   public static final short SET_HOME_BIT        = 0b000000010000000;
-   public static final short DEL_HOME_BIT        = 0b000000001000000;
-   public static final short KICK_BIT            = 0b000000000100000;
-   public static final short INVITE_BIT          = 0b000000000010000;
-   public static final short RENAME_BIT          = 0b000000000001000;
-   public static final short MANAGEMENT_BIT      = 0b000000000000100;
-   public static final short PERMISSION_BIT      = 0b000000000000010;
-   public static final short LOCK_OUT_BIT        = 0b000000000000001;
+      final short permissionBit;
 
+      Permission(short bit){
+         permissionBit = bit;
+      }
+   }
 
    @Getter private String name;
    @Getter private double balance = 0;
@@ -238,6 +245,16 @@ public class Gang implements ConfigurationSerializable {
       return new Gang(dict);
    }
 
+   public void incKills(Member m){
+      m.incKillCont();
+      this.totalKills++;
+   }
+
+   public void incPoints(Member m, int amt){
+      m.incPointCont(amt);
+      this.points += amt;
+   }
+
    @Override
    public boolean equals(Object o) {
       if(o.getClass().equals(this.getClass()))
@@ -265,10 +282,10 @@ public class Gang implements ConfigurationSerializable {
     * individually per rank, and per member in the gang.
     */
    public enum Rank{
-      KNOWN( "&8[&7Known&8]&r", DEFAULT_KNOWN_PERMS),
-      HONORED( "&8[&aHonored&8]", DEFAULT_HONORED_PERMS),
-      EXALTED("&8[&9&mExalted&8]", DEFAULT_EXALTED_PERMS),
-      MASTERMIND("&8[&3&lMastermind&8]&r", DEFAULT_MASTERMIND_PERMS)
+      KNOWN( "&8[&7Known&8]&r", Permission.KNOWN_PERMS),
+      HONORED( "&8[&aHonored&8]", Permission.HONORED_PERMS),
+      EXALTED("&8[&9&mExalted&8]", Permission.EXALTED),
+      MASTERMIND("&8[&3&lMastermind&8]&r", Permission.MASTERMIND_PERMS)
       ;
 
       /**
@@ -317,7 +334,7 @@ public class Gang implements ConfigurationSerializable {
        *   Exalted:     0b011 1111 1111 0110 : All Permissions except renaming.
        *   Mastermind:  0b111 1111 1111 1110 : All permissions, full control.
        */
-      final short defPermissions;
+      final Permission defPermissions;
 
       /**
        * Wraps the ranks for members, to give a general idea of permissions and hierarchy.
@@ -325,7 +342,7 @@ public class Gang implements ConfigurationSerializable {
        * @param prefix colorcode formatted (&8) title to be used as a prefix in gang chat
        * @param permissions default short-binary formatted numbers with bits that represent permissions.
        */
-      Rank(String prefix, short permissions){
+      Rank(String prefix, Permission permissions){
          this.prefix = prefix;
          this.defPermissions = permissions;
       }

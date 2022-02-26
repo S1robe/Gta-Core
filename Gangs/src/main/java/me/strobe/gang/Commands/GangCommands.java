@@ -18,6 +18,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.security.Permission;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,7 +95,7 @@ public class GangCommands implements CommandExecutor {
       return false;
    }
    private boolean disband(Member sender){
-      if(sender.getRank().compareTo(Gang.Rank.MASTERMIND) == 0){
+      if(sender.getRank() == Gang.Rank.MASTERMIND){
          sender.getGang().disband();
          return true;
       }
@@ -102,7 +103,7 @@ public class GangCommands implements CommandExecutor {
    }
    private boolean promote(Member sender, OfflinePlayer promotee){
       Member promoted = MemberUtils.getMemberFromPlayer(promotee);
-      if(sender.getRank().compareTo(Gang.Rank.EXALTED) >= 0 && promoted.getRank().compareTo(Gang.Rank.EXALTED) < 0){
+      if(sender.isPermissionSet(Gang.Permission.M) >= 0 && sender.getRank().ordinal() < promoted.getRank().ordinal()){
          sender.getGang().promoteMember(promoted, null);
          return true;
       }
