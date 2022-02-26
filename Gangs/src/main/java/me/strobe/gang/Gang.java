@@ -30,35 +30,6 @@ import java.util.stream.Collectors;
 @SerializableAs("Gang")
 public class Gang implements ConfigurationSerializable {
 
-   public enum Permission {
-      MASTERMIND_PERMS  ((short) 0b111111111111110),
-      EXALTED_PERMS     ((short) 0b011111111110110),
-      HONORED_PERMS     ((short) 0b001001011000000),
-      KNOWN_PERMS       ((short) 0b000000000000000),
-      MASTERMIND        ((short) 0b100000000000000),
-      EXALTED           ((short) 0b010000000000000),
-      HONORED           ((short) 0b001000000000000),
-      WITHDRAW          ((short) 0b000100000000000),
-      UPGRADE           ((short) 0b000010000000000),
-      FF                ((short) 0b000001000000000),
-      ALLY              ((short) 0b000000100000000),
-      SETHOME           ((short) 0b000000010000000),
-      DELHOME           ((short) 0b000000001000000),
-      KICK              ((short) 0b000000000100000),
-      INVITE            ((short) 0b000000000010000),
-      RENAME            ((short) 0b000000000001000),
-      MANAGEMENT        ((short) 0b000000000000100),
-      PERMISSION        ((short) 0b000000000000010),
-      LOCKOUT           ((short) 0b000000000000001)
-
-      ;
-
-      final short permissionBit;
-
-      Permission(short bit){
-         permissionBit = bit;
-      }
-   }
 
    @Getter private String name;
    @Getter private double balance = 0;
@@ -275,6 +246,36 @@ public class Gang implements ConfigurationSerializable {
       x.put("allies", new ArrayList<>(allies.keySet()));
       x.put("friendlyFire", friendlyFire);
       return x;
+   }
+
+   public enum Permission {
+      MASTERMIND_PERMS  ((short) 0b111111111111110),
+      EXALTED_PERMS     ((short) 0b011111111110110),
+      HONORED_PERMS     ((short) 0b001001011000000),
+      KNOWN_PERMS       ((short) 0b000000000000000),
+      MASTERMIND        ((short) 0b100000000000000),
+      EXALTED           ((short) 0b010000000000000),
+      HONORED           ((short) 0b001000000000000),
+      WITHDRAW          ((short) 0b000100000000000),
+      UPGRADE           ((short) 0b000010000000000),
+      FF                ((short) 0b000001000000000),
+      ALLY              ((short) 0b000000100000000),
+      SETHOME           ((short) 0b000000010000000),
+      DELHOME           ((short) 0b000000001000000),
+      KICK              ((short) 0b000000000100000),
+      INVITE            ((short) 0b000000000010000),
+      RENAME            ((short) 0b000000000001000),
+      MANAGEMENT        ((short) 0b000000000000100),
+      PERMISSION        ((short) 0b000000000000010),
+      LOCKOUT           ((short) 0b000000000000001)
+
+      ;
+
+      final short permissionBit;
+
+      Permission(short bit){
+         permissionBit = bit;
+      }
    }
 
    /**

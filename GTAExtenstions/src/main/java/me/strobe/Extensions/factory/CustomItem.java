@@ -25,6 +25,8 @@ import java.util.List;
 @Getter @SerializableAs("CustomItem")
 public abstract class CustomItem implements ConfigurationSerializable {
 
+    protected CustomItem(){}
+
     protected CustomItem(ItemStack item,
                          boolean isStackable, short maxStackSize,
                          boolean isContainer,
@@ -34,6 +36,7 @@ public abstract class CustomItem implements ConfigurationSerializable {
                          boolean isArmor, short defenseValue,
                          boolean isDropOnDeath,
                          boolean isDropOutsideInventory,
+                         boolean isStandardDrop,
                          short maxContents) {
 
         Validate.notNull(item);
@@ -41,6 +44,7 @@ public abstract class CustomItem implements ConfigurationSerializable {
         this.nbtWrapper = new NBTItem(item);
         this.isDropOnDeath = isDropOnDeath;
         this.isDropOutsideInventory = isDropOutsideInventory;
+        this.isStandardDrop = isStandardDrop;
 
         checkStackableTag(isStackable, maxStackSize,this);
 
@@ -121,10 +125,10 @@ public abstract class CustomItem implements ConfigurationSerializable {
     }
 
     /** The item in game */
-    private final ItemStack item;
+    private ItemStack item;
 
     /** The nbt wrapper that allows for editing nbt data of the item */
-    private final NBTItem nbtWrapper;
+    private NBTItem nbtWrapper;
 
     /**
      * Determines if this item will stack with others of this type.
@@ -224,13 +228,55 @@ public abstract class CustomItem implements ConfigurationSerializable {
      *
      * @apiNote if this is set, then #isDroppable is true
      */
-    private final boolean isDropOnDeath;
+    private boolean isDropOnDeath;
 
     /**
      * Determines if this item can be dropped outside the inventory
      *
      * @apiNote if this is set, then #isDroppable is true
      */
-    private final boolean isDropOutsideInventory;
+    private boolean isDropOutsideInventory;
+
+    /**
+     * Determines of this item can be dropped with the drop key
+     */
+    private boolean isStandardDrop;
+
+    /**
+     * This method is called when the item has reacehd the end of its uses
+     *  as denoted by #numUsesLeft = 0
+     * AND
+     *  #doesBreakAfterSetUses == true;
+     *  Otherwise, the item will just be prevented from use/dampened use
+     */
+    public abstract void destroy();
+
+    /**
+     * This is called to drop items from this if this is a container,
+     * The item must be a container otherwise this is not called, and therefore should
+     * throw {@link UnsupportedOperationException}
+     *
+     * This method will drop an item as per usual as if the owner threw out the item.
+     */
+    public abstract void dropContents();
+
+    /**
+     * This method is called if the item is flagged as droppable in any context, it should be implemented as such
+     * This will drop the item representation of this container item and will remove it from the owners inventory,
+     * If this is stackable it should drop one item at a time.
+     */
+    public abstract void dropItem();
+
+    /**
+     * This method is called when this item is right clicked in the main hand, and this item must be a container.
+     * It will then open a gui that will display the contained items of this container.
+     */
+    public abstract void openContainer();
+
+    /**
+     * This method is called when this item is attempted to be repaired, or is repaired.
+     */
+    public abstract void repair();
+
 
 }

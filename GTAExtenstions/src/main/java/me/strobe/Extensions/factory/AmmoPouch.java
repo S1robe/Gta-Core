@@ -14,12 +14,12 @@ import java.util.Map;
  * Created On    : 2/25/2022, 10:18 AM
  * Last Edit     : 2/25/2022, 10:18 AM (Update Me!)
  * Time to Write : (Rough Estimate)
- * <p>
+ *
  * (Class Description)
  */
 public class AmmoPouch extends CustomItem {
 
-    private final ItemStack ammo;
+    private ItemStack ammo;
 
     public AmmoPouch(ItemStack representation, String ammoType, short capacity){
         super(representation, false, (short) 0,
@@ -27,13 +27,36 @@ public class AmmoPouch extends CustomItem {
                 (short) 0, false, null,
                 0, 0,
                 true, EquipmentSlot.HAND, false,
-                (short) 0, true, true, capacity);
+                (short) 0, true, true, false, capacity);
 
         this.ammo = Main.getCsUtility().generateWeapon(ammoType);
     }
 
-    private AmmoPouch(){
-        this(null, null, (short) 0);
+    private AmmoPouch(){}
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public void dropContents() {
+
+    }
+
+    @Override
+    public void dropItem() {
+
+    }
+
+    @Override
+    public void openContainer() {
+
+    }
+
+    @Override
+    public void repair() {
+
     }
 
 

@@ -248,7 +248,7 @@ public class Member implements ConfigurationSerializable {
    }
 
    public boolean isPermissionSet(Gang.Permission permission){
-      return this.
+      return
    }
    /**
     * Assigns permissions based on an internal representation of bits, that represent a permission node
