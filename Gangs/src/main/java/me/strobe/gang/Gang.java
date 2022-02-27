@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @SerializableAs("Gang")
 public class Gang implements ConfigurationSerializable {
 
-
    @Getter private String name;
    @Getter private double balance = 0;
    @Getter private double points = 0;
@@ -44,6 +43,13 @@ public class Gang implements ConfigurationSerializable {
    @Getter private final transient List<Gang> friendlyFireGangs = new ArrayList<>();
    @Getter @Setter private boolean friendlyFire;
 
+   /**
+    * Creates a new gang, also auto creates a member for the "leader", and also saves and adds this gang ot the list
+    * of gangs
+    *
+    * @param leader The leader of this gang, also the sender of the command to create a new gang
+    * @param name    The name of this gang, already checked for validity from {@link GangUtils#validateName(String)}.
+    */
    public Gang(Player leader, String name){
       this.name  = name;
       Member m = new Member(leader, this, Rank.MASTERMIND);
@@ -54,6 +60,12 @@ public class Gang implements ConfigurationSerializable {
       GangUtils.addGang(this);
    }
 
+   /**
+    * Creates a new Gang from a map, used by {@link ConfigurationSerializable}
+    * @apiNote Not intended to be called normally, since this is used during deserialization
+    *
+    * @param map The mapping of internal data of a given gang
+    */
    public Gang(Map<String, Object> map){
       this.name = (String) map.get("name");
       this.balance = (double) map.get("balance");
@@ -67,8 +79,15 @@ public class Gang implements ConfigurationSerializable {
 
       ((List<String>) map.get("allies")).forEach(n -> allies.put(n, GangUtils.getGangByName(n)));
       this.friendlyFire = (boolean) map.get("friendlyFire");
+
+      GangUtils.saveGang(this);
+      GangUtils.addGang(this);
    }
 
+   /**
+    * Disbands this gang, deletes it entirely, cleaning up all members
+    * This also deletes it from the configuration files.
+    */
    public void disband(){
       allies.forEach((gName, g) -> {
          g.getAllies().remove(this.getName());
@@ -86,7 +105,13 @@ public class Gang implements ConfigurationSerializable {
       GangUtils.deleteGang(this);
    }
 
-   public boolean invite(Player p){
+   /**
+    * Invites the player specified to this Gang
+    *
+    * @param p The player being invited, Players are flagged internally for this gang's invite, for 30 minutes,
+    *          They must respond within this time, or it will be removed, upon leaving this is removed automatically.
+    */
+   public void invite(Player p){
       Title.sendTitle(p, 0, 10, 3, null, "&7You have been invited to " + getName() + "!");
       p.setMetadata(Member.invitedToGang, new FixedMetadataValue(Main.getMain(), getName()));
       new BukkitRunnable(){
@@ -94,70 +119,128 @@ public class Gang implements ConfigurationSerializable {
          public void run() {
             p.removeMetadata(Member.invitedToGang, Main.getMain());
          }
-      }.runTaskTimer(Main.getMain(), 0, 6000);
-      return true;
+      }.runTaskLater(Main.getMain(), 6000);
+      //TOOD: make the delay configuraable in GangUtils via config.
    }
 
-   public boolean toggleFF(){
-      friendlyFire = !friendlyFire;
-      return friendlyFire;
+   /**
+    * Toggles the Friendly Fire module for this gang.
+    */
+   public void toggleFF(){
+      friendlyFire ^= true;
    }
 
-   public boolean toggleFFGang(Gang g){
+   /**
+    * Requests a toggling of Friendly Fire between the gangs, by default this setting is false, to prevent friendly fire.
+    * There is no time limit for these requests, they last untill the server restarts, or never disappear.
+    *
+    * @param g The gang requesting a toggle, or the gang that is accepting a toggle request.
+    */
+   public void toggleFFGang(Gang g){
       if(g.getFriendlyFireGangs().contains(this)){
          g.getFriendlyFireGangs().remove(this);
          friendlyFireGangs.remove(g);
-         return false;
       }
-      else{
+      else
          g.getFriendlyFireGangs().add(this);
-         return true;
-      }
    }
 
+   /**
+    * Used to accept an ally request between gangs
+    *
+    * @param name The name of the gang that we are accepting the request of
+    */
    public void acceptRequest(String name){
       allies.putIfAbsent(name, inRequests.get(name));
       inRequests.remove(name);
    }
 
+   /**
+    * Requests allying of this gang with another gang
+    *
+    * @param name The gang that we wish to ally with
+    */
    public void requestAlly(String name){
       Gang g = GangUtils.getGangByName(name);
+      if(isAlly(g)) return;
+      if(g.outRequests.containsKey(this.name)){ //if you have a request active
+         acceptRequest(name); // accept
+         g.outRequests.remove(this.name); //remove the requests from your list
+         inRequests.remove(name);         // remove from my receieved requests
+         return;
+      }
       g.inRequests.putIfAbsent(this.name, this);
       outRequests.putIfAbsent(name, g);
    }
 
+   /**
+    * Cancels an ally request to the specified gang.
+    *
+    * @param name The name of the gang we are revoking our ally request from.
+    */
    public void cancelRequest(String name){
       GangUtils.getGangByName(name).inRequests.remove(this.name);
       outRequests.remove(name);
    }
 
+   /**
+    * Enemies a gang, will auto un ally them if they are an ally
+    *
+    * @param name The name of the gang we are enemying
+    */
    public void enemy(String name){
       allies.get(name).allies.remove(this.name);
       allies.remove(name);
    }
 
+   /**
+    * Sets the name of this gang to the specified one.
+    * @apiNote The parameter {@see newName} Should be checked with {@link GangUtils#validateName(String)}
+    *    before calling this method
+    *
+    * @param newName The new name of the gang
+    */
    public void setName(String newName){
       String hand = this.name;
       this.name = newName;
       GangUtils.updateGangName(this, hand,  newName);
    }
 
+   /**
+    * Adds a player as a member to this gang.
+    *
+    * @param p The player that accepted the invite to this gang
+    */
    public void addMember(OfflinePlayer p){
       Member m = new Member(p, this, Rank.KNOWN);
       this.members.putIfAbsent(p.getUniqueId(), m);
    }
 
+   /**
+    * Kicks a member from this gang, used in cases where the player is offline
+    *
+    * @param p The player we wish to kick from this gang.
+    */
    public void kickMember(OfflinePlayer p){
-      Member m = this.members.get(p.getUniqueId());
-      this.members.remove(p.getUniqueId());
-      MemberUtils.deleteMember(m);
+      kickMember(this.members.get(p.getUniqueId()));
    }
 
+   /**
+    * Kicks a member from this gang
+    * @param m The member we are kicking
+    */
    public void kickMember(Member m){
       this.members.remove(m.getUuid());
       MemberUtils.deleteMember(m);
    }
 
+   /**
+    * Promote a member by 1 rank or to a specific rank.
+    *
+    * @apiNote The parameter 'r' may be set to null to specify a singular promotion.
+    * @param p The member we are promoting
+    * @param r The Rank we are moving to.
+    */
    public void promoteMember(Member p, Gang.Rank r){
       if(r != null)
          p.setRank(r);
@@ -165,7 +248,13 @@ public class Gang implements ConfigurationSerializable {
          p.setRank(p.getRank().ordinal()+1);
    }
 
-   //Owner
+   /**
+    * Demote a member by 1 rank or to a specific rank.
+    *
+    * @apiNote The parameter 'r' may be set to null to specify a singular demotion.
+    * @param p The member we are demoting
+    * @param r The Rank we are moving to.
+    */
    public void demoteMember(Member p, Gang.Rank r){
       if(r != null)
          p.setRank(r);
@@ -173,59 +262,123 @@ public class Gang implements ConfigurationSerializable {
          p.setRank(p.getRank().ordinal()-1);
    }
 
-   //Owner
+   /**
+    * Transfers ownership of this gang to the specified member
+    *
+    * @apiNote This method sets the old owner to {@link Gang.Rank#EXALTED}
+    * @param p The member we are transferring to
+    */
    public void transferOwnership(Member p){
       p.setRank(Rank.MASTERMIND);
       owner.setRank(Rank.EXALTED);
       owner = p;
    }
 
-   //Requires Recruit Status
+   /**
+    * Sets a home at this location if it doesnt not already exist, with the specified name
+    *
+    * @param l The location to set the home (likely always the player's locations)
+    * @param name the name identifying this home from others.
+    */
    public void setGangHome(Location l, String name){
       gangHomes.putIfAbsent(name, l);
    }
 
-   //Requires Officer Status
+   /**
+    * Deletes a gang home from this gang with the specified name
+    *
+    * @param name The name of the home to delete.
+    */
    public void deleteGangHome(String name){
       gangHomes.remove(name);
    }
 
-   //Recruit
+   /**
+    * Deposit money into the gang's bank
+    *
+    * @apiNote amt is not checked for validity here, it should be checked prior to this call.
+    * @param amt the amount to deposit
+    */
    public void deposit(double amt){
       this.balance += amt;
    }
 
-   //Officer
+   /**
+    * Withdraws a set amount from the gang's back
+    *
+    * @apiNote amt is not checked for validity, it should be checked prior to calling this.
+    * @param amt the amount to take from the gang bank.
+    */
    public void withdraw(double amt){
       this.balance = Math.max(balance - amt, 0);
    }
 
+   /**
+    * Checks if the other gang is an ally
+    * @param g The gang to check
+    * @return if the two gangs are allies, i.e they both have each others names in {@link Gang#allies}
+    */
    public boolean isAlly(Gang g){
       return allies.get(g.getName()) != null;
    }
 
+   /**
+    * Checks if friendly fire is on for the other gang
+    * @param g The gang to check
+    * @return if the two gangs agreed to friendly fire, i.e both have each others names in {@link Gang#friendlyFireGangs}
+    */
    public boolean isFriendlyFire(Gang g){
       return friendlyFireGangs.contains(g);
    }
 
+   /**
+    * Checks if both members are from the same gang
+    *
+    * @param $1 The first member, supplying the gang as well
+    * @param $2 The seocnd member being checked.
+    * @return if the two members are apart of the same gang
+    */
    public static boolean areMembersOfSameGang(Member $1, Member $2){
       return $1.getGang().equals($2.getGang());
    }
 
+   /**
+    * Deserializes a gang from the provided map
+    *
+    * @apiNote Used typically by {@link ConfigurationSerializable}, not intended to be called normally.
+    * @param dict The mapping of internal data for the gang
+    * @return A new gang reference, completly initioalliez
+    */
    public static Gang deserialize(Map<String, Object> dict){
       return new Gang(dict);
    }
 
+   /**
+    * Increase the kills of this gang
+    * @param m The member that supplied the kills
+    */
    public void incKills(Member m){
       m.incKillCont();
       this.totalKills++;
    }
 
+   /**
+    * Increase the points of this gang
+    * @param m The member that earned the points
+    * @param amt how many points earned
+    */
    public void incPoints(Member m, int amt){
       m.incPointCont(amt);
       this.points += amt;
    }
 
+   /**
+    * Returns if this gang and another gang are equal
+    *
+    * @apiNote Equality is tested by comparing the names of the two gangs, if they match they are the same.
+    * @param o The other object that we suspect is a gang
+    * @return If this gang and the other object are in fact the same.q
+    */
    @Override
    public boolean equals(Object o) {
       if(o.getClass().equals(this.getClass()))
@@ -233,6 +386,13 @@ public class Gang implements ConfigurationSerializable {
       return false;
    }
 
+   /**
+    * Used to serialize a gang
+    *
+    * @apiNote Not intended to be called normally, called by {@link org.bukkit.configuration.file.FileConfiguration} when
+    * having an object of this type put into a file.
+    * @return The inner mapping of this Gang.
+    */
    @Override
    public Map<String, Object> serialize() {
       Map<String, Object> x = new HashMap<>();
@@ -248,6 +408,10 @@ public class Gang implements ConfigurationSerializable {
       return x;
    }
 
+   /**
+    * Permissions set for all gangs,
+    * Permissions are made to be flexible and reusable and easily testable.
+    */
    public enum Permission {
       MASTERMIND_PERMS  ((short) 0b111111111111110),
       EXALTED_PERMS     ((short) 0b011111111110110),

@@ -57,12 +57,8 @@ public class GangUtils {
 
    public static void saveGang(String s){
       Gang g = getGangByName(s);
-      if(g != null) {
-         gangFile.reloadCustomConfig();
-         gangConfig = gangFile.getCustomConfig();
-         gangConfig.set(g.getName(), g);
-         gangFile.saveCustomConfig();
-      }
+      if(g != null)
+         saveGang(g);
    }
 
    public static void deleteGang(Gang g){
@@ -75,13 +71,8 @@ public class GangUtils {
 
    public static void deleteGang(String s){
       Gang g = getGangByName(s);
-      if(g != null) {
-         gangFile.reloadCustomConfig();
-         gangConfig = gangFile.getCustomConfig();
-         gangConfig.set(s, null);
-         gangFile.saveCustomConfig();
-         gangs.remove(s);
-      }
+      if(g != null)
+         deleteGang(g);
    }
 
    public static Gang getGangWithMember(Member m){

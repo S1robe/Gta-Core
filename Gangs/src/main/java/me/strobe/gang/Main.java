@@ -25,14 +25,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin {
 
 
-   @Getter
-   static Main main;
+   @Getter private static Main main;
    @Getter private CustomFile memberFile;
    @Getter private CustomFile gangFile;
    @Getter private FileManager fileMan;
    @Getter private Economy econ;
 
    Main(){
+      main = this;
       ConfigurationSerialization.registerClass(Gang.class);
       ConfigurationSerialization.registerClass(Member.class);
    }
