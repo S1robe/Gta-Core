@@ -447,10 +447,10 @@ public class Gang implements ConfigurationSerializable {
     * individually per rank, and per member in the gang.
     */
    public enum Rank{
-      KNOWN( "&8[&7Known&8]&r", Permission.KNOWN_PERMS),
-      HONORED( "&8[&aHonored&8]", Permission.HONORED_PERMS),
-      EXALTED("&8[&9&mExalted&8]", Permission.EXALTED),
-      MASTERMIND("&8[&3&lMastermind&8]&r", Permission.MASTERMIND_PERMS)
+      KNOWN( "&8[&7Known&8]&7", Permission.KNOWN_PERMS),
+      HONORED( "&8[&aHonored&8]&7", Permission.HONORED_PERMS),
+      EXALTED("&8[&9&mExalted&8]&7", Permission.EXALTED),
+      MASTERMIND("&8[&3&lMastermind&8]&7", Permission.MASTERMIND_PERMS)
       ;
 
       /**
@@ -511,6 +511,7 @@ public class Gang implements ConfigurationSerializable {
          this.prefix = prefix;
          this.defPermissions = permissions;
       }
+
    }
 
    public enum Upgrades{
@@ -524,5 +525,6 @@ public class Gang implements ConfigurationSerializable {
 
       ;
    }
+
 
 }

@@ -2,7 +2,6 @@ package me.strobe.gang;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import me.Strobe.Core.Utils.StringUtils;
 import me.strobe.gang.Utils.GangUtils;
 import me.strobe.gang.Utils.MemberUtils;
@@ -13,7 +12,6 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -311,6 +309,10 @@ public class Member implements ConfigurationSerializable {
          removePermission(bit);
    }
 
+   public boolean isOnline(){
+      return p.isOnline();
+   }
+
    /**
     * Used to compress the unique data of a given Member implementation so that it may be stored.
     *
@@ -326,5 +328,23 @@ public class Member implements ConfigurationSerializable {
       x.put("totalKillCont", totalKillCont);
       x.put("totalPointCount", totalPointCont);
       return x;
+   }
+
+   public String[] stringify(){
+      return new String[] {
+         "UUID: " + uuid.toString(),
+         "Rank: " + rank.prefix,
+         "Money Contributed: " + totalMoneyCont,
+         "Kills Contributed: " + totalKillCont,
+         "Points Contributed: " + totalPointCont
+      };
+   }
+
+   @Override
+   public String toString(){
+      if(p.isOnline())
+         return StringUtils.color(this.rank.prefix + " &a" + this.p.getName());
+      else
+         return StringUtils.color(this.rank.prefix + " &7" + this.p.getName());
    }
 }
