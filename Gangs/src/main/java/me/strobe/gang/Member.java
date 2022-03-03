@@ -169,7 +169,7 @@ public class Member implements ConfigurationSerializable {
     * Decreases the amount of points this member has contributed to their gang.
     *
     * @param amt The amount of points lost, due to death to other player, or some other loss cause.
-    * @apiNote This method is called in various Event methods apart of bukkit. Todo: add these methods here
+    * @apiNote This method is called in various Event methods apart of bukkit.
     */
    public void decPointCont(int amt){
       this.totalPointCont = Math.max(0, totalPointCont - amt);

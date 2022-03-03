@@ -242,6 +242,8 @@ public abstract class CustomItem implements ConfigurationSerializable {
      */
     private boolean isStandardDrop;
 
+
+
     /**
      * This method is called when the item has reacehd the end of its uses
      *  as denoted by #numUsesLeft = 0

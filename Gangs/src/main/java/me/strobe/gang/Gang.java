@@ -2,6 +2,7 @@ package me.strobe.gang;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.Strobe.Core.Utils.ItemUtils;
 import me.Strobe.Core.Utils.RegionUtils;
 import me.Strobe.Core.Utils.Title;
 import me.strobe.gang.Utils.GangUtils;
@@ -11,6 +12,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -372,6 +374,17 @@ public class Gang implements ConfigurationSerializable {
       this.points += amt;
    }
 
+   public ItemStack item(){
+      ItemStack x = ItemUtils.getSkullOf(owner.getUuid());
+      ItemUtils.applyLore(x, "&7Owner: &e" + owner.getP().getName(),
+                                       "&7Online Members: &e" + getNumOnlineMembers());
+      return x;
+   }
+
+   public int getNumOnlineMembers(){
+      return (int) members.values().stream().map(Member::getP).filter(OfflinePlayer::isOnline).count();
+   }
+
    /**
     * Returns if this gang and another gang are equal
     *
@@ -417,17 +430,22 @@ public class Gang implements ConfigurationSerializable {
       EXALTED_PERMS     ((short) 0b011111111110110),
       HONORED_PERMS     ((short) 0b001001011000000),
       KNOWN_PERMS       ((short) 0b000000000000000),
+
       MASTERMIND        ((short) 0b100000000000000),
       EXALTED           ((short) 0b010000000000000),
       HONORED           ((short) 0b001000000000000),
+
       WITHDRAW          ((short) 0b000100000000000),
       UPGRADE           ((short) 0b000010000000000),
+
       FF                ((short) 0b000001000000000),
       ALLY              ((short) 0b000000100000000),
       SETHOME           ((short) 0b000000010000000),
       DELHOME           ((short) 0b000000001000000),
+
       KICK              ((short) 0b000000000100000),
       INVITE            ((short) 0b000000000010000),
+
       RENAME            ((short) 0b000000000001000),
       MANAGEMENT        ((short) 0b000000000000100),
       PERMISSION        ((short) 0b000000000000010),
@@ -525,6 +543,4 @@ public class Gang implements ConfigurationSerializable {
 
       ;
    }
-
-
 }
