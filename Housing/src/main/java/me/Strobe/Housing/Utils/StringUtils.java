@@ -28,7 +28,6 @@ public final class StringUtils {
    public static final String leftHouse = "&c&l(!)&7 You have left {plr}'s house!";
    public static final String alreadyOwnedHouse = "&c&l(!)&7 You already have a house!";
 
-   //TODO: Command args helper yes.
    public static final String cmdSetSpawnSuccess = "&a&l(!)&7 You have set the spawn of this house to {x}, {y}, {z}";
    public static final String cmdSetSpawnFail = "&c&l(!)&7 You cannot set the spawn of your house here.";
    public static final String cmdAddMemFailAddedPrior = "&c&l(!)&7 You cannot add {plr} to your house because they're already added.";

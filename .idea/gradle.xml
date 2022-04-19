@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/BankRobberies" />
             <option value="$PROJECT_DIR$/CommonUtils" />
+            <option value="$PROJECT_DIR$/FileAPI" />
             <option value="$PROJECT_DIR$/GTAEnchanting" />
             <option value="$PROJECT_DIR$/GTAExtenstions" />
             <option value="$PROJECT_DIR$/Gangs" />
@@ -22,6 +23,7 @@
             <option value="$PROJECT_DIR$/Gta-Gangs" />
             <option value="$PROJECT_DIR$/Housing" />
             <option value="$PROJECT_DIR$/NoHitDelay" />
+            <option value="$PROJECT_DIR$/Robberies" />
             <option value="$PROJECT_DIR$/VinnyD" />
           </set>
         </option>

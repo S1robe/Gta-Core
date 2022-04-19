@@ -35,6 +35,11 @@ public class AmmoPouch extends CustomItem {
     private AmmoPouch(){}
 
     @Override
+    public void use() {
+
+    }
+
+    @Override
     public void destroy() {
 
     }

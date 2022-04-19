@@ -12,6 +12,8 @@
         <module name="Gta-Core.Gta-Core.main" />
         <module name="Gta-Core.BankRobberies.main" />
         <module name="Gta-Core.Housing.test" />
+        <module name="Gta-Core.FileAPI.main" />
+        <module name="Gta-Core.Robberies.main" />
         <module name="Gta-Core.Gangs.main" />
         <module name="Gta-Core.VinnyD.main" />
       </profile>

@@ -9,4 +9,6 @@ include 'GTAEnchanting'
 include 'VinnyD'
 include 'CommonUtils'
 include 'GTAExtenstions'
+include 'Robberies'
+include 'FileAPI'
 

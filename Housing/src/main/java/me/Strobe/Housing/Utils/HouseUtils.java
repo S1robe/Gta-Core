@@ -24,8 +24,6 @@ import java.util.logging.Level;
 
 public class HouseUtils {
 
-   //TODO keep only the loaded houses in memory.
-
    public static int maxNumDays;
    private static final List<House> unownedHouses = new ArrayList<>();
    private static final List<House> ownedHouses = new ArrayList<>();
@@ -149,7 +147,6 @@ public class HouseUtils {
       houseFile.saveCustomConfig();
    }
    public static void flagAll(String flag, String value){
-      //todo explore command line parameters
       houseConfig.getKeys(false).forEach(h -> {
          World x = RegionUtils.locationDeserializer((String) houseConfig.get(h + ".sLocation")).getWorld();
          Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rg flag " + h + " -w " + x.getName() + " " + flag + " " + value);
