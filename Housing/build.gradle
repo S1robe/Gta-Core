@@ -2,6 +2,7 @@ plugins {
     id 'java'
 }
 
+libsDirName = '/home/kira/Documents/Programming/Minecraft (Java)/GTATest/plugins/'
 group 'me.Strobe'
 version '1.0'
 
@@ -15,6 +16,7 @@ repositories {
     flatDir {
         dirs '/home/kira/Documents/Programming/Minecraft (Java)/Jars/'
         dirs '/home/kira/Documents/Programming/Minecraft (Java)/UnModded/GTA/GTACore2/Gta-Core/build/libs/'
+
         // <-- folder in your project where jars are located
     }
 
@@ -42,8 +44,4 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.18'
 
 
-}
-
-test {
-    useJUnitPlatform()
 }

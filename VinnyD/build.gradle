@@ -24,6 +24,27 @@ dependencies {
     implementation name: 'Crackshot-2.4'
 }
 
-test {
-    useJUnitPlatform()
+
+project.buildDir = '/home/kira/Documents/Programming/Minecraft (Java)/GTATest/plugins/'
+compileJava {
+    options.compilerArgs << "-s"
+    options.compilerArgs << "$projectDir/generated/java"
+
+    doFirst {
+        // make sure that directory exists
+        file(new File(projectDir, "/generated/java")).mkdirs()
+    }
+}
+
+clean.doLast {
+    // clean-up directory when necessary
+    file(new File(projectDir, "/generated")).deleteDir()
+}
+
+sourceSets {
+    generated {
+        java {
+            srcDir "$projectDir/generated/java"
+        }
+    }
 }

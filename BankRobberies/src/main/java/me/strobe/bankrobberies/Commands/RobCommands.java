@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class RobCommands implements CommandExecutor {
+
    @Override
    public boolean onCommand(CommandSender sender, Command command, String cmd, String[] args) {
       if(sender instanceof Player){
@@ -186,7 +187,19 @@ public class RobCommands implements CommandExecutor {
       return false;
    }
 
-
+   /**
+    * This method is used to create a robbery with the specific parameters below.
+    *
+    * @param u           The user making the creation request.
+    * @param npc         The npc that is being selected, an NPC must exist to bind its UUID to this robbery.
+    * @param regionName  The name of the world edit region to bind to
+    * @param timeToRob   How long the robbery takes
+    * @param timetoReset How long it takes for this robbery to repopulate
+    * @param minDrops    The minimum amount of item drops this robbery can have (1 is default)
+    * @param maxDrops    The max drops this one will have, if this is set above the total number of possible drops,
+    *                    duplicates will be dropped.
+    * @return            True if the robbery was successfully created.
+    */
    private boolean create(User u, NPC npc, String regionName, int timeToRob, int timetoReset, int minDrops, int maxDrops){
       Player p = u.getPLAYER().getPlayer();
       Region sel = Main.getWE().getCachedPlayer(u.getPlayerUUID()).getSelection();
@@ -209,6 +222,14 @@ public class RobCommands implements CommandExecutor {
          u.sendPlayerMessage(RobUtils.Text.NO_SELECTION.create());
       return false;
    }
+
+   /**
+    * This method should be called to delete a robbery assuming you have the NPC reference.
+    *
+    * @param u    The user making the deletion request.
+    * @param npc  The NPC that is associated with the robbery we wish to delete.
+    * @return     True if the robbery was deleted.
+    */
    private boolean delete(User u, NPC npc){
       Robbery r = RobUtils.getRobberyByNPC(npc);
       if(r == null){
@@ -221,6 +242,14 @@ public class RobCommands implements CommandExecutor {
          return true;
       }
    }
+
+   /**
+    * This method should be called to force reset a robbery.
+    *
+    * @param u    The user making the reset request.
+    * @param npc  The npc associated with the reset.
+    * @return     True if the robbery was reset.
+    */
    private boolean reset(User u, NPC npc){
       Robbery r = RobUtils.getRobberyByNPC(npc);
       if(r == null){
@@ -233,6 +262,7 @@ public class RobCommands implements CommandExecutor {
          return true;
       }
    }
+
    private boolean addCommandToRob(User u, NPC npc, String cmd, boolean onStart, boolean onSuccess, boolean onFail, boolean onEnd){
       Robbery r = RobUtils.getRobberyByNPC(npc);
       if(r == null){
@@ -309,6 +339,5 @@ public class RobCommands implements CommandExecutor {
       GUIS.firstPage(u.getPLAYER().getPlayer().getPlayer(), regID);
       return true;
    }
-
 
 }

@@ -213,33 +213,28 @@ public class HouseUtils {
          public void run() {
             ownedHouses.forEach(House::update);
          }
-      }.runTaskTimer(Main.getMain(), 20L, 20L);
+      }.runTaskTimer(Main.getMain(), 0L, 1L);
    }
-   public static void updateItemInHouseGUI(Player p, ItemStack i, House h) {
+
+   public static void updateItemInHouseGUI(Player p, ItemStack item, House h) {
       new BukkitRunnable() {
          @Override
          public void run() {
+            if(item == null) {
+               this.cancel();
+               return;
+            }
             if(p.getOpenInventory() != null ) {
-               if(i != null) {
-                  if(h != null) {
-                     String[] x =  h.getTimeLeftString();
-                     ItemUtils.changeLine(i, 0, x[0]);
-                     ItemUtils.changeLine(i, 1, x[1]);
-                     ItemUtils.changeLine(i, 2, x[2]);
-                     ItemUtils.changeLine(i, 3, x[3]);
-                  }
-                  else {
-                     System.out.println("House null");
-                     this.cancel();
-                  }
-               }
-               else {
-                  System.out.println("item null");
-                  this.cancel();
+               if(h != null) {
+                  String[] x =  h.getTimeLeftString();
+                  ItemUtils.changeLine(item, 0, x[0]);
+                  ItemUtils.changeLine(item, 1, x[1]);
+                  ItemUtils.changeLine(item, 2, x[2]);
+                  ItemUtils.changeLine(item, 3, x[3]);
                }
             }
          }
-      }.runTaskTimer(Main.getMain(), 20L, 400L);
+      }.runTaskTimer(Main.getMain(), 1L, 1L);
    }
 
    public static boolean isHouseSign(Block b){
@@ -285,11 +280,4 @@ public class HouseUtils {
       houseConfig = houseFile.getCustomConfig();
       loadAllOwnedHouses();
    }
-
-
-//   public static Location LocaitonFromVector(Vector bv){
-//      Location l = new Location(bv.getX(). bv.get)
-//   }
-
-
 }

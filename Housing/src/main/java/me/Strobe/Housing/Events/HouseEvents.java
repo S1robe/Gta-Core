@@ -33,17 +33,23 @@ public class HouseEvents implements Listener {
    @EventHandler
    public void onInteract(PlayerInteractEvent e) {
       Block b = e.getClickedBlock();
-      if(b != null && HouseUtils.isHouseSign(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-         onHouseSignClick(e.getPlayer(), HouseUtils.getHouseBySignBlock(b));
-      }
-      else if(b != null && HouseUtils.isHouseBlockedChest(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
+      System.out.println(b);
+      if(b != null){
          House h = HouseUtils.getHouseByChestLocation(b.getLocation());
-         if(h != null && h.isPlayerApartOfHouse(e.getPlayer())) {
-            Chest c = (Chest) b.getState();
-            if(c.getInventory().getHolder() instanceof DoubleChest) {
-               openCoveredHouseDoubleChest(e.getPlayer(), (DoubleChest) c.getInventory().getHolder());
+         if(h == null) return;
+         if(HouseUtils.isHouseSign(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            onHouseSignClick(e.getPlayer(), h);
+         }
+         else if(b.getState() instanceof DoubleChest) {
+            if(h.isPlayerApartOfHouse(e.getPlayer())) {
+               Chest c = (Chest) b.getState();
+               if(c.getInventory().getHolder() instanceof DoubleChest)
+                  openCoveredHouseDoubleChest(e.getPlayer(), (DoubleChest) c.getInventory().getHolder());
             }
-            else {
+         }
+         else if(HouseUtils.isHouseBlockedChest(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            if(h.isPlayerApartOfHouse(e.getPlayer())) {
+               Chest c = (Chest) b.getState();
                openCoveredHouseChest(e.getPlayer(), c);
             }
          }
@@ -79,8 +85,8 @@ public class HouseEvents implements Listener {
       }
    }
 
-   private void onHouseSignBreak(Player p, House h){
-      if(h.isOwned()){
+   private void onHouseSignBreak(Player p, House h) {
+      if(h.isOwned()) {
          h.sendOwnerMessage(me.Strobe.Housing.Utils.StringUtils.brokenHouseSign);
          h.sendMembersAMessage(me.Strobe.Housing.Utils.StringUtils.brokenHouseSignMember.replace("{reg}", h.getName()));
       }
@@ -166,7 +172,7 @@ public class HouseEvents implements Listener {
          User u = User.getByPlayer(p);
          OfflinePlayer o = Bukkit.getOfflinePlayer(UUID.fromString(((SkullMeta) clicked.getItemMeta()).getOwner()));
 
-         //TODO later on add permisisosn and GUI here for editing permissions.
+         //TODO later on add permission and GUI here for editing permissions.
 
       }
       else if(clicked.getType().equals(Material.POTION)){
@@ -183,7 +189,7 @@ public class HouseEvents implements Listener {
             DelayedTeleport.doDelayedTeleport(Main.getMain(), p, h.getSpawnLocation(), 5);
             break;
          case "Extend Your Stay":
-            if(u.getBalance() < (h.getPrice()/h.getStartDays())){
+            if(u.getBalance() < (h.getPrice() / h.getStartDays())){
                u.sendPlayerMessage(me.Strobe.Housing.Utils.StringUtils.notEnoughMoney);
                return;
             }

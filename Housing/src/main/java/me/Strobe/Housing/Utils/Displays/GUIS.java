@@ -70,16 +70,19 @@ public class GUIS {
          inv.setItem(0, houseItemOwned);
          inv.setItem(5, noMemberOf());
          HouseUtils.updateItemInHouseGUI(p, inv.getItem(0), h);
+         //HouseUtils.updateItemInHouseGUI(p, inv, 0, h);
       }
       else if(houseItemOwned == null) {
          inv.setItem(0, noHouse());
          GenUtils.setRight(inv, filler(), houseItemAddedTo);
+         //HouseUtils.updateAddedHouses(p, inv, houseItemAddedTo.size(), h);
          houseItemAddedTo.forEach(i -> HouseUtils.updateItemInHouseGUI(p, i, h));
       }
       else {
          inv.setItem(0, houseItemOwned);
          GenUtils.setRight(inv, filler(), houseItemAddedTo);
          HouseUtils.updateItemInHouseGUI(p, inv.getItem(0), h);
+         //HouseUtils.updateAddedHouses(p, inv, houseItemAddedTo.size(), h);
          houseItemAddedTo.forEach(i -> HouseUtils.updateItemInHouseGUI(p, i, h));
       }
       p.openInventory(inv);
@@ -95,6 +98,7 @@ public class GUIS {
       inv.setItem(4, ItemUtils.createItem(Material.BED, "&eEdit Members"));
       inv.setItem(7, ItemUtils.getSkullOf(p.getUniqueId()));
       HouseUtils.updateItemInHouseGUI(p, inv.getItem(7), h);
+      //HouseUtils.updateItemInHouseGUI(p, inv, 7, h);
       p.openInventory(inv);
 
    }
@@ -110,10 +114,12 @@ public class GUIS {
          inv.setItem(2, ItemUtils.createItem(Material.TRAP_DOOR,  "&cLeave Home"));
          inv.setItem(7, ItemUtils.getSkullOf(ow.getUniqueId()));
          HouseUtils.updateItemInHouseGUI(p, inv.getItem(7), h);
+         //HouseUtils.updateItemInHouseGUI(p, inv, 7, h);
       }
       else {
          inv.setItem(4, ItemUtils.createItem(Material.IRON_DOOR, 1, 0, "&cYou dont own this house!"));
          HouseUtils.updateItemInHouseGUI(p, inv.getItem(4), h);
+         //HouseUtils.updateItemInHouseGUI(p, inv, 4, h);
       }
       p.openInventory(inv);
    }

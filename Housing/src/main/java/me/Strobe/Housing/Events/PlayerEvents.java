@@ -55,8 +55,8 @@ public class PlayerEvents implements Listener {
                   House h = new House(e.getBlock().getLocation(), Integer.parseInt(e.getLine(3)), Double.parseDouble(e.getLine(2)), pr, HouseUtils.findChests(p.getWorld(), pr));
                   e.setLine(0, "FOR RENT");
                   e.setLine(1, "&r" + h.getName());
-                  e.setLine(2,"&r" + h.getStartDays() + " Days");
-                  e.setLine(3,"&r$" + h.getPrice());
+                  e.setLine(2, "&r" + h.getStartDays() + " Days");
+                  e.setLine(3, "&r$" + h.getPrice());
                   HouseUtils.addNewHouse(h);
                   me.Strobe.Core.Utils.StringUtils.sendMessage(p, me.Strobe.Housing.Utils.StringUtils.cmdCreateHouseSuccess.replace("{loc}", RegionUtils.locationSerializer(h.getSignLocation())));
                   Main.getWG().getRegionManager(p.getWorld()).saveChanges();

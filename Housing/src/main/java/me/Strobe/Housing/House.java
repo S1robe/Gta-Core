@@ -170,7 +170,6 @@ public class House implements ConfigurationSerializable {
    @SneakyThrows
    private void resetHouse() {
       startTime = -1;
-      System.out.println(name);
       region.getOwners().removeAll();
       region.getMembers().removeAll();
       owner = null;
