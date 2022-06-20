@@ -252,11 +252,12 @@ public class HouseUtils {
    }
    public static boolean isHouseBlockedChest(Block b){
       Material m = b.getType();
-      return ((m.equals(Material.CHEST) || m.equals(Material.TRAPPED_CHEST)) && isChestBlocked((Chest)b.getState())) 
+      return ((m.equals(Material.CHEST) || m.equals(Material.TRAPPED_CHEST)) && isChestBlocked((Chest)b.getState()))
                && ownedHouses.stream().map(House::getChestLocations).anyMatch(list -> list.contains(b.getLocation()));
 
    }
    public static boolean isChestBlocked(Chest c){
+      System.out.println(c);
       return !c.getLocation().add(0,1,0).getBlock().isEmpty();
    }
    public static List<Location> findChests(World world, ProtectedRegion pr){
@@ -267,7 +268,7 @@ public class HouseUtils {
          for (int j = min.getBlockY(); j< max.getBlockY(); j++)
             for (int k = min.getBlockZ(); k< max.getBlockZ(); k++) {
                Block b = world.getBlockAt(i, j, k);
-               if (b.getType().equals(Material.CHEST) ||b.getType().equals(Material.TRAPPED_CHEST) ){
+               if (b.getType().equals(Material.CHEST) || b.getType().equals(Material.TRAPPED_CHEST) ){
                   chests.add(new Location(world,i,j,k));
                }
             }

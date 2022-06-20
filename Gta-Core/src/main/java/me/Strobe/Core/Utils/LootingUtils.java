@@ -405,12 +405,6 @@ public final class LootingUtils {
          });
    }
 
-
-
-
-
-
-
    public static void loadAllLoot() {
       loadLoot("Chest");
       loadLoot("Zombie");

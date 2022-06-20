@@ -2,6 +2,7 @@ plugins {
     id 'java'
 }
 
+libsDirName = '/home/kira/Documents/Programming/Minecraft (Java)/GTATest/plugins/'
 version 'unspecified'
 
 repositories {
@@ -27,28 +28,4 @@ dependencies {
     implementation name: 'worldedit-bukkit-6.1.9'
     implementation name: 'worldguard-6.2'
     implementation name: 'Citizens_2'
-}
-
-project.buildDir = '/home/kira/Documents/Programming/Minecraft (Java)/GTATest/plugins/'
-compileJava {
-    options.compilerArgs << "-s"
-    options.compilerArgs << "$projectDir/generated/java"
-
-    doFirst {
-        // make sure that directory exists
-        file(new File(projectDir, "/generated/java")).mkdirs()
-    }
-}
-
-clean.doLast {
-    // clean-up directory when necessary
-    file(new File(projectDir, "/generated")).deleteDir()
-}
-
-sourceSets {
-    generated {
-        java {
-            srcDir "$projectDir/generated/java"
-        }
-    }
 }

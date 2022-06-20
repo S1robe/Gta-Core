@@ -13,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,24 +32,20 @@ public class HouseEvents implements Listener {
    @EventHandler
    public void onInteract(PlayerInteractEvent e) {
       Block b = e.getClickedBlock();
-      System.out.println(b);
       if(b != null){
-         House h = HouseUtils.getHouseByChestLocation(b.getLocation());
-         if(h == null) return;
+         //Sign Clicks
          if(HouseUtils.isHouseSign(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            House h = HouseUtils.getHouseBySignBlock(b);
             onHouseSignClick(e.getPlayer(), h);
          }
-         else if(b.getState() instanceof DoubleChest) {
-            if(h.isPlayerApartOfHouse(e.getPlayer())) {
-               Chest c = (Chest) b.getState();
-               if(c.getInventory().getHolder() instanceof DoubleChest)
-                  openCoveredHouseDoubleChest(e.getPlayer(), (DoubleChest) c.getInventory().getHolder());
-            }
-         }
+         //Chest cliks
          else if(HouseUtils.isHouseBlockedChest(b) && e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            House h = HouseUtils.getHouseByChestLocation(b.getLocation());
+            //Ignore this warning, isHouseBlocked passes iff this is a house as well.
             if(h.isPlayerApartOfHouse(e.getPlayer())) {
                Chest c = (Chest) b.getState();
-               openCoveredHouseChest(e.getPlayer(), c);
+               System.out.println(c);
+               openCoveredChest(e.getPlayer(), c.getInventory());
             }
          }
       }
@@ -208,16 +203,8 @@ public class HouseEvents implements Listener {
       }
    }
 
-   private void openCoveredHouseChest(Player p, Chest clicked){
+   private void openCoveredChest(Player p, Inventory i){
       p.closeInventory();
-      p.openInventory(clicked.getInventory());
+      p.openInventory(i);
    }
-   private void openCoveredHouseDoubleChest(Player p, DoubleChest clicked){
-      p.closeInventory();
-      p.openInventory(clicked.getInventory());
-   }
-
-
-
-
 }
