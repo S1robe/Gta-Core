@@ -1,6 +1,0 @@
-ItemFactory:
-	Creating Items for use
-
-ItemListener:
-	Listen for changes in lore on specificly flagged items. (NBT API?)
-	
